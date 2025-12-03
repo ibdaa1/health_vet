@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>التقرير الشهري — HealthVet</title>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f4f8f5;
+      --card: #fff;
+      --accent: #2b6b3a;
+      --accent-2: #c79b3c;
+      --danger: #d9534f;
+      --warning: #f0ad4e;
+      --success: #28a745;
+      --muted: #6b7280;
+      --radius: 12px;
+      font-family: "Tajawal", system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+    }
+    * { box-sizing: border-box; }
+    html, body { 
+      height: 100%; 
+      margin: 0; 
+      background: var(--bg); 
+      -webkit-font-smoothing: antialiased; 
+      color: #111; 
+      direction: rtl;
+    }
+    .container { 
+      max-width: 900px; 
+      margin: 0 auto; 
+      padding: 20px; 
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid var(--accent);
+    }
+    .logo {
+      width: 60px;
+      height: 60px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--accent), #29552f);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 900;
+      font-size: 1.2rem;
+    }
+    .h-title { font-weight: 800; font-size: 1.4rem; }
+    .date-range { 
+      font-size: 0.95rem; 
+      color: var(--muted); 
+      margin-top: 4px;
+    }
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 18px;
+      margin-bottom: 16px;
+      box-shadow: 0 10px 30px rgba(10, 20, 30, 0.04);
+    }
+    .section-title {
+      font-weight: 700;
+      font-size: 1.15rem;
+      margin-bottom: 14px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #e8efe8;
+      color: var(--accent);
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+    }
+    .stat-item {
+      background: #f8f9fa;
+      border-radius: 10px;
+      padding: 14px;
+      text-align: center;
+    }
+    .stat-value {
+      font-weight: 800;
+      font-size: 1.8rem;
+      color: var(--accent);
+    }
+    .stat-label {
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+    .stat-unavailable {
+      color: var(--warning);
+      font-style: italic;
+    }
+    .print-controls {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .btn {
+      padding: 10px 18px;
+      border-radius: 8px;
+      border: 0;
+      background: var(--accent);
+      color: #fff;
+      cursor: pointer;
+      font-weight: 600;
+      font-family: inherit;
+    }
+    .btn.ghost {
+      background: transparent;
+      border: 1px solid #e6e6e6;
+      color: var(--muted);
+    }
+    .loading {
+      text-align: center;
+      padding: 30px;
+      color: var(--muted);
+    }
+    .error {
+      background: #ffe0e0;
+      color: var(--danger);
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+    }
+    .dev-notes {
+      background: #fff8e6;
+      border: 1px solid rgba(199, 155, 60, 0.3);
+      border-radius: 8px;
+      padding: 14px;
+      margin-top: 20px;
+      font-size: 0.85rem;
+    }
+    .dev-notes h4 {
+      margin: 0 0 10px 0;
+      color: #6b4b10;
+    }
+    .dev-notes ul {
+      margin: 0;
+      padding-right: 20px;
+    }
+    .dev-notes li {
+      margin-bottom: 6px;
+    }
+    .dev-notes code {
+      background: #fff;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.82rem;
+    }
+    
+    /* Print Styles */
+    @media print {
+      .print-controls, .dev-notes { display: none !important; }
+      body { background: #fff; }
+      .container { max-width: 100%; padding: 10px; }
+      .card { box-shadow: none; border: 1px solid #ddd; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="print-controls">
+      <button class="btn" onclick="window.print()">🖨️ طباعة التقرير</button>
+      <button class="btn ghost" onclick="window.history.back()">← العودة</button>
+    </div>
+    
+    <header class="header">
+      <div class="logo">HV</div>
+      <div>
+        <div class="h-title">التقرير الشهري — HealthVet</div>
+        <div class="date-range" id="dateRange">جارٍ التحميل...</div>
+      </div>
+    </header>
+
+    <div id="loadingIndicator" class="loading">جارٍ تحميل البيانات...</div>
+    <div id="errorContainer"></div>
+    
+    <!-- Complaints Statistics -->
+    <div class="card" id="complaintsCard" style="display:none;">
+      <div class="section-title">📋 إحصائيات الشكاوى</div>
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-value" id="totalReceived">--</div>
+          <div class="stat-label">عدد الشكاوى التي تم استلامها</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="totalClosed">--</div>
+          <div class="stat-label">عدد الشكاوى التي تم إغلاقها</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="catComplaints">--</div>
+          <div class="stat-label">عدد شكاوى القطط</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="dogComplaints">--</div>
+          <div class="stat-label">عدد شكاوى الكلاب</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reception / Customer Service Statistics -->
+    <div class="card" id="receptionCard" style="display:none;">
+      <div class="section-title">🏢 إحصائيات الاستقبال وخدمة العملاء</div>
+      <div class="stats-grid" id="receptionStats">
+        <div class="stat-item">
+          <div class="stat-value stat-unavailable" id="totalAdoptions">غير متوفر</div>
+          <div class="stat-label">عدد حالات التبني</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value stat-unavailable" id="totalIntakes">غير متوفر</div>
+          <div class="stat-label">عدد حالات الاستلام</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Veterinary Care Statistics -->
+    <div class="card" id="vetCareCard" style="display:none;">
+      <div class="section-title">🏥 إحصائيات الرعاية البيطرية</div>
+      <div class="stats-grid" id="vetCareStats">
+        <div class="stat-item">
+          <div class="stat-value stat-unavailable" id="totalOperations">غير متوفر</div>
+          <div class="stat-label">عدد العمليات</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value stat-unavailable" id="totalEuthanasia">غير متوفر</div>
+          <div class="stat-label">عدد حالات القتل الرحيم</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Developer Notes -->
+    <div class="dev-notes">
+      <h4>📝 ملاحظات للمطورين</h4>
+      <ul>
+        <li>
+          <strong>Complaints API:</strong> يستخدم <code>/health_vet/api/get_all_complaints.php</code> مع المعلمات <code>from</code> و <code>to</code> للفلترة بالتاريخ.
+        </li>
+        <li>
+          <strong>نقاط النهاية المطلوبة:</strong>
+          <ul>
+            <li><code>/health_vet/api/get_adoptions.php?start=YYYY-MM-DD&end=YYYY-MM-DD</code> - لإحصائيات التبني</li>
+            <li><code>/health_vet/api/get_intakes.php?start=YYYY-MM-DD&end=YYYY-MM-DD</code> - لإحصائيات الاستلام</li>
+            <li><code>/health_vet/api/get_operations.php?start=YYYY-MM-DD&end=YYYY-MM-DD</code> - لإحصائيات العمليات</li>
+            <li><code>/health_vet/api/get_euthanasia.php?start=YYYY-MM-DD&end=YYYY-MM-DD</code> - لإحصائيات القتل الرحيم</li>
+          </ul>
+        </li>
+        <li>
+          <strong>شكل البيانات المتوقع:</strong> يجب أن ترجع كل نقطة نهاية <code>{ success: true, data: [...] }</code> أو <code>{ success: true, count: N }</code>
+        </li>
+        <li>
+          <strong>ملاحظة:</strong> إذا لم تدعم <code>get_all_complaints.php</code> معلمات <code>from/to</code>، يرجى تحديث الـ API لدعم فلترة التاريخ.
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <script src="session_check.js"></script>
+  <script>
+    /*
+      Monthly Report Page - HealthVet
+      Displays complaint statistics and placeholders for other metrics.
+      Developer Notes: See backend API requirements in the dev-notes section above.
+    */
+    
+    const API_BASE = '/health_vet/api/';
+    const $ = id => document.getElementById(id);
+    
+    // Parse query parameters
+    function getQueryParams() {
+      const params = new URLSearchParams(window.location.search);
+      return {
+        start: params.get('start'),
+        end: params.get('end')
+      };
+    }
+    
+    // Format date for display
+    function formatDateArabic(dateStr) {
+      if (!dateStr) return '';
+      try {
+        const date = new Date(dateStr);
+        return date.toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
+      } catch {
+        return dateStr;
+      }
+    }
+    
+    // Show error message
+    function showError(message) {
+      const container = $('errorContainer');
+      container.innerHTML = `<div class="error">${message}</div>`;
+    }
+    
+    // Load complaints data
+    async function loadComplaints(start, end) {
+      try {
+        // The API uses 'from' and 'to' parameters based on get_all_complaints.php
+        const url = `${API_BASE}get_all_complaints.php?from=${start}&to=${end}`;
+        const response = await fetch(url, { credentials: 'same-origin' });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (!data.success) {
+          throw new Error(data.message || 'فشل في جلب بيانات الشكاوى');
+        }
+        
+        return data.data || [];
+      } catch (error) {
+        console.error('Error loading complaints:', error);
+        throw error;
+      }
+    }
+    
+    // Compute complaint statistics
+    function computeComplaintStats(complaints) {
+      const totalReceived = complaints.length;
+      
+      // Count closed complaints (ComplaintStatus === 'Closed' or FinalStatus contains 'Close')
+      const totalClosed = complaints.filter(c => 
+        c.ComplaintStatus === 'Closed' || 
+        (c.FinalStatus && c.FinalStatus.toLowerCase().includes('close'))
+      ).length;
+      
+      // Count cat complaints (ComplaintType contains 'cat' or 'قط')
+      const catComplaints = complaints.filter(c => {
+        const type = (c.ComplaintType || '').toLowerCase();
+        return type.includes('cat') || type.includes('قط');
+      }).length;
+      
+      // Count dog complaints (ComplaintType contains 'dog' or 'كل')
+      const dogComplaints = complaints.filter(c => {
+        const type = (c.ComplaintType || '').toLowerCase();
+        return type.includes('dog') || type.includes('كل');
+      }).length;
+      
+      return { totalReceived, totalClosed, catComplaints, dogComplaints };
+    }
+    
+    // Try to load optional API data
+    async function tryLoadOptionalData(endpoint, start, end) {
+      try {
+        const url = `${API_BASE}${endpoint}?start=${start}&end=${end}`;
+        const response = await fetch(url, { credentials: 'same-origin' });
+        
+        if (!response.ok) return null;
+        
+        const data = await response.json();
+        
+        if (!data.success) return null;
+        
+        // Return count if available, or array length
+        if (typeof data.count === 'number') return data.count;
+        if (Array.isArray(data.data)) return data.data.length;
+        if (Array.isArray(data)) return data.length;
+        
+        return null;
+      } catch {
+        return null;
+      }
+    }
+    
+    // Update stat display
+    function updateStat(elementId, value, isUnavailable = false) {
+      const el = $(elementId);
+      if (el) {
+        if (isUnavailable) {
+          el.textContent = 'غير متوفر';
+          el.classList.add('stat-unavailable');
+        } else {
+          el.textContent = value;
+          el.classList.remove('stat-unavailable');
+        }
+      }
+    }
+    
+    // Main initialization
+    async function init() {
+      const { start, end } = getQueryParams();
+      
+      // Validate parameters
+      if (!start || !end) {
+        showError('يرجى تحديد تاريخ البداية والنهاية في عنوان URL');
+        $('loadingIndicator').style.display = 'none';
+        return;
+      }
+      
+      // Update date range display
+      $('dateRange').textContent = `من ${formatDateArabic(start)} إلى ${formatDateArabic(end)}`;
+      
+      try {
+        // Load complaints data
+        const complaints = await loadComplaints(start, end);
+        const stats = computeComplaintStats(complaints);
+        
+        // Update complaint statistics
+        updateStat('totalReceived', stats.totalReceived);
+        updateStat('totalClosed', stats.totalClosed);
+        updateStat('catComplaints', stats.catComplaints);
+        updateStat('dogComplaints', stats.dogComplaints);
+        
+        // Show complaints card
+        $('complaintsCard').style.display = 'block';
+        
+      } catch (error) {
+        showError(`خطأ في تحميل بيانات الشكاوى: ${error.message}`);
+      }
+      
+      // Try to load optional data (these will show placeholders if APIs don't exist)
+      try {
+        const adoptionsCount = await tryLoadOptionalData('get_adoptions.php', start, end);
+        updateStat('totalAdoptions', adoptionsCount, adoptionsCount === null);
+        
+        const intakesCount = await tryLoadOptionalData('get_intakes.php', start, end);
+        updateStat('totalIntakes', intakesCount, intakesCount === null);
+        
+        const operationsCount = await tryLoadOptionalData('get_operations.php', start, end);
+        updateStat('totalOperations', operationsCount, operationsCount === null);
+        
+        const euthanasiaCount = await tryLoadOptionalData('get_euthanasia.php', start, end);
+        updateStat('totalEuthanasia', euthanasiaCount, euthanasiaCount === null);
+        
+        // Show optional sections
+        $('receptionCard').style.display = 'block';
+        $('vetCareCard').style.display = 'block';
+        
+      } catch (error) {
+        console.warn('Error loading optional data:', error);
+      }
+      
+      // Hide loading indicator
+      $('loadingIndicator').style.display = 'none';
+    }
+    
+    // Start when DOM is ready
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>

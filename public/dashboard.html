@@ -172,6 +172,20 @@ html,body{height:100%;margin:0;background:var(--bg);-webkit-font-smoothing:antia
       <button id="btnCleanup" class="iconBtn" title="تنظيف الحجوزات (Cron)">🧹</button>
     </div>
   </header>
+  <!-- Monthly Report Section -->
+  <section class="card" style="margin-bottom:14px;padding:14px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;" dir="rtl">
+    <div style="font-weight:700;">التقرير الشهري:</div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <label for="reportStartDate" style="font-size:0.9rem;">من:</label>
+      <input type="date" id="reportStartDate" class="input" style="width:auto;">
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <label for="reportEndDate" style="font-size:0.9rem;">إلى:</label>
+      <input type="date" id="reportEndDate" class="input" style="width:auto;">
+    </div>
+    <button id="btnPrintReport" class="btn" title="طباعة التقرير">طباعة التقرير</button>
+    <button id="btnPrintReportNewTab" class="btn ghost" title="فتح في تبويب جديد">فتح في تبويب جديد</button>
+  </section>
   <!-- Notifications Container -->
   <div id="notifications" class="notifications"></div>
   <section class="kpis" aria-label="KPIs">
@@ -439,6 +453,7 @@ const RESERVE_THRESHOLD = 10;
 const VISIT_THRESHOLD = 20;
 document.addEventListener('DOMContentLoaded', () => {
   bindUI();
+  initReportDates();
   refreshAll();
 });
 function bindUI(){
@@ -448,6 +463,32 @@ function bindUI(){
   $('btnScan').addEventListener('click', openScanModal);
   $('closeScan')?.addEventListener('click', closeScanModal);
   $('btnCleanup').addEventListener('click', runCleanupReservations);
+  // Monthly Report Buttons
+  $('btnPrintReport').addEventListener('click', () => openMonthlyReport(false));
+  $('btnPrintReportNewTab').addEventListener('click', () => openMonthlyReport(true));
+}
+/* ---------- Monthly Report Functions ---------- */
+function initReportDates() {
+  const now = new Date();
+  const firstDayPrevMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const lastDayPrevMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+  const formatDate = (d) => d.toISOString().slice(0, 10);
+  $('reportStartDate').value = formatDate(firstDayPrevMonth);
+  $('reportEndDate').value = formatDate(lastDayPrevMonth);
+}
+function openMonthlyReport(newTab) {
+  const start = $('reportStartDate').value;
+  const end = $('reportEndDate').value;
+  if (!start || !end) {
+    alert('يرجى اختيار تاريخ البداية والنهاية');
+    return;
+  }
+  const url = `./Monthly_Reports.html?start=${start}&end=${end}`;
+  if (newTab) {
+    window.open(url, '_blank');
+  } else {
+    window.location.href = url;
+  }
 }
 /* ---------- collapsible sections ---------- */
 function toggleSection(sectionId) {
