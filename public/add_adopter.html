@@ -863,15 +863,12 @@
                     const isAvailable = await checkAvailability(trimmedCode, false);
                 
                     currentAnimalId = animal.id;
-                    const photoUrl = animal.photo ? animal.photo : '/health_vet/public/default_animal.png';
+                    // تم إزالة صورة الحيوان لتقليل الطلبات
                 
                     info.innerHTML = `
                         <div class="search-result-card">
                             <div class="row">
-                                <div class="col-md-4">
-                                    <img src="/health_vet/${photoUrl}" alt="${animal.animal_name}" class="animal-image" onerror="this.src='/health_vet/public/default_animal.png'">
-                                </div>
-                                <div class="col-md-8">
+                                <div class="col-12">
                                     <h6 class="mb-2">${animal.animal_name}</h6>
                                     <p class="mb-1"><strong>${translations.animal_code_label || 'رمز الحيوان'}:</strong> ${animal.animal_code}</p>
                                     <p class="mb-1"><strong>${translations.animal_type || 'النوع'}:</strong> ${animal.animal_type}</p>
