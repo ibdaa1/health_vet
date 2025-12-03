@@ -16,6 +16,32 @@ header('Content-Type: application/json; charset=utf-8');
 require_once __DIR__ . '/db.php';
 session_start();
 
+// ========== حماية من الطلبات المكررة (Rate Limiting) ==========
+$rate_limit_key = 'add_adopter_last_request_' . session_id();
+$rate_limit_cooldown = 2; // ثانيتين بين الطلبات
+
+// التحقق من الطلبات المكررة للعمليات الكتابية فقط
+$action = $_POST['action'] ?? ($_GET['action'] ?? '');
+$write_actions = ['add', 'update', 'delete_adoption'];
+
+if (in_array($action, $write_actions)) {
+    $last_request_time = $_SESSION[$rate_limit_key] ?? 0;
+    $current_time = time();
+    
+    if ($current_time - $last_request_time < $rate_limit_cooldown) {
+        http_response_code(429);
+        echo json_encode([
+            'success' => false, 
+            'message' => 'الرجاء الانتظار قبل إعادة المحاولة. (حماية من الطلبات المكررة)'
+        ]);
+        exit;
+    }
+    
+    // تحديث وقت آخر طلب
+    $_SESSION[$rate_limit_key] = $current_time;
+}
+// ========== نهاية حماية Rate Limiting ==========
+
 // محاولة رفع حدود الرفع (قد لا تعمل على بعض الاستضافات)
 @ini_set('post_max_size', '64M');
 @ini_set('upload_max_filesize', '64M');

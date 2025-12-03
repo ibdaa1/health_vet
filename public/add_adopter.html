@@ -538,6 +538,12 @@
         let qrStream = null;
         let qrScanning = false;
         let qrTargetInput = null; // لتحديد الحقل المستهدف للـ QR
+        
+        // *** متغيرات منع الطلبات المكررة ***
+        let isSubmitting = false; // منع الإرسال المتكرر
+        let lastRequestTime = 0; // وقت آخر طلب
+        const REQUEST_COOLDOWN = 2000; // الحد الأدنى بين الطلبات (2 ثانية)
+        let debounceTimer = null; // مؤقت التأخير للبحث
      
         // === وظيفة جديدة: تحميل سجل التبني من معلمة URL ===
         function loadAdoptionFromURL() {
@@ -812,21 +818,25 @@
         }
      
         function searchAnimalSuggestions(value) {
-            const suggestionsDiv = document.getElementById('animalSuggestions');
-            const filtered = allAnimals.filter(animal =>
-                animal.animal_code.toLowerCase().includes(value.toLowerCase()) ||
-                animal.animal_name.toLowerCase().includes(value.toLowerCase())
-            ).slice(0, 10);
-            if (filtered.length === 0) {
-                suggestionsDiv.style.display = 'none';
-                return;
-            }
-            suggestionsDiv.innerHTML = filtered.map(animal => `
-                <div class="combo-item" onclick="selectAnimal(${animal.id}, '${animal.animal_code}', '${animal.animal_name}')">
-                    ${animal.animal_code} - ${animal.animal_name} (${animal.animal_type})
-                </div>
-            `).join('');
-            suggestionsDiv.style.display = 'block';
+            // استخدام debounce لتقليل الطلبات
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                const suggestionsDiv = document.getElementById('animalSuggestions');
+                const filtered = allAnimals.filter(animal =>
+                    animal.animal_code.toLowerCase().includes(value.toLowerCase()) ||
+                    animal.animal_name.toLowerCase().includes(value.toLowerCase())
+                ).slice(0, 10);
+                if (filtered.length === 0) {
+                    suggestionsDiv.style.display = 'none';
+                    return;
+                }
+                suggestionsDiv.innerHTML = filtered.map(animal => `
+                    <div class="combo-item" onclick="selectAnimal(${animal.id}, '${animal.animal_code}', '${animal.animal_name}')">
+                        ${animal.animal_code} - ${animal.animal_name} (${animal.animal_type})
+                    </div>
+                `).join('');
+                suggestionsDiv.style.display = 'block';
+            }, 300); // تأخير 300 مللي ثانية
         }
      
         function selectAnimal(id, code, name) {
@@ -1175,7 +1185,7 @@
             
             console.log('تم تفعيل وضع التعديل بنجاح');
         }
-        // === 5. وظائف الإرسال (نسخة واحدة مُصلحة لكل دالة) ===
+        // === 5. وظائف الإرسال (مع حماية من الطلبات المكررة) ===
         // مساعدة: تحويل dataURL إلى Blob
         function dataURLToBlob(dataURL) {
             const parts = dataURL.split(',');
@@ -1185,13 +1195,40 @@
             for (let i = 0; i < binary.length; i++) array[i] = binary.charCodeAt(i);
             return new Blob([array], { type: mime });
         }
+        
+        // دالة التحقق من إمكانية الإرسال
+        function canSubmit() {
+            const now = Date.now();
+            if (isSubmitting) {
+                console.log('طلب مكرر: الإرسال قيد التنفيذ');
+                return false;
+            }
+            if (now - lastRequestTime < REQUEST_COOLDOWN) {
+                console.log('طلب مكرر: انتظر قليلاً قبل الإرسال مرة أخرى');
+                return false;
+            }
+            return true;
+        }
+        
         async function submitEdit(e) {
              e.preventDefault();
+             
+             // منع الإرسال المكرر
+             if (!canSubmit()) {
+                 document.getElementById('message').innerHTML = `<div class="alert alert-warning">يرجى الانتظار قبل إعادة المحاولة...</div>`;
+                 return;
+             }
+             
              console.log('بدء submitEdit، adoption_id:', currentAdoptionId);
              if (!userPermissions.canEdit) {
                  alert('ليس لديك صلاحية التعديل.');
                  return;
              }
+             
+            // تعيين حالة الإرسال
+            isSubmitting = true;
+            lastRequestTime = Date.now();
+            
             // تحقق من التوقيع وتحويله إلى Blob
             let signatureBlob = null;
             if (!signaturePad.isEmpty()) {
@@ -1226,6 +1263,7 @@
                 console.error('Error in update submission:', error);
                 document.getElementById('message').innerHTML = `<div class="alert alert-danger">${translations.connection_error || 'حدث خطأ في الاتصال. تحقق من الإنترنت أو الخادم.'}</div>`;
             } finally {
+                isSubmitting = false;
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = `<i class="fas fa-floppy-disk"></i>`;
             }
@@ -1233,48 +1271,63 @@
      
         async function submitNew(e) {
             e.preventDefault();
+            
+            // منع الإرسال المكرر
+            if (!canSubmit()) {
+                document.getElementById('message').innerHTML = `<div class="alert alert-warning">يرجى الانتظار قبل إعادة المحاولة...</div>`;
+                return;
+            }
+            
             if (!userPermissions.canAdd) {
                 alert('ليس لديك صلاحية الإضافة.');
                 return;
             }
-            // تحقق من Animal ID
-            if (!currentAnimalId) {
-                await checkAnimalCode(document.getElementById('animal_code').value);
+            
+            // تعيين حالة الإرسال
+            isSubmitting = true;
+            lastRequestTime = Date.now();
+            
+            const submitBtn = document.getElementById('submitButton');
+            
+            try {
+                // تحقق من Animal ID
                 if (!currentAnimalId) {
-                    alert(translations.animal_code_required || 'رمز الحيوان مطلوب ويجب التحقق منه.');
+                    await checkAnimalCode(document.getElementById('animal_code').value);
+                    if (!currentAnimalId) {
+                        alert(translations.animal_code_required || 'رمز الحيوان مطلوب ويجب التحقق منه.');
+                        return;
+                    }
+                }
+                // تأكد من وجود التوقيع على اللوحة
+                if (signaturePad.isEmpty()) {
+                    alert('التوقيع مطلوب.');
                     return;
                 }
-            }
-            // تأكد من وجود التوقيع على اللوحة
-            if (signaturePad.isEmpty()) {
-                alert('التوقيع مطلوب.');
-                return;
-            }
-            // ضع التوقيع صراحةً في الحقل المخفي قبل إنشاء FormData
-            // استخدم JPEG لتقليل الحجم أو PNG إذا رغبت بالشفافية
-            const base64Data = signaturePad.toDataURL('image/jpeg', 0.7); // أصغر من PNG عادة
-            const blob = dataURLToBlob(base64Data);
-            // بناء FormData
-            const formData = new FormData(document.getElementById('adoptionForm'));
-            formData.set('action', 'add'); // استخدم set لتجنّب مفاتيح مكررة
-            formData.delete('adoption_id'); // تأكيد الحذف
-            formData.set('adopter_signature_file', blob, 'signature.jpg'); // إرسال كـ Blob
-            // debug: عرض الحقول الموجودة
-            console.log('SubmitNew - signature blob size:', blob.size);
-            console.log('FormData entries:', Array.from(formData.entries()).map(([k, v]) => ({ key: k, value: (typeof v === 'string' ? (v.length > 60 ? v.substring(0,60)+'...' : v) : v) })));
-            const submitBtn = document.getElementById('submitButton');
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>`;
-            try {
+                // ضع التوقيع صراحةً في الحقل المخفي قبل إنشاء FormData
+                // استخدم JPEG لتقليل الحجم أو PNG إذا رغبت بالشفافية
+                const base64Data = signaturePad.toDataURL('image/jpeg', 0.7); // أصغر من PNG عادة
+                const blob = dataURLToBlob(base64Data);
+                // بناء FormData
+                const formData = new FormData(document.getElementById('adoptionForm'));
+                formData.set('action', 'add'); // استخدم set لتجنّب مفاتيح مكررة
+                formData.delete('adoption_id'); // تأكيد الحذف
+                formData.set('adopter_signature_file', blob, 'signature.jpg'); // إرسال كـ Blob
+                // debug: عرض الحقول الموجودة
+                console.log('SubmitNew - signature blob size:', blob.size);
+                console.log('FormData entries:', Array.from(formData.entries()).map(([k, v]) => ({ key: k, value: (typeof v === 'string' ? (v.length > 60 ? v.substring(0,60)+'...' : v) : v) })));
+                
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>`;
+                
                 const response = await fetch(apiUrl, { method: 'POST', body: formData, credentials: 'include' });
                 const result = await response.json();
                 const messageDiv = document.getElementById('message');
                 if (result.success) {
-                    // تحديث الصفحة كاملة لمسح النموذج
+                    messageDiv.innerHTML = `<div class="alert alert-success">${result.message}</div>`;
+                    // تحديث الصفحة كاملة لمسح النموذج بعد تأخير قصير
                     setTimeout(() => {
                         location.reload();
-                    }, 1000);
-                    messageDiv.innerHTML = `<div class="alert alert-success">${result.message}</div>`;
+                    }, 1500);
                 } else {
                     messageDiv.innerHTML = `<div class="alert alert-danger">${result.message}</div>`;
                 }
@@ -1282,6 +1335,7 @@
                 console.error('Error in new submission:', error);
                 document.getElementById('message').innerHTML = `<div class="alert alert-danger">${translations.connection_error || 'حدث خطأ في الاتصال.'}</div>`;
             } finally {
+                isSubmitting = false;
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = `<i class="fas fa-check-circle"></i>`;
             }
@@ -1402,8 +1456,19 @@
                  document.getElementById('submitButton').style.display = 'block';
              }
          }
-        // إضافة مستمع للنموذج
-        document.addEventListener('DOMContentLoaded', function() {
+         
+        // متغير للتحقق من تهيئة الصفحة
+        let pageInitialized = false;
+        
+        // تهيئة الصفحة مرة واحدة فقط
+        function initializePage() {
+            if (pageInitialized) {
+                console.log('الصفحة مهيأة مسبقاً');
+                return;
+            }
+            pageInitialized = true;
+            console.log('بدء تهيئة الصفحة...');
+            
             // قراءة رمز الحيوان من URL وملء الحقل
             const urlParams = new URLSearchParams(window.location.search);
             const animalCode = urlParams.get('animal_code');
@@ -1412,11 +1477,15 @@
                 // تحميل تفاصيل الحيوان تلقائياً
                 checkAnimalCode(decodeURIComponent(animalCode));
             }
+            
             // تحميل الترجمات فورًا لتجنب التأخير
             language = localStorage.getItem('appLang') || 'ar';
             loadTranslations(language);
         
-            document.getElementById('adoptionForm').addEventListener('submit', function(e) {
+            // إضافة مستمع للنموذج مرة واحدة فقط
+            const adoptionForm = document.getElementById('adoptionForm');
+            adoptionForm.addEventListener('submit', function(e) {
+                e.preventDefault(); // منع الإرسال الافتراضي
                 if (currentAdoptionId) {
                     submitEdit(e);
                 } else {
@@ -1433,9 +1502,17 @@
                     document.getElementById('animalSuggestions').style.display = 'none';
                 }, 200);
             });
-        });
-     
-        window.onload = function() {
+            
+            // زر التعهد
+            document.getElementById("openDeclaration").addEventListener("click", function() {
+                window.open(
+                    "Declarations.html", // مسار الملف
+                    "DeclarationsWindow", // اسم النافذة
+                    "width=900,height=700,scrollbars=yes,resizable=yes,top=50,left=50"
+                );
+            });
+            
+            // تحميل الصلاحيات والبيانات
             loadUserPermissions().then(() => {
                 loadAllAnimals(); // تحميل قائمة الحيوانات
                 initializeSignaturePad(); // تهيئة التوقيع بعد تحميل الصفحة
@@ -1444,17 +1521,17 @@
                 // تحميل سجل التبني من معلمة URL إذا وجدت
                 loadAdoptionFromURL();
             });
-        };
-        // === سكريبت زر التعهد (نُقل الزر، لذا نُحدث السكريبت هنا) ===
-        document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById("openDeclaration").addEventListener("click", function() {
-                window.open(
-                    "Declarations.html", // مسار الملف
-                    "DeclarationsWindow", // اسم النافذة
-                    "width=900,height=700,scrollbars=yes,resizable=yes,top=50,left=50"
-                );
-            });
-        });
+            
+            console.log('تم تهيئة الصفحة بنجاح');
+        }
+        
+        // استخدام DOMContentLoaded مرة واحدة فقط
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializePage);
+        } else {
+            // DOM جاهز بالفعل
+            initializePage();
+        }
     </script>
 </body>
 </html>
