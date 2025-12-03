@@ -242,10 +242,6 @@
           <div class="stat-label">عدد الحجوزات</div>
         </div>
         <div class="stat-item">
-          <div class="stat-value" id="pendingApplications">--</div>
-          <div class="stat-label">طلبات التبني المعلقة</div>
-        </div>
-        <div class="stat-item">
           <div class="stat-value" id="totalVisitors">--</div>
           <div class="stat-label">إجمالي الزوار</div>
         </div>
@@ -273,11 +269,23 @@
 
     <!-- Veterinary Care Statistics -->
     <div class="card" id="vetCareCard" style="display:none;">
-      <div class="section-title">🏥 إحصائيات الرعاية البيطرية</div>
+      <div class="section-title">🏥 إحصائيات العيادة البيطرية</div>
       <div class="stats-grid" id="vetCareStats">
         <div class="stat-item">
           <div class="stat-value" id="totalVisits">--</div>
-          <div class="stat-label">عدد الزيارات</div>
+          <div class="stat-label">إجمالي الزيارات</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="checkupVisits">--</div>
+          <div class="stat-label">الفحوصات</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="surgeryVisits">--</div>
+          <div class="stat-label">العمليات الجراحية</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="vaccineVisits">--</div>
+          <div class="stat-label">التطعيمات</div>
         </div>
         <div class="stat-item">
           <div class="stat-value" id="completedCases">--</div>
@@ -300,14 +308,13 @@
             <li><code>/health_vet/api/get_all_complaints.php?from=&to=</code> - إحصائيات الشكاوى</li>
             <li><code>/health_vet/api/get_data.php?resource=animals</code> - بيانات الحيوانات</li>
             <li><code>/health_vet/api/get_data.php?resource=adoptions</code> - بيانات التبني</li>
-            <li><code>/health_vet/api/add_visit.php?action=get_all</code> - بيانات الزيارات</li>
-            <li><code>/health_vet/api/get_adoption_applications_pending.php</code> - طلبات التبني المعلقة</li>
+            <li><code>/health_vet/api/add_visit.php?action=get_all</code> - بيانات الزيارات البيطرية</li>
             <li><code>/health_vet/api/get_incoming_requests_summary.php</code> - طلبات استلام الحيوانات</li>
             <li><code>/health_vet/api/get_visitors_summary.php</code> - ملخص الزوار</li>
           </ul>
         </li>
         <li>
-          <strong>الجداول المستخدمة:</strong> <code>Complaints</code>, <code>tbl_animals</code>, <code>tbl_adoptions</code>, <code>tbl_visits</code>, <code>adoption_applications</code>, <code>incoming_animal_requests</code>, <code>visitor_interactions</code>
+          <strong>الجداول المستخدمة:</strong> <code>Complaints</code>, <code>tbl_animals</code>, <code>tbl_adoptions</code>, <code>tbl_visits</code>, <code>incoming_animal_requests</code>, <code>visitor_interactions</code>
         </li>
       </ul>
     </div>
@@ -319,7 +326,7 @@
       Monthly Report Page - HealthVet
       Uses existing APIs to display statistics.
       APIs: get_all_complaints.php, get_data.php, add_visit.php, 
-            get_adoption_applications_pending.php, get_incoming_requests_summary.php, get_visitors_summary.php
+            get_incoming_requests_summary.php, get_visitors_summary.php
     */
     
     const API_BASE = '/health_vet/api/';
@@ -462,26 +469,14 @@
         const visits = (data.visits || []).filter(v => isDateInRange(v.visit_date, start, end));
         return {
           total: visits.length,
+          checkup: visits.filter(v => (v.visit_type || '').toLowerCase() === 'checkup').length,
+          surgery: visits.filter(v => (v.visit_type || '').toLowerCase() === 'surgery').length,
+          vaccine: visits.filter(v => (v.visit_type || '').toLowerCase() === 'vaccine').length,
           completed: visits.filter(v => (v.CaseStatus || '').toLowerCase() === 'completed').length,
           inProgress: visits.filter(v => (v.CaseStatus || '').toLowerCase().includes('progress')).length
         };
       } catch (error) {
         console.warn('Error loading visits:', error);
-        return null;
-      }
-    }
-
-    // Load pending adoption applications using get_adoption_applications_pending.php
-    async function loadPendingApplications() {
-      try {
-        const url = `${API_BASE}get_adoption_applications_pending.php`;
-        const response = await fetch(url, { credentials: 'same-origin' });
-        if (!response.ok) return null;
-        const data = await response.json();
-        if (!data.success) return null;
-        return (data.data || []).length;
-      } catch (error) {
-        console.warn('Error loading pending applications:', error);
         return null;
       }
     }
@@ -577,14 +572,6 @@
         console.warn('Error loading adoptions:', error);
       }
 
-      // Load pending applications
-      try {
-        const pendingCount = await loadPendingApplications();
-        updateStat('pendingApplications', pendingCount, pendingCount === null);
-      } catch (error) {
-        console.warn('Error loading pending applications:', error);
-      }
-
       // Load visitors summary
       try {
         const visitorsTotal = await loadVisitorsSummary();
@@ -612,6 +599,9 @@
         const visitsData = await loadVisits(start, end);
         if (visitsData) {
           updateStat('totalVisits', visitsData.total);
+          updateStat('checkupVisits', visitsData.checkup);
+          updateStat('surgeryVisits', visitsData.surgery);
+          updateStat('vaccineVisits', visitsData.vaccine);
           updateStat('completedCases', visitsData.completed);
           updateStat('inProgressCases', visitsData.inProgress);
           $('vetCareCard').style.display = 'block';
