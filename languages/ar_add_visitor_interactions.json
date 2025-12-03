@@ -1,0 +1,45 @@
+{
+    "page_title": "تسجيل/تعديل تفاعلات الزوار",
+    "header_title": "تسجيل تفاعلات الزوار 🐾",
+    "section_visit_data": "بيانات الزيارة",
+    "label_visit_date": "تاريخ الزيارة:",
+    "label_visit_type": "نوع الزيارة:",
+    "option_select_visit_type": "-- اختر نوع الزيارة --",
+    "option_personal": "شخصية",
+    "option_official": "رسمية",
+    "option_volunteer": "تطوع",
+    "label_entity": "الجهة (إن وجدت):",
+    "section_visitor_data": "بيانات الزائر",
+    "label_visitor_full_name": "الاسم الكامل للزائر:",
+    "label_visitor_age": "عمر الزائر (سنوات):",
+    "label_visitor_gender": "الجنس:",
+    "option_male": "ذكر",
+    "option_female": "أنثى",
+    "label_visitor_nationality": "الجنسية:",
+    "label_visitor_contact_number": "رقم الاتصال:",
+    "section_health_interaction": "معلومات صحية وتفاعل",
+    "label_allergies_question": "هل لديك حساسية تجاه الحيوانات؟",
+    "label_yes": "نعم",
+    "label_no": "لا",
+    "label_agree_to_interact_question": "هل توافق على التفاعل مع الحيوانات؟",
+    "label_on_medication_question": "هل تتناول أدوية حالياً؟",
+    "label_medication_affects_question": "هل تؤثر الأدوية على قدرتك على التفاعل؟",
+    "section_parent_guardian": "بيانات الولي/الوصي",
+    "label_parent_guardian_name": "اسم الولي/الوصي الكامل:",
+    "label_parent_guardian_contact": "رقم اتصال الولي/الوصي:",
+    "label_relationship_to_visitor": "العلاقة بالزائر:",
+    "label_number_of_children": "عدد الأطفال المرافقين:",
+    "section_signatures": "التوقيعات",
+    "label_visitor_signature": "توقيع الزائر:",
+    "label_parent_guardian_signature": "توقيع الولي/الوصي:",
+    "button_clear_signature": "مسح التوقيع",
+    "label_disclaimer_signed": "أقر بأنني قرأت وفهمت إخلاء المسؤولية وأوافق عليه.",
+    "button_submit_add": "تسجيل التفاعل",
+    "button_submit_edit": "حفظ التعديلات",
+    "message_sending": "... جاري الإرسال",
+    "message_fetch_error": "فشل في جلب البيانات.",
+    "message_fetching": "... جاري جلب البيانات",
+    "message_success": "✅ نجاح:",
+    "message_failure": "❌ فشل:",
+    "message_connection_error": "❌ خطأ في الاتصال:"
+}
