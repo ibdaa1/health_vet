@@ -1,0 +1,184 @@
+<?php
+// get_report_data.php
+header('Content-Type: application/json; charset=utf-8');
+require_once 'db.php';
+
+$response = ['success' => false, 'message' => '', 'data' => []];
+
+try {
+    // التحقق من الجلسة
+    session_start();
+    if (!isset($_SESSION['user_id'])) {
+        throw new Exception('غير مصرح بالدخول');
+    }
+    
+    // الحصول على التواريخ
+    $startDate = isset($_GET['start_date']) ? $_GET['start_date'] : date('Y-m-01');
+    $endDate = isset($_GET['end_date']) ? $_GET['end_date'] : date('Y-m-d');
+    
+    // وحدة الشكاوى وإدارة العمليات
+    $complaints = [
+        'received' => 0,
+        'closed' => 0,
+        'cats' => 0,
+        'dogs' => 0
+    ];
+    
+    // جلب بيانات الشكاوى (افترض أن لديك جدول complaints)
+    $query = "SELECT 
+        COUNT(*) as received,
+        SUM(CASE WHEN status = 'closed' THEN 1 ELSE 0 END) as closed,
+        SUM(CASE WHEN animal_type LIKE '%cat%' THEN 1 ELSE 0 END) as cats,
+        SUM(CASE WHEN animal_type LIKE '%dog%' THEN 1 ELSE 0 END) as dogs
+        FROM tbl_complaints 
+        WHERE DATE(created_at) BETWEEN ? AND ?";
+    
+    $stmt = $pdo->prepare($query);
+    $stmt->execute([$startDate, $endDate]);
+    $complaintsData = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    if ($complaintsData) {
+        $complaints = [
+            'received' => (int)$complaintsData['received'],
+            'closed' => (int)$complaintsData['closed'],
+            'cats' => (int)$complaintsData['cats'],
+            'dogs' => (int)$complaintsData['dogs']
+        ];
+    }
+    
+    // وحدة الاستقبال وخدمة المتعاملين
+    $reception = [
+        'adopted_cats' => 0,
+        'surrendered_cats' => 0,
+        'adopted_dogs' => 0,
+        'surrendered_dogs' => 0
+    ];
+    
+    // جلب بيانات التبني
+    $query = "SELECT 
+        animal_type,
+        operation_type,
+        COUNT(*) as count
+        FROM tbl_adoptions 
+        WHERE DATE(adoption_date) BETWEEN ? AND ?
+        GROUP BY animal_type, operation_type";
+    
+    $stmt = $pdo->prepare($query);
+    $stmt->execute([$startDate, $endDate]);
+    $adoptionsData = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    foreach ($adoptionsData as $row) {
+        $type = strtolower($row['animal_type']);
+        $operation = strtolower($row['operation_type']);
+        $count = (int)$row['count'];
+        
+        if (strpos($type, 'cat') !== false) {
+            if ($operation === 'adopt') {
+                $reception['adopted_cats'] += $count;
+            } elseif ($operation === 'surrender') {
+                $reception['surrendered_cats'] += $count;
+            }
+        } elseif (strpos($type, 'dog') !== false) {
+            if ($operation === 'adopt') {
+                $reception['adopted_dogs'] += $count;
+            } elseif ($operation === 'surrender') {
+                $reception['surrendered_dogs'] += $count;
+            }
+        }
+    }
+    
+    // وحدة الرعاية البيطرية
+    $veterinary = [
+        'stray_cats_received' => 0,
+        'domestic_cats_received' => 0,
+        'stray_dogs_received' => 0,
+        'domestic_dogs_received' => 0,
+        'cat_operations' => 0,
+        'dog_operations' => 0,
+        'euthanasia' => 0
+    ];
+    
+    // جلب بيانات الحيوانات المستلمة
+    $query = "SELECT 
+        animal_type,
+        animal_origin,
+        COUNT(*) as count
+        FROM tbl_animals 
+        WHERE DATE(received_date) BETWEEN ? AND ?
+        GROUP BY animal_type, animal_origin";
+    
+    $stmt = $pdo->prepare($query);
+    $stmt->execute([$startDate, $endDate]);
+    $animalsData = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    foreach ($animalsData as $row) {
+        $type = strtolower($row['animal_type']);
+        $origin = strtolower($row['animal_origin']);
+        $count = (int)$row['count'];
+        
+        if (strpos($type, 'cat') !== false) {
+            if ($origin === 'stray') {
+                $veterinary['stray_cats_received'] += $count;
+            } elseif ($origin === 'domestic') {
+                $veterinary['domestic_cats_received'] += $count;
+            }
+        } elseif (strpos($type, 'dog') !== false) {
+            if ($origin === 'stray') {
+                $veterinary['stray_dogs_received'] += $count;
+            } elseif ($origin === 'domestic') {
+                $veterinary['domestic_dogs_received'] += $count;
+            }
+        }
+    }
+    
+    // جلب بيانات العمليات
+    $query = "SELECT 
+        animal_type,
+        COUNT(*) as count
+        FROM tbl_medical_records 
+        WHERE DATE(visit_date) BETWEEN ? AND ?
+        AND treatment_type = 'operation'
+        GROUP BY animal_type";
+    
+    $stmt = $pdo->prepare($query);
+    $stmt->execute([$startDate, $endDate]);
+    $operationsData = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    foreach ($operationsData as $row) {
+        $type = strtolower($row['animal_type']);
+        $count = (int)$row['count'];
+        
+        if (strpos($type, 'cat') !== false) {
+            $veterinary['cat_operations'] += $count;
+        } elseif (strpos($type, 'dog') !== false) {
+            $veterinary['dog_operations'] += $count;
+        }
+    }
+    
+    // جلب بيانات القتل الرحيم
+    $query = "SELECT COUNT(*) as count 
+        FROM tbl_medical_records 
+        WHERE DATE(visit_date) BETWEEN ? AND ?
+        AND treatment_type = 'euthanasia'";
+    
+    $stmt = $pdo->prepare($query);
+    $stmt->execute([$startDate, $endDate]);
+    $euthanasiaData = $stmt->fetch(PDO::FETCH_ASSOC);
+    $veterinary['euthanasia'] = (int)($euthanasiaData['count'] ?? 0);
+    
+    $response['success'] = true;
+    $response['data'] = [
+        'complaints' => $complaints,
+        'reception' => $reception,
+        'veterinary' => $veterinary,
+        'period' => [
+            'start' => $startDate,
+            'end' => $endDate
+        ]
+    ];
+    
+} catch (Exception $e) {
+    $response['message'] = $e->getMessage();
+}
+
+echo json_encode($response, JSON_UNESCAPED_UNICODE);
