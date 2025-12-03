@@ -1,0 +1,586 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>لوحة تحكم العيادة والمستودع — Health Vet</title>
+<!-- ECharts for charts -->
+<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+<style>
+/* الهوية: أخضر وبيج، خلفية بيضاء */
+:root{
+  --brand-green: #2ca02c;
+  --brand-beige: #f5e9d4;
+  --bg: #ffffff;
+  --muted: #666;
+  --accent: #0b74de;
+  --card-shadow: rgba(0,0,0,0.06);
+  --radius: 8px;
+  font-family: "Tahoma", Arial, Helvetica, sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:#222;direction:rtl;padding:18px}
+.container{max-width:1200px;margin:0 auto}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;gap:12px;flex-wrap:wrap}
+.title {display:flex;flex-direction:column}
+.title h1{margin:0;font-size:1.2rem}
+.controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.controls .search{min-width:240px}
+.cardRow{display:flex;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+.card{flex:1;min-width:180px;background:var(--bg);padding:14px;border-radius:var(--radius);box-shadow:0 6px 20px var(--card-shadow);text-align:right;border-left:6px solid var(--brand-green)}
+.card h3{margin:0;font-size:0.95rem}
+.card p{margin:8px 0 0;font-size:1.5rem;font-weight:700}
+.kpi-note{font-size:0.8rem;color:var(--muted)}
+.section{background:var(--bg);padding:12px;border-radius:var(--radius);box-shadow:0 6px 20px var(--card-shadow);margin-bottom:12px}
+.grid{display:grid;grid-template-columns:1fr 420px;gap:12px}
+@media(max-width:1000px){ .grid{grid-template-columns:1fr} }
+@media(max-width:768px){
+  body{padding:12px}
+  .header{justify-content:center;text-align:center}
+  .controls{justify-content:center;margin-top:12px}
+  .cardRow{justify-content:center}
+  .card{min-width:150px}
+  .filter-row{justify-content:center;flex-direction:column;align-items:stretch}
+  .filter-row > div{min-width:auto;margin-bottom:8px}
+}
+@media(max-width:480px){
+  .cardRow{gap:8px}
+  .card{padding:10px;min-width:120px}
+  .card p{font-size:1.2rem}
+  .controls .search{min-width:200px}
+}
+.table{width:100%;border-collapse:collapse;margin-top:8px}
+.table th,.table td{border:1px solid #eee;padding:8px;text-align:right;font-size:0.95rem}
+.button{padding:8px 12px;border-radius:6px;border:0;background:var(--accent);color:#fff;cursor:pointer;font-size:0.9rem}
+.button.green{background:var(--brand-green)}
+.select, .search, select, input {padding:8px;border:1px solid #ddd;border-radius:6px;width:100%;font-size:0.9rem}
+.filter-row{display:flex;gap:12px;flex-wrap:wrap;align-items:end}
+.legend{display:flex;gap:8px;flex-wrap:wrap}
+.result-row{padding:8px;border-bottom:1px solid #f0f0f0}
+.badge{display:inline-block;padding:4px 8px;border-radius:999px;background:var(--brand-beige);color:#333;font-weight:600}
+.edit-btn{background:var(--brand-green);color:#fff;padding:6px 8px;border-radius:6px;border:0;cursor:pointer;font-size:0.85rem}
+.small{font-size:0.9rem;color:var(--muted)}
+.no-results{color:var(--muted);text-align:center;padding:20px}
+.tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.pager{display:flex;gap:6px;align-items:center}
+.footer-space{height:40px}
+.loading {padding:12px;text-align:center;color:var(--muted)}
+.err {color:#b00020;background:#fff0f0;border:1px solid #f5c6cb;padding:10px;border-radius:6px;margin-bottom:8px}
+.lang-btn{background:var(--brand-green);color:#fff;border:0;padding:8px 12px;border-radius:6px;cursor:pointer;font-size:0.9rem;margin-left:8px}
+</style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="title">
+        <h1 id="dashboard-title">لوحة تحكم العيادة والمستودع</h1>
+      </div>
+      <div class="controls">
+        <input id="globalSearch" class="search" placeholder="ابحث: animal_code أو ملاحظات..." />
+        <button id="btnSearch" class="button">بحث</button>
+        <button id="btnRefresh" class="button">تحديث</button>
+        <button id="langToggle" class="lang-btn">English</button>
+      </div>
+    </div>
+    <div id="errorBox" style="display:none" class="err"></div>
+    <div class="cardRow" id="cards">
+      <div class="card">
+        <h3 id="total-visits-label">إجمالي الزيارات</h3>
+        <p id="cntVisits">...</p>
+        <div id="visits-note" class="kpi-note">كل الفترات</div>
+      </div>
+      <div class="card">
+        <h3 id="total-doctors-label">عدد الأطباء</h3>
+        <p id="cntDoctors">...</p>
+        <div id="doctors-note" class="kpi-note">doctor_empid المميز</div>
+      </div>
+      <div class="card">
+        <h3 id="dispensed-label">سجلات الصرف</h3>
+        <p id="cntDispensed">...</p>
+        <div id="dispensed-note" class="kpi-note">جدول منتجات الزيارة</div>
+      </div>
+      <div class="card">
+        <h3 id="movements-label">حركات المخزون</h3>
+        <p id="cntMovements">...</p>
+        <div id="movements-note" class="kpi-note">جدول حركات المخزون</div>
+      </div>
+    </div>
+    <div class="section filter-row" style="margin-bottom:18px">
+      <div style="min-width:200px">
+        <label id="visit-type-label" class="small">نوع الزيارة</label><br/>
+        <select id="filterVisitType" class="select"><option value="">كل الأنواع</option></select>
+      </div>
+      <div style="min-width:200px">
+        <label id="case-status-label" class="small">حالة القضية</label><br/>
+        <select id="filterCaseStatus" class="select"><option value="">كل الحالات</option></select>
+      </div>
+      <div style="min-width:200px">
+        <label id="animal-status-label" class="small">حالة الحيوان</label><br/>
+        <select id="filterAnimalStatus" class="select"><option value="">كل الحالات</option></select>
+      </div>
+      <div style="min-width:260px">
+        <label id="doctor-label" class="small">الطبيب (doctor_empid)</label><br/>
+        <select id="filterDoctor" class="select"><option value="">كل الأطباء</option></select>
+      </div>
+      <div>
+        <button id="btnApplyFilters" class="button green">تطبيق الفلاتر</button>
+        <button id="btnClearFilters" class="button" style="background:transparent;color:var(--accent);border:1px solid #ddd">مسح</button>
+      </div>
+    </div>
+    <div class="grid">
+      <div>
+        <div class="section">
+          <h3 id="visits-title">سجلات الزيارات</h3>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <div id="visits-note-text" class="small">اضغط "تعديل" لفتح صفحة التعديل/الإضافة</div>
+            <div class="tools">
+              <button id="btnExportVisits" class="button green">تصدير CSV</button>
+              <div class="pager">
+                <button id="prevPage" class="button" title="السابق">‹</button>
+                <span id="pageInfo" class="small">1</span>
+                <button id="nextPage" class="button" title="التالي">›</button>
+              </div>
+            </div>
+          </div>
+          <div style="max-height:520px;overflow:auto">
+            <table class="table" id="visitsTable">
+              <thead>
+                <tr><th id="id-header">رقم المعرف</th><th id="animal-header">الحيوان</th><th id="visit-date-header">تاريخ الزيارة</th><th id="doctor-header">الطبيب</th><th id="type-header">النوع</th><th id="case-status-header">حالة القضية</th><th id="animal-status-header">حالة الحيوان</th><th id="actions-header">إجراءات</th></tr>
+              </thead>
+              <tbody><tr><td colspan="8" class="loading">جارٍ التحميل...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="section" style="margin-top:12px">
+          <h3 id="dispense-rate-title">معدل الصرف (وحدات أساسية) — 30 يوم</h3>
+          <div id="chart_timeseries" style="height:280px;width:100%"></div>
+        </div>
+      </div>
+      <div>
+        <div class="section">
+          <h3 id="low-stock-title">منتجات منخفضة المخزون</h3>
+          <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+            <input id="lowSearch" class="search" placeholder="ابحث في المنتجات المنخفضة..." style="flex:1" />
+            <button id="btnExportLow" class="button green">تصدير CSV</button>
+          </div>
+          <div style="max-height:360px;overflow:auto">
+            <table class="table" id="lowStockTable">
+              <thead><tr><th id="variant-header">رقم المتغير</th><th id="sku-header">رمز المنتج</th><th id="product-header">المنتج</th><th id="quantity-header">الكمية (حزم)</th><th id="min-quantity-header">الحد الأدنى</th></tr></thead>
+              <tbody><tr><td colspan="5" class="loading">جارٍ التحميل...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="section" style="margin-top:12px">
+          <h3 id="visit-dist-title">توزيعات الزيارات</h3>
+          <div id="chart_visit_type" style="height:140px;margin-bottom:8px"></div>
+          <div id="chart_case_status" style="height:140px;margin-bottom:8px"></div>
+          <div id="chart_animal_status" style="height:140px"></div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-space"></div>
+  </div>
+<script src="session_check.js"></script>
+<script>
+const translations = {
+  ar: {
+    dashboard_title: 'لوحة تحكم العيادة والمستودع',
+    search_placeholder: 'ابحث: animal_code أو ملاحظات...',
+    search_btn: 'بحث',
+    refresh_btn: 'تحديث',
+    total_visits_label: 'إجمالي الزيارات',
+    visits_note: 'كل الفترات',
+    total_doctors_label: 'عدد الأطباء',
+    doctors_note: 'doctor_empid المميز',
+    dispensed_label: 'سجلات الصرف',
+    dispensed_note: 'جدول منتجات الزيارة',
+    movements_label: 'حركات المخزون',
+    movements_note: 'جدول حركات المخزون',
+    visit_type_label: 'نوع الزيارة',
+    all_types: 'كل الأنواع',
+    case_status_label: 'حالة القضية',
+    all_cases: 'كل الحالات',
+    animal_status_label: 'حالة الحيوان',
+    all_animal_cases: 'كل الحالات',
+    doctor_label: 'الطبيب (doctor_empid)',
+    all_doctors: 'كل الأطباء',
+    apply_filters: 'تطبيق الفلاتر',
+    clear_filters: 'مسح',
+    visits_title: 'سجلات الزيارات',
+    visits_note_text: 'اضغط "تعديل" لفتح صفحة التعديل/الإضافة',
+    export_csv: 'تصدير CSV',
+    prev_page: 'السابق',
+    next_page: 'التالي',
+    id_header: 'رقم المعرف',
+    animal_header: 'الحيوان',
+    visit_date_header: 'تاريخ الزيارة',
+    doctor_header: 'الطبيب',
+    type_header: 'النوع',
+    case_status_header: 'حالة القضية',
+    animal_status_header: 'حالة الحيوان',
+    actions_header: 'إجراءات',
+    edit_btn: 'تعديل',
+    dispense_rate_title: 'معدل الصرف (وحدات أساسية) — 30 يوم',
+    low_stock_title: 'منتجات منخفضة المخزون',
+    low_search_placeholder: 'ابحث في المنتجات المنخفضة...',
+    variant_header: 'رقم المتغير',
+    sku_header: 'رمز المنتج',
+    product_header: 'المنتج',
+    quantity_header: 'الكمية (حزم)',
+    min_quantity_header: 'الحد الأدنى',
+    visit_dist_title: 'توزيعات الزيارات',
+    loading: 'جارٍ التحميل...',
+    no_results: 'لا سجلات',
+    lang_btn_en: 'English',
+    lang_btn_ar: 'العربية'
+  },
+  en: {
+    dashboard_title: 'Clinic and Warehouse Dashboard',
+    search_placeholder: 'Search: animal_code or notes...',
+    search_btn: 'Search',
+    refresh_btn: 'Refresh',
+    total_visits_label: 'Total Visits',
+    visits_note: 'All periods',
+    total_doctors_label: 'Number of Doctors',
+    doctors_note: 'distinct doctor_empid',
+    dispensed_label: 'Dispense Records',
+    dispensed_note: 'tbl_VisitProducts',
+    movements_label: 'Stock Movements',
+    movements_note: 'tbl_StockMovements',
+    visit_type_label: 'Visit Type',
+    all_types: 'All Types',
+    case_status_label: 'Case Status',
+    all_cases: 'All Cases',
+    animal_status_label: 'Animal Status',
+    all_animal_cases: 'All Cases',
+    doctor_label: 'Doctor (doctor_empid)',
+    all_doctors: 'All Doctors',
+    apply_filters: 'Apply Filters',
+    clear_filters: 'Clear',
+    visits_title: 'Visit Records',
+    visits_note_text: 'Click "Edit" to open edit/add page',
+    export_csv: 'Export CSV',
+    prev_page: 'Previous',
+    next_page: 'Next',
+    id_header: 'ID',
+    animal_header: 'Animal',
+    visit_date_header: 'Visit Date',
+    doctor_header: 'Doctor',
+    type_header: 'Type',
+    case_status_header: 'CaseStatus',
+    animal_status_header: 'AnimalStatus',
+    actions_header: 'Actions',
+    edit_btn: 'Edit',
+    dispense_rate_title: 'Dispense Rate (Base units) — 30 days',
+    low_stock_title: 'Low Stock Products',
+    low_search_placeholder: 'Search in low stock products...',
+    variant_header: 'VariantID',
+    sku_header: 'SKU',
+    product_header: 'Product',
+    quantity_header: 'Quantity (packs)',
+    min_quantity_header: 'MinQuantity',
+    visit_dist_title: 'Visit Distributions',
+    loading: 'Loading...',
+    no_results: 'No records',
+    lang_btn_en: 'English',
+    lang_btn_ar: 'العربية'
+  }
+};
+let currentLang = 'ar';
+function setLanguage(lang) {
+  currentLang = lang;
+  document.documentElement.lang = lang;
+  document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+  document.body.style.direction = lang === 'ar' ? 'rtl' : 'ltr';
+  document.body.style.textAlign = lang === 'ar' ? 'right' : 'left';
+  const t = translations[lang];
+  document.getElementById('dashboard-title').textContent = t.dashboard_title;
+  document.getElementById('globalSearch').placeholder = t.search_placeholder;
+  document.getElementById('btnSearch').textContent = t.search_btn;
+  document.getElementById('btnRefresh').textContent = t.refresh_btn;
+  document.getElementById('total-visits-label').textContent = t.total_visits_label;
+  document.getElementById('visits-note').textContent = t.visits_note;
+  document.getElementById('total-doctors-label').textContent = t.total_doctors_label;
+  document.getElementById('doctors-note').textContent = t.doctors_note;
+  document.getElementById('dispensed-label').textContent = t.dispensed_label;
+  document.getElementById('dispensed-note').textContent = t.dispensed_note;
+  document.getElementById('movements-label').textContent = t.movements_label;
+  document.getElementById('movements-note').textContent = t.movements_note;
+  document.getElementById('visit-type-label').textContent = t.visit_type_label;
+  document.getElementById('filterVisitType').options[0].text = t.all_types;
+  document.getElementById('case-status-label').textContent = t.case_status_label;
+  document.getElementById('filterCaseStatus').options[0].text = t.all_cases;
+  document.getElementById('animal-status-label').textContent = t.animal_status_label;
+  document.getElementById('filterAnimalStatus').options[0].text = t.all_animal_cases;
+  document.getElementById('doctor-label').textContent = t.doctor_label;
+  document.getElementById('filterDoctor').options[0].text = t.all_doctors;
+  document.getElementById('btnApplyFilters').textContent = t.apply_filters;
+  document.getElementById('btnClearFilters').textContent = t.clear_filters;
+  document.getElementById('visits-title').textContent = t.visits_title;
+  document.getElementById('visits-note-text').textContent = t.visits_note_text;
+  document.getElementById('btnExportVisits').textContent = t.export_csv;
+  document.getElementById('prevPage').title = t.prev_page;
+  document.getElementById('nextPage').title = t.next_page;
+  document.getElementById('id-header').textContent = t.id_header;
+  document.getElementById('animal-header').textContent = t.animal_header;
+  document.getElementById('visit-date-header').textContent = t.visit_date_header;
+  document.getElementById('doctor-header').textContent = t.doctor_header;
+  document.getElementById('type-header').textContent = t.type_header;
+  document.getElementById('case-status-header').textContent = t.case_status_header;
+  document.getElementById('animal-status-header').textContent = t.animal_status_header;
+  document.getElementById('actions-header').textContent = t.actions_header;
+  document.getElementById('dispense-rate-title').textContent = t.dispense_rate_title;
+  document.getElementById('low-stock-title').textContent = t.low_stock_title;
+  document.getElementById('lowSearch').placeholder = t.low_search_placeholder;
+  document.getElementById('btnExportLow').textContent = t.export_csv;
+  document.getElementById('variant-header').textContent = t.variant_header;
+  document.getElementById('sku-header').textContent = t.sku_header;
+  document.getElementById('product-header').textContent = t.product_header;
+  document.getElementById('quantity-header').textContent = t.quantity_header;
+  document.getElementById('min-quantity-header').textContent = t.min_quantity_header;
+  document.getElementById('visit-dist-title').textContent = t.visit_dist_title;
+  document.querySelectorAll('.loading').forEach(el => el.textContent = t.loading);
+  document.querySelectorAll('.no-results').forEach(el => el.textContent = t.no_results);
+  document.getElementById('langToggle').textContent = lang === 'ar' ? t.lang_btn_en : t.lang_btn_ar;
+  // Re-render tables if loaded
+  if (document.querySelector('#visitsTable tbody tr:not(.loading)')) loadVisits();
+  if (document.querySelector('#lowStockTable tbody tr:not(.loading)')) renderLowStock([]); // Trigger re-render if needed
+}
+document.getElementById('langToggle').addEventListener('click', () => {
+  const newLang = currentLang === 'ar' ? 'en' : 'ar';
+  setLanguage(newLang);
+});
+const API_STATS = '/health_vet/api/dashboard_stats.php';
+const API_VISITS = '/health_vet/api/visits_query.php';
+const API_DOCTORS = '/health_vet/api/get_doctors.php';
+const elems = {
+  errorBox: document.getElementById('errorBox'),
+  cntVisits: document.getElementById('cntVisits'),
+  cntDoctors: document.getElementById('cntDoctors'),
+  cntDispensed: document.getElementById('cntDispensed'),
+  cntMovements: document.getElementById('cntMovements'),
+  filterVisitType: document.getElementById('filterVisitType'),
+  filterCaseStatus: document.getElementById('filterCaseStatus'),
+  filterAnimalStatus: document.getElementById('filterAnimalStatus'),
+  filterDoctor: document.getElementById('filterDoctor'),
+  visitsTbody: document.querySelector('#visitsTable tbody'),
+  lowTbody: document.querySelector('#lowStockTable tbody'),
+  lowSearch: document.getElementById('lowSearch'),
+  globalSearch: document.getElementById('globalSearch'),
+  pageInfo: document.getElementById('pageInfo')
+};
+let doctorsMap = new Map();
+let distinctDoctorIds = [];
+let page = 0;
+const pageSize = 25;
+const chartTimeseries = echarts.init(document.getElementById('chart_timeseries'));
+const chartVisitType = echarts.init(document.getElementById('chart_visit_type'));
+const chartCaseStatus = echarts.init(document.getElementById('chart_case_status'));
+const chartAnimalStatus = echarts.init(document.getElementById('chart_animal_status'));
+document.getElementById('btnRefresh').addEventListener('click', initDashboard);
+document.getElementById('btnApplyFilters').addEventListener('click', ()=> { page = 0; loadVisits(); });
+document.getElementById('btnClearFilters').addEventListener('click', ()=> {
+  elems.filterVisitType.value=''; elems.filterCaseStatus.value=''; elems.filterAnimalStatus.value=''; elems.filterDoctor.value=''; elems.globalSearch.value=''; page=0; loadVisits();
+});
+document.getElementById('btnSearch').addEventListener('click', ()=> { page=0; loadVisits(); });
+document.getElementById('prevPage').addEventListener('click', ()=> { if (page>0) { page--; loadVisits(); }});
+document.getElementById('nextPage').addEventListener('click', ()=> { page++; loadVisits(); });
+document.getElementById('btnExportLow').addEventListener('click', exportLowCSV);
+document.getElementById('btnExportVisits').addEventListener('click', exportVisitsCSV);
+elems.lowSearch.addEventListener('input', ()=> filterLowTable(elems.lowSearch.value));
+async function fetchJson(url, opts = {}) {
+  try {
+    const res = await fetch(url, Object.assign({credentials:'same-origin'}, opts));
+    const text = await res.text();
+    try {
+      return JSON.parse(text);
+    } catch (e) {
+      throw new Error('Bad JSON from ' + url + ' : ' + text.slice(0,200));
+    }
+  } catch (err) {
+    throw err;
+  }
+}
+function showError(msg) {
+  elems.errorBox.style.display = 'block';
+  elems.errorBox.textContent = msg;
+}
+function clearError() {
+  elems.errorBox.style.display = 'none';
+  elems.errorBox.textContent = '';
+}
+async function initDashboard() {
+  clearError();
+  page = 0;
+  try {
+    const statsResp = await fetchJson(API_STATS + '?recent=12&top=10&low=200&days=30');
+    if (!statsResp.success) throw new Error(statsResp.message || 'Stats API error');
+    const stats = statsResp.data;
+    elems.cntVisits.textContent = stats.counts.visits ?? 0;
+    elems.cntDoctors.textContent = stats.counts.doctors ?? 0;
+    elems.cntDispensed.textContent = stats.counts.dispensed_items ?? 0;
+    elems.cntMovements.textContent = stats.counts.stock_movements ?? 0;
+    populateSelect(elems.filterVisitType, stats.distinct_visit_types || []);
+    populateSelect(elems.filterCaseStatus, stats.distinct_case_statuses || []);
+    populateSelect(elems.filterAnimalStatus, stats.distinct_animal_statuses || []);
+    distinctDoctorIds = (stats.distinct_doctor_ids || []).map(v => String(v));
+    await loadDoctorsForIds(distinctDoctorIds);
+    renderLowStock(stats.low_stock_products || []);
+    renderTimeSeries(stats.dispensed_over_time || []);
+    renderPie(chartVisitType, stats.visit_type_distribution || [], 'visit_type');
+    renderPie(chartCaseStatus, stats.case_status_distribution || [], 'CaseStatus');
+    renderPie(chartAnimalStatus, stats.animal_status_distribution || [], 'AnimalStatus');
+    await loadVisits();
+  } catch (err) {
+    console.error('initDashboard error', err);
+    showError('فشل تحميل اللوحة: ' + (err.message || err));
+    try { await loadVisits(); } catch(e){ }
+  }
+}
+function populateSelect(sel, arr) {
+  const allText = currentLang === 'ar' ? translations.ar.all_types : translations.en.all_types;
+  sel.innerHTML = '<option value="">'+ allText +'</option>';
+  (arr || []).forEach(v => {
+    const opt = document.createElement('option'); opt.value = v; opt.textContent = v; sel.appendChild(opt);
+  });
+}
+async function loadDoctorsForIds(idList) {
+  doctorsMap.clear();
+  const allDoctorsText = currentLang === 'ar' ? translations.ar.all_doctors : translations.en.all_doctors;
+  elems.filterDoctor.innerHTML = '<option value="">'+ allDoctorsText +'</option>';
+  if (!idList || !idList.length) return;
+  try {
+    const resp = await fetchJson(API_DOCTORS + '?debug=0');
+    if (!resp.success) throw new Error(resp.message || 'get_doctors failed');
+    const all = resp.data || [];
+    const returned = new Map();
+    all.forEach(d => {
+      const id = d.EmpID ?? d.EmpId ?? d.ID ?? d.id;
+      const name = d.EmpName ?? d.Name ?? d.FullName ?? d.DisplayName ?? String(id);
+      if (id !== undefined && id !== null) returned.set(String(id), String(name));
+    });
+    idList.forEach(id => {
+      const name = returned.get(String(id)) ?? null;
+      doctorsMap.set(String(id), name);
+      const opt = document.createElement('option');
+      opt.value = String(id);
+      opt.textContent = name ? `${name} (${id})` : `id:${id}`;
+      elems.filterDoctor.appendChild(opt);
+    });
+  } catch (err) {
+    console.warn('loadDoctorsForIds failed', err);
+    idList.forEach(id => {
+      doctorsMap.set(String(id), null);
+      const opt = document.createElement('option');
+      opt.value = String(id); opt.textContent = `id:${id}`; elems.filterDoctor.appendChild(opt);
+    });
+  }
+}
+function renderLowStock(rows) {
+  elems.lowTbody.innerHTML = '';
+  const noResultsText = currentLang === 'ar' ? translations.ar.no_results : translations.en.no_results;
+  if (!rows || rows.length === 0) {
+    elems.lowTbody.innerHTML = '<tr><td colspan="5" class="no-results">'+ noResultsText +'</td></tr>';
+    return;
+  }
+  rows.forEach(r => {
+    const tr = document.createElement('tr');
+    const pname = r.ProductName || r.product_name || '';
+    const qp = (r.QuantityPacks !== null && r.QuantityPacks !== undefined) ? Number(r.QuantityPacks).toFixed(4) : '-';
+    tr.innerHTML = `<td>${r.VariantID}</td><td>${escapeHtml(r.SKU||'')}</td><td>${escapeHtml(pname)}</td><td>${qp}</td><td>${r.MinQuantity ?? '-'}</td>`;
+    elems.lowTbody.appendChild(tr);
+  });
+}
+function renderTimeSeries(series) {
+  const times = (series || []).map(x => x.date);
+  const vals = (series || []).map(x => Number(x.total_base || 0));
+  chartTimeseries.setOption({
+    tooltip:{trigger:'axis'},
+    xAxis:{type:'category', data:times},
+    yAxis:{type:'value', name:'Base units'},
+    series:[{type:'line', data:vals, smooth:true, areaStyle:{}}], grid:{left:'6%',right:'6%',bottom:'6%'}
+  });
+}
+function renderPie(chart, rows, key) {
+  const data = (rows || []).map(r => ({ name: r[key] ?? (Object.values(r)[0] || ''), value: Number(r.cnt || 0) }));
+  chart.setOption({ tooltip:{trigger:'item'}, series:[{type:'pie', radius:'60%', data:data, label:{formatter:'{b}: {c} ({d}%)'}}], legend:{show:false} });
+}
+function filterLowTable(q) {
+  const trs = Array.from(document.querySelectorAll('#lowStockTable tbody tr'));
+  trs.forEach(tr => {
+    const txt = tr.textContent.trim().toLowerCase();
+    tr.style.display = (!q || txt.includes(q.toLowerCase())) ? '' : 'none';
+  });
+}
+function formatDoctor(empid) {
+  if (empid === null || empid === undefined) return '';
+  const id = String(empid);
+  const name = doctorsMap.get(id);
+  return name ? `${name} (id:${id})` : `id:${id}`;
+}
+async function loadVisits() {
+  try {
+    const loadingText = currentLang === 'ar' ? translations.ar.loading : translations.en.loading;
+    const noResultsText = currentLang === 'ar' ? translations.ar.no_results : translations.en.no_results;
+    elems.visitsTbody.innerHTML = '<tr><td colspan="8" class="loading">'+ loadingText +'</td></tr>';
+    const params = new URLSearchParams();
+    if (elems.filterVisitType.value) params.set('visit_type', elems.filterVisitType.value);
+    if (elems.filterCaseStatus.value) params.set('CaseStatus', elems.filterCaseStatus.value);
+    if (elems.filterAnimalStatus.value) params.set('AnimalStatus', elems.filterAnimalStatus.value);
+    if (elems.filterDoctor.value) params.set('doctor_empid', elems.filterDoctor.value);
+    if (elems.globalSearch.value) params.set('q', elems.globalSearch.value.trim());
+    params.set('limit', pageSize);
+    params.set('offset', page * pageSize);
+    params.set('order_by', 'visit_date');
+    params.set('order_dir', 'DESC');
+    const url = API_VISITS + '?' + params.toString();
+    const j = await fetchJson(url);
+    if (!j.success) throw new Error(j.message || 'visits API error');
+    const rows = j.data || [];
+    const total = j.total ?? 0;
+    elems.visitsTbody.innerHTML = '';
+    if (!rows.length) {
+      elems.visitsTbody.innerHTML = '<tr><td colspan="8" class="no-results">'+ noResultsText +'</td></tr>';
+      elems.pageInfo.textContent = `0 / 0`;
+      return;
+    }
+    rows.forEach(r => {
+      const tr = document.createElement('tr');
+      const editText = currentLang === 'ar' ? translations.ar.edit_btn : translations.en.edit_btn;
+      tr.innerHTML = `<td>${r.id}</td>
+                      <td>${escapeHtml(r.animal_code||'')}</td>
+                      <td>${escapeHtml(r.visit_date||r.created_at||'')}</td>
+                      <td>${escapeHtml(formatDoctor(r.doctor_empid))}</td>
+                      <td>${escapeHtml(r.visit_type||'')}</td>
+                      <td>${escapeHtml(r.CaseStatus||'')}</td>
+                      <td>${escapeHtml(r.AnimalStatus||'')}</td>
+                      <td><button class="edit-btn" onclick="window.location='add_visit.html?id=${r.id}'">${editText}</button></td>`;
+      elems.visitsTbody.appendChild(tr);
+    });
+    elems.pageInfo.textContent = `${page+1} / ${Math.max(1, Math.ceil(total / pageSize))}`;
+  } catch (err) {
+    console.error('loadVisits error', err);
+    showError('فشل تحميل سجلات الزيارات: ' + (err.message || err));
+    elems.visitsTbody.innerHTML = '<tr><td colspan="8" class="no-results">فشل التحميل</td></tr>';
+  }
+}
+function exportLowCSV() {
+  const rows = Array.from(document.querySelectorAll('#lowStockTable tr')).map(tr => Array.from(tr.querySelectorAll('th,td')).map(td => '"' + td.textContent.trim().replace(/"/g,'""') + '"').join(',')).join('\n');
+  const blob = new Blob([rows], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = 'low_stock_products.csv'; a.click(); URL.revokeObjectURL(url);
+}
+function exportVisitsCSV() {
+  const rows = Array.from(document.querySelectorAll('#visitsTable tr')).map(tr => Array.from(tr.querySelectorAll('th,td')).map(td => '"' + td.textContent.trim().replace(/"/g,'""') + '"').join(',')).join('\n');
+  const blob = new Blob([rows], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = 'visits.csv'; a.click(); URL.revokeObjectURL(url);
+}
+function escapeHtml(s) { if (s == null) return ''; return String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+initDashboard();
+window.addEventListener('resize', ()=> {
+  try { chartTimeseries.resize(); chartVisitType.resize(); chartCaseStatus.resize(); chartAnimalStatus.resize(); } catch(e){ }
+});
+</script>
+</body>
+</html>

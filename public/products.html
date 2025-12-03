@@ -1,0 +1,521 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title data-i18n="title">Products — HealthVet</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+:root{
+  --brand:#1a4721;
+  --brand-light:#2b5d34;
+  --accent:#b8860b;
+  --accent-light:#c79b3c;
+  --muted:#5c5c5c;
+  --muted-light:#8a8a8a;
+  --green:#0d6e1d;
+  --orange:#b36200;
+  --red:#a51c1c;
+  --border:#e0e0e0;
+  --bg-light:#f8faf8;
+  font-family:"Tajawal",sans-serif;
+}
+*{box-sizing:border-box; margin:0; padding:0}
+body{background:#f1f4f1;color:#222;padding:8px;font-size:0.9rem;line-height:1.5}
+.container{max-width:1200px;margin:0 auto}
+.header{display:flex;gap:10px;align-items:center;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.logo{width:42px;height:42px;border-radius:6px;background:linear-gradient(135deg,var(--brand),#153a1d);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.9rem}
+.card{background:#fff;padding:10px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.08);margin-bottom:10px;border:1px solid var(--border)}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.col{flex:1 1 180px;min-width:140px}
+label{display:block;font-weight:600;margin-bottom:4px;font-size:0.85rem;color:var(--muted)}
+.input,select{font-family:inherit;font-size:0.85rem}
+.input,select{width:100%;padding:7px 9px;border-radius:6px;border:1px solid var(--border);background:#fff;transition:border-color 0.2s}
+.input:focus,select:focus{outline:none;border-color:var(--brand-light)}
+.button{padding:7px 10px;border-radius:6px;border:none;cursor:pointer;background:var(--brand);color:#fff;font-weight:600;font-size:0.85rem;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:4px}
+.button:hover{background:var(--brand-light)}
+.button.ghost{background:transparent;border:1px solid var(--border);color:var(--muted)}
+.button.ghost:hover{background:#f5f5f5}
+.button.icon-only{padding:8px;border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center}
+.button.icon-only i{font-size:1rem}
+.small{font-size:0.8rem;color:var(--muted-light)}
+/* products grid - smaller cards like previous */
+.productsGrid{display:grid;grid-template-columns:repeat(auto-fill, minmax(250px, 1fr));gap:10px;max-height:400px;overflow:auto;padding:4px}
+.productCard{display:flex;gap:10px;align-items:flex-start;border-radius:8px;padding:8px;background:#fff;border:1px solid var(--border);box-shadow:0 2px 6px rgba(0,0,0,0.04);transition:transform 0.2s, box-shadow 0.2s;flex-direction:column;min-height:200px}
+.productCard:hover{transform:translateY(-2px);box-shadow:0 4px 10px rgba(0,0,0,0.08)}
+.productThumb{flex:0 0 auto;display:flex;align-items:center;justify-content:center;border-radius:6px;overflow:hidden;background:#fafafa;width:100%;height:100px;max-width:300px;max-height:300px;position:relative}
+.productThumb img{display:block;max-width:100%;max-height:100%;object-fit:contain}
+.productMeta{flex:1;display:flex;flex-direction:column;gap:4px}
+.productTitle{font-weight:700;color:var(--brand);font-size:0.9rem}
+.productSpecs{font-size:0.8rem;color:var(--muted);max-height:60px;overflow:auto;padding-right:4px}
+/* variant panel */
+.variantPanel{margin-top:8px;border-top:1px dashed #eee;padding-top:6px;display:none}
+.variantGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px}
+.vcard{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:6px;
+  padding:6px;
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  box-shadow:0 2px 6px rgba(0,0,0,0.04);
+  height:110px;
+  min-height:110px;
+  overflow:hidden;
+  font-size:0.8rem;
+  line-height:1.15;
+}
+.vtitle{font-weight:700;color:var(--brand);font-size:0.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vmeta{font-size:0.8rem;color:#333;flex:1;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.stockBadge{display:inline-block;padding:3px 6px;border-radius:4px;color:#fff;font-weight:600;font-size:0.7rem}
+.stock-high{background:var(--green)}
+.stock-low{background:var(--orange)}
+.stock-zero{background:var(--red)}
+.vactions{display:flex;gap:6px;margin-top:auto;justify-content:flex-start}
+/* smaller buttons in variants */
+.vactions .button{padding:4px 6px;font-size:0.8rem}
+/* pager */
+.pager{display:flex;gap:6px;align-items:center;justify-content:center;margin-top:12px}
+.pager .button{background:#f5f5f5;color:var(--muted);border:1px solid var(--border)}
+.pager .button:hover{background:#eaeaea}
+.pager .button:disabled{opacity:0.5;cursor:not-allowed}
+.pager-info{font-size:0.85rem;color:var(--muted-light)}
+.empty{padding:30px;text-align:center;color:var(--muted);font-size:0.9rem}
+.formTitle{margin-bottom:8px;font-weight:700;color:var(--brand);font-size:1rem}
+
+/* carousel inside product card */
+.carousel {
+  position:relative;
+  width:100%;
+  height:100px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  background:linear-gradient(0deg,#fafafa,#fff);
+}
+.carousel img {
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  transition:opacity .25s ease;
+  display:block;
+}
+.carousel .cbtn {
+  position:absolute;
+  top:50%;
+  transform:translateY(-50%);
+  background:rgba(255,255,255,0.85);
+  border:1px solid var(--border);
+  padding:6px;
+  border-radius:50%;
+  cursor:pointer;
+  width:32px;height:32px;display:flex;align-items:center;justify-content:center;
+}
+.carousel .cbtn.left{left:8px}
+.carousel .cbtn.right{right:8px}
+.carousel .indicators {
+  position:absolute;
+  bottom:6px;
+  left:50%;
+  transform:translateX(-50%);
+  display:flex;
+  gap:6px;
+  align-items:center;
+}
+.carousel .indicators button{
+  width:8px;height:8px;border-radius:50%;border:none;background:rgba(0,0,0,0.2);padding:0;cursor:pointer;
+}
+.carousel .indicators button.active{background:var(--brand)}
+
+/* responsive */
+@media (max-width: 768px) {
+  .productsGrid{grid-template-columns:1fr}
+  .row{flex-direction:column}
+  .col{flex:1 1 auto}
+  .variantGrid{grid-template-columns:1fr}
+  .header{flex-direction:column;align-items:flex-start;gap:5px}
+  .header > div:last-child{margin-left:0 !important;display:flex;width:100%;justify-content:flex-end}
+}
+@media (min-width: 769px) and (max-width: 1024px) {
+  .row{flex-wrap:wrap}
+  .col{flex:1 1 200px}
+  .productsGrid{grid-template-columns:repeat(auto-fill, minmax(220px, 1fr))}
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="logo">HV</div>
+    <div>
+      <div id="pageTitle" class="formTitle" data-i18n="title">Products — HealthVet</div>
+      <div class="small" id="pageSubtitle" data-i18n="subtitle">Product data — click "Details" to show variants (names only).</div>
+    </div>
+    <div style="margin-left:auto;display:flex;gap:6px;align-items:center">
+      <select id="langSelect" class="input" style="width:100px" aria-label="language">
+        <option value="en">English</option>
+        <option value="ar">العربية</option>
+      </select>
+    </div>
+  </div>
+  <div class="card">
+    <div class="formTitle" data-i18n="search_products">Products Search</div>
+    <div class="row">
+      <div class="col">
+        <label data-i18n="search_label">Search by name, code, supplier</label>
+        <input id="searchInput" class="input" type="search" data-i18n-placeholder="search_ph" placeholder="Search by name, code, supplier" aria-label="Search">
+      </div>
+      <div class="col">
+        <label data-i18n="per_page">Per Page</label>
+        <select id="perPage" class="input">
+          <option value="12">12</option>
+          <option value="24" selected>24</option>
+          <option value="48">48</option>
+        </select>
+      </div>
+      <div class="col">
+        <label data-i18n="category">Category</label>
+        <select id="filterCategory" class="input"><option value="" data-i18n="all_categories">All Categories</option></select>
+      </div>
+      <div style="min-width:120px;align-self:end">
+        <button id="btnSearch" class="button icon-only" title="Search"><i class="fas fa-search"></i></button>
+      </div>
+    </div>
+  </div>
+  <div class="row" style="margin-top:8px">
+    <div class="col">
+      <div class="small" data-i18n="show_by">Show by:</div>
+    </div>
+    <div class="col">
+      <button id="btnNewProduct" class="button" title="New Product"><i class="fas fa-plus"></i> <span data-i18n="new_product">New Product</span></button>
+    </div>
+  </div>
+  <div id="grid" class="productsGrid" aria-live="polite"></div>
+  <div id="pager" class="pager"></div>
+</div>
+<script src="session_check.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+<script>
+/*
+  تحديث: يعرض لكل بطاقة (productCard) "استوديو" صور (carousel) يجمع:
+  - صورة رئيسية من tbl_Products.ProductImage
+  - كل صور المتغيرات من tbl_ProductVariants.ProductImage
+  الصور مخزنة بنفس المسار: /health_vet/uploads/ProductImage/<filename>
+  المنطق:
+  - renderProducts ينشئ البطاقة ويمرّر thumb element واسم الصورة الرئيسية إلى fetchVariantImagesForCard
+  - fetchVariantImagesForCard يطلب بيانات المتغيرات ويستخرج صورها، ثم يبني carousel
+  - carousel يدعم أزرار السابق/التالي، مؤشرات، وتدوير تلقائي، ويمنع التكرار
+*/
+
+const apiBase = '/health_vet/api/';
+const variantsBase = '/health_vet/api/variants/';
+const languagesPath = '/health_vet/languages/';
+let LANG = localStorage.getItem('hv_lang') || 'en';
+const $ = id => document.getElementById(id);
+let page = 1;
+let perPage = 24;
+let TRANSLATIONS = {};
+
+async function loadTranslations(lang){
+  try {
+    const res = await fetch(`${languagesPath}${lang}_products.json`, { cache:'no-cache' });
+    if (!res.ok) { TRANSLATIONS = {}; return; }
+    TRANSLATIONS = await res.json();
+  } catch(e){ TRANSLATIONS = {}; }
+}
+function t(key, fallback){
+  if (TRANSLATIONS && TRANSLATIONS[key]) return TRANSLATIONS[key];
+  return fallback || key;
+}
+async function applyTranslations(){
+  await loadTranslations(LANG);
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const key = el.getAttribute('data-i18n');
+    const fallback = el.textContent;
+    el.textContent = t(key, fallback);
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el=>{
+    const key = el.getAttribute('data-i18n-placeholder');
+    const fallback = el.getAttribute('placeholder') || '';
+    el.setAttribute('placeholder', t(key, fallback));
+  });
+  document.documentElement.lang = LANG;
+  document.documentElement.dir = LANG==='ar' ? 'rtl' : 'ltr';
+}
+function normalizeProductID(p){
+  if (!p) return null;
+  return p.Product_ID ?? p.ProductID ?? p.Product_Id ?? p.id ?? null;
+}
+function escapeHtml(s){ return (s==null)?'':String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function stockBadgeHtml(q){
+  const qty = Number(q || 0);
+  if (qty <= 0) return `<span class="stockBadge stock-zero">${t('stock_out','Out')}</span>`;
+  if (qty <= 5) return `<span class="stockBadge stock-low">${t('stock_low','Low')}</span>`;
+  return `<span class="stockBadge stock-high">${t('stock_ok','OK')}</span>`;
+}
+
+async function loadCategories(){
+  try{
+    const res = await fetch(`${apiBase}get_inventory_list.php?lang=${LANG}`, { credentials:'same-origin' });
+    const j = await res.json();
+    if (!j.success) return;
+    const sel = $('filterCategory'); sel.innerHTML = `<option value="">${t('all_categories','All Categories')}</option>`;
+    (j.data||[]).filter(i=>i.Type==='Category').forEach(c=>{
+      const o = document.createElement('option'); o.value = c.ItemID; o.textContent = LANG === 'en' ? (c.Name_EN || c.Name || c.Name_AR) : (c.Name_AR || c.Name || c.Name_EN); sel.appendChild(o);
+    });
+  }catch(e){ console.warn('loadCategories error', e); }
+}
+
+async function loadProducts(){
+  const grid = $('grid');
+  grid.innerHTML = `<div class="empty">${t('loading','Loading...')}</div>`;
+  const q = encodeURIComponent($('searchInput').value.trim());
+  const cat = encodeURIComponent($('filterCategory').value || '');
+  perPage = parseInt($('perPage').value,10) || perPage;
+  const url = `${apiBase}get_products.php?lang=${LANG}&page=${page}&per_page=${perPage}&q=${q}&category=${cat}`;
+  try{
+    const res = await fetch(url, { credentials:'same-origin' });
+    const j = await res.json();
+    if (!j.success){
+      grid.innerHTML = `<div class="empty">${escapeHtml(j.message || t('error','Error'))}</div>`;
+      return;
+    }
+    renderProducts(j.data || [], j.page || page, j.per_page || perPage, j.total || 0);
+  }catch(e){
+    console.error('loadProducts', e);
+    grid.innerHTML = `<div class="empty">${t('failed_load','Failed to load')}</div>`;
+  }
+}
+
+function renderProducts(items, curPage, curPer, total){
+  const grid = $('grid'); grid.innerHTML = '';
+  if (!items.length) { grid.innerHTML = `<div class="empty">${t('no_products','No products found')}</div>`; renderPager(curPage, curPer, total); return; }
+  items.forEach(p=>{
+    const productId = normalizeProductID(p);
+    const card = document.createElement('div'); card.className = 'productCard';
+    const thumb = document.createElement('div'); thumb.className='productThumb';
+    // temporary placeholder while we build carousel
+    thumb.innerHTML = `<div class="carousel"><div style="padding:6px;color:var(--muted)">${t('loading','Loading...')}</div></div>`;
+    card.appendChild(thumb);
+
+    const meta = document.createElement('div'); meta.className='productMeta';
+    const title = document.createElement('div'); title.className='productTitle';
+    title.textContent = LANG === 'en' ? (p.Name_EN || p.Name_AR || '') : (p.Name_AR || p.Name_EN || '');
+    meta.appendChild(title);
+    const code = document.createElement('div'); code.className='small'; code.textContent = `${t('code','Code')}: ${p.Product_Code || ''}`;
+    meta.appendChild(code);
+    const specs = document.createElement('div'); specs.className='productSpecs';
+    specs.innerHTML = `<div><strong>${t('supplier','Supplier')}:</strong> ${escapeHtml(p.Supplier||'—')}</div>
+                      <div class="small"><strong>${t('qty','Qty')}:</strong> ${p.Quantity ?? 0}</div>`;
+    meta.appendChild(specs);
+    const variantSummary = document.createElement('div'); variantSummary.className='small'; variantSummary.style.marginTop='6px';
+    variantSummary.textContent = t('loading_variants','Loading variants...');
+    meta.appendChild(variantSummary);
+    card.appendChild(meta);
+    const variantPanel = document.createElement('div'); variantPanel.className='variantPanel';
+    const variantGrid = document.createElement('div'); variantGrid.className='variantGrid';
+    variantPanel.appendChild(variantGrid);
+    card.appendChild(variantPanel);
+    const actions = document.createElement('div'); actions.style.display='flex'; actions.style.gap='6px'; actions.style.marginTop='auto';
+    const editBtn = document.createElement('button'); editBtn.className='button icon-only ghost'; editBtn.innerHTML = '<i class="fas fa-edit"></i>'; editBtn.title = t('edit','Edit');
+    editBtn.addEventListener('click', ev => { ev.stopPropagation(); if (productId) window.location.href = `/health_vet/public/add_Products.html?ProductID=${productId}`; else alert(t('missing_id','Missing product id')); });
+    actions.appendChild(editBtn);
+    const detailsBtn = document.createElement('button'); detailsBtn.className='button icon-only ghost'; detailsBtn.innerHTML = '<i class="fas fa-eye"></i>'; detailsBtn.title = t('details','Details');
+    detailsBtn.addEventListener('click', ev => { ev.stopPropagation(); if(productId) toggleVariantPanel(productId, variantPanel, variantGrid, variantSummary); else alert(t('missing_id','Missing product id')); });
+    actions.appendChild(detailsBtn);
+    card.appendChild(actions);
+    grid.appendChild(card);
+
+    // fetch summary & variants and build carousel using product image + variant images
+    if (productId) fetchVariantImagesForCard(productId, variantSummary, variantGrid, thumb, p.ProductImage);
+    else variantSummary.textContent = '';
+  });
+  renderPager(curPage, curPer, total);
+}
+
+/**
+ * Fetch variants summary and variants list (if available) — then build carousel using:
+ * - productImage (from tbl_Products.ProductImage)
+ * - each variant's ProductImage (from tbl_ProductVariants.ProductImage)
+ *
+ * thumbEl: element where carousel will be inserted
+ */
+async function fetchVariantImagesForCard(productID, variantSummaryEl, variantGrid, thumbEl, productImageFilename){
+  try{
+    const res = await fetch(`${variantsBase}get_variants_with_labels.php?product_id=${encodeURIComponent(productID)}&lang=${encodeURIComponent(LANG)}`, { credentials:'same-origin' });
+    const j = await safeJson(res);
+    if (!j) { variantSummaryEl.textContent = ''; buildImageCarousel(thumbEl, []); return; }
+    if (!j.success){
+      variantSummaryEl.textContent = LANG === 'en' ? (j.message || t('error','Error')) : (j.message || t('error','Error'));
+      variantGrid.dataset.variants = JSON.stringify(j.variants || []);
+      // still try to build carousel with product image only
+      const imgs = buildImageList(productImageFilename, j.variants || []);
+      buildImageCarousel(thumbEl, imgs);
+      return;
+    }
+    const sum = j.summary || { variants_count:0, total_qty:0 };
+    variantSummaryEl.textContent = `${t('variants','Variants')}: ${sum.variants_count} · ${t('total_qty','Total Qty')}: ${sum.total_qty}`;
+    variantGrid.dataset.variants = JSON.stringify(j.variants || []);
+    const imgs = buildImageList(productImageFilename, j.variants || []);
+    buildImageCarousel(thumbEl, imgs);
+  }catch(e){
+    console.warn('fetchVariantImagesForCard', e);
+    variantSummaryEl.textContent = '';
+    buildImageCarousel(thumbEl, buildImageList(productImageFilename, []));
+  }
+}
+
+/**
+ * Collects and normalizes image paths (unique) from productImage filename and variants array.
+ * returns array of absolute paths ready to use in <img src="">
+ */
+function buildImageList(productImageFilename, variantsArray){
+  const basePath = '/health_vet/uploads/ProductImage/';
+  const set = new Set();
+  // product image
+  if (productImageFilename && String(productImageFilename).trim()) set.add(basePath + String(productImageFilename).trim());
+  // variants: expect each variant object may have ProductImage property
+  (variantsArray || []).forEach(v=>{
+    const fn = v.ProductImage || v.Product_Image || v.Image || '';
+    if (fn && String(fn).trim()) set.add(basePath + String(fn).trim());
+  });
+  // convert to array and filter duplicates
+  const arr = Array.from(set);
+  // optionally, verify existence by preloading later; for now return list (browser will 404 missing files)
+  return arr;
+}
+
+/**
+ * Build a lightweight carousel inside the provided thumb element.
+ * images: array of image URLs (may be empty)
+ */
+function buildImageCarousel(thumbEl, images){
+  thumbEl.innerHTML = ''; // clear placeholder
+  if (!images || !images.length) {
+    thumbEl.innerHTML = `<div style="padding:6px;color:var(--muted)">${t('no_image','No Image')}</div>`;
+    return;
+  }
+
+  const carousel = document.createElement('div'); carousel.className = 'carousel';
+  const img = document.createElement('img'); img.alt = '';
+  carousel.appendChild(img);
+
+  const leftBtn = document.createElement('button'); leftBtn.className = 'cbtn left'; leftBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
+  const rightBtn = document.createElement('button'); rightBtn.className = 'cbtn right'; rightBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
+  carousel.appendChild(leftBtn); carousel.appendChild(rightBtn);
+
+  const indicators = document.createElement('div'); indicators.className = 'indicators';
+  const dots = [];
+  images.forEach((_,i)=>{
+    const b = document.createElement('button'); if (i===0) b.classList.add('active');
+    b.addEventListener('click', ()=> show(i));
+    indicators.appendChild(b);
+    dots.push(b);
+  });
+  carousel.appendChild(indicators);
+
+  thumbEl.appendChild(carousel);
+
+  // preload images
+  const preloaded = images.map(src=>{
+    const im = new Image();
+    im.src = src;
+    return im;
+  });
+
+  let idx = 0;
+  let rotateTimer = null;
+  const ROTATE_MS = 4000;
+
+  function show(i){
+    if (i < 0) i = images.length - 1;
+    if (i >= images.length) i = 0;
+    idx = i;
+    img.style.opacity = '0';
+    // set small timeout to allow fade transition
+    setTimeout(()=> {
+      img.src = images[idx];
+      // set alt from filename
+      img.alt = images[idx].split('/').pop();
+      // activate dot
+      dots.forEach(d=>d.classList.remove('active'));
+      if (dots[idx]) dots[idx].classList.add('active');
+      img.style.opacity = '1';
+    }, 60);
+  }
+
+  leftBtn.addEventListener('click', ()=> { show(idx-1); resetAutoRotate(); });
+  rightBtn.addEventListener('click', ()=> { show(idx+1); resetAutoRotate(); });
+
+  // swipe support (mobile)
+  let startX = null;
+  carousel.addEventListener('touchstart', (e)=> { startX = e.touches && e.touches[0] ? e.touches[0].clientX : null; }, {passive:true});
+  carousel.addEventListener('touchend', (e)=> {
+    if (startX === null) return;
+    const endX = e.changedTouches && e.changedTouches[0] ? e.changedTouches[0].clientX : null;
+    if (endX === null) return;
+    const diff = endX - startX;
+    if (Math.abs(diff) > 30) {
+      if (diff > 0) show(idx-1); else show(idx+1);
+      resetAutoRotate();
+    }
+    startX = null;
+  }, {passive:true});
+
+  function startAutoRotate(){
+    if (rotateTimer) clearInterval(rotateTimer);
+    rotateTimer = setInterval(()=> { show(idx+1); }, ROTATE_MS);
+  }
+  function resetAutoRotate(){ startAutoRotate(); }
+
+  carousel.addEventListener('mouseenter', ()=> { if (rotateTimer) clearInterval(rotateTimer); });
+  carousel.addEventListener('mouseleave', ()=> { startAutoRotate(); });
+
+  // initial show
+  show(0);
+  startAutoRotate();
+}
+
+/* existing helper safeJson */
+async function safeJson(response){
+  const text = await response.text();
+  try { return JSON.parse(text); } catch(e) { console.error('safeJson parse error, raw response:', text.slice(0,2000)); return null; }
+}
+
+function renderPager(current, per_page, total){
+  const pager = $('pager');
+  const totalPages = Math.max(1, Math.ceil((total||0)/per_page));
+  pager.innerHTML = '';
+  const info = document.createElement('div'); info.className='pager-info'; info.textContent = `${current}/${totalPages} · ${total||0} ${t('products','products')}`;
+  pager.appendChild(info);
+  const prev = document.createElement('button'); prev.className='button icon-only ghost'; prev.innerHTML = '<i class="fas fa-chevron-left"></i>'; prev.title = t('prev','Prev');
+  prev.disabled = current <= 1; prev.addEventListener('click', ()=>{ if(page>1){ page--; loadProducts(); }});
+  pager.appendChild(prev);
+  const next = document.createElement('button'); next.className='button icon-only ghost'; next.innerHTML = '<i class="fas fa-chevron-right"></i>'; next.title = t('next','Next');
+  next.disabled = current >= totalPages; next.addEventListener('click', ()=>{ if(page < totalPages){ page++; loadProducts(); }});
+  pager.appendChild(next);
+}
+
+/* Events */
+document.getElementById('btnSearch').addEventListener('click', ()=>{ page = 1; loadProducts(); });
+document.getElementById('searchInput').addEventListener('keydown', e=>{ if(e.key === 'Enter'){ page = 1; loadProducts(); }});
+document.getElementById('perPage').addEventListener('change', ()=>{ perPage = parseInt(document.getElementById('perPage').value,10); page = 1; loadProducts(); });
+document.getElementById('filterCategory').addEventListener('change', ()=>{ page = 1; loadProducts(); });
+document.getElementById('langSelect').value = LANG;
+document.getElementById('langSelect').addEventListener('change', async (e)=>{
+  LANG = e.target.value;
+  localStorage.setItem('hv_lang', LANG);
+  await applyTranslations();
+  await loadCategories();
+  page = 1; loadProducts();
+});
+document.getElementById('btnNewProduct').addEventListener('click', ()=> window.location.href = '/health_vet/public/add_Products.html');
+
+/* init */
+(async function init(){ await applyTranslations(); await loadCategories(); loadProducts(); })();
+</script>
+</body>
+</html>

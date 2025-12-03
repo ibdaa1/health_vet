@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title id="title">تفاصيل المنتج — HealthVet</title>
+<style>
+:root{
+  --brand-dark-green:#2b5d34;
+  --brand-olive:#35603e;
+  --brand-gold:#c79b3c;
+  --brand-beige:#b89b7a;
+  --muted:#666;
+  --card-bg:#fff;
+  --radius:12px;
+  font-family:"Tajawal","Segoe UI",Roboto,Arial,sans-serif;
+  color-scheme: light;
+}
+*{box-sizing:border-box}
+body{margin:0;background:#f6f8f6;padding:16px;color:#222}
+.container{max-width:1100px;margin:0 auto}
+.header{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.logo{width:48px;height:48px;border-radius:10px;background:linear-gradient(135deg,var(--brand-dark-green),var(--brand-olive));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800}
+.titleBlock{flex:1}
+.titleBlock h1{margin:0;font-size:1.1rem;color:var(--brand-dark-green)}
+.controls{display:flex;gap:8px;align-items:center}
+.langBtn{background:var(--brand-dark-green);color:#fff;border:none;padding:8px 12px;border-radius:8px;cursor:pointer}
+
+/* layout */
+.productWrap{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
+@media(max-width:880px){ .productWrap{grid-template-columns:1fr} }
+
+/* gallery */
+.gallery{background:var(--card-bg);border-radius:12px;padding:12px;box-shadow:0 6px 18px rgba(0,0,0,0.06)}
+.gallery img{width:100%;height:auto;border-radius:8px;object-fit:contain;max-height:420px}
+
+/* details */
+.details{background:var(--card-bg);border-radius:12px;padding:14px;box-shadow:0 6px 18px rgba(0,0,0,0.04)}
+.metaLine{display:flex;gap:12px;flex-wrap:wrap;margin-top:6px;color:var(--muted)}
+.namePrimary{font-weight:800;font-size:1.05rem;color:var(--brand-dark-green)}
+
+/* attributes */
+.attrGroup{margin-top:12px}
+.attrTitle{font-weight:700;margin-bottom:6px}
+.attrOptions{display:flex;gap:8px;flex-wrap:wrap}
+.optBtn{padding:8px 10px;border-radius:8px;border:1px solid #e6ebe6;background:#fff;cursor:pointer;font-size:0.95rem}
+.optBtn.active{border-color:var(--brand-olive);background:linear-gradient(90deg,var(--brand-gold),var(--brand-beige));color:#1f1f1f;font-weight:700}
+
+/* stock + qty */
+.stockInfo{margin-top:12px;font-weight:700}
+.qtyBox{display:flex;gap:8px;align-items:center;margin-top:8px}
+.qtyBox input{width:88px;padding:8px;border-radius:8px;border:1px solid #e6ebe6}
+
+/* actions */
+.actions{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
+.btn{padding:10px 14px;border-radius:8px;border:none;cursor:pointer}
+.btn.primary{background:var(--brand-dark-green);color:#fff}
+.btn.secondary{background:var(--brand-gold);color:#221}
+
+/* small */
+.small{font-size:0.9rem;color:var(--muted);margin-top:8px}
+.notice{margin-top:8px;padding:10px;border-radius:8px;background:#fff9ec;border:1px solid rgba(199,155,60,0.18);color:#5a3f10}
+
+/* modal simple */
+.modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.4);z-index:999;visibility:hidden;opacity:0;transition:0.15s}
+.modal.show{visibility:visible;opacity:1}
+.modal .card{width:100%;max-width:520px;padding:18px}
+.formRow{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.formRow label{min-width:110px}
+.input{padding:8px;border-radius:8px;border:1px solid #e6ebe6}
+</style>
+</head>
+<body>
+<div class="container" role="main">
+  <div class="header" role="banner">
+    <div style="display:flex;align-items:center;gap:12px">
+      <div class="logo" aria-hidden="true">HV</div>
+      <div class="titleBlock">
+        <h1 id="pageTitle">تفاصيل المنتج</h1>
+        <div class="small" id="subtitle">اختر مواصفات المنتج ثم اضغط صرف لتخفيض المخزون</div>
+      </div>
+    </div>
+    <div class="controls">
+      <button id="langToggle" class="langBtn">English</button>
+    </div>
+  </div>
+
+  <div id="content" class="productWrap">
+    <div class="gallery" aria-live="polite">
+      <img id="productImage" src="/health_vet/uploads/ProductImage/default.png" alt="product image">
+    </div>
+
+    <div class="details">
+      <div id="productName" class="namePrimary">اسم المنتج</div>
+      <div class="metaLine">
+        <div id="productCode" class="small">كود: —</div>
+        <div id="productSupplier" class="small">المورد: —</div>
+      </div>
+
+      <div class="attrGroup" id="attributesArea">
+        <div class="attrTitle">⚙️ السمات</div>
+        <div id="attributesList" class="attrOptions small">جارٍ تحميل السمات...</div>
+      </div>
+
+      <div class="stockInfo" id="stockInfo">الكمية المتاحة: —</div>
+
+      <div class="qtyBox">
+        <label class="small">كمية الصرف</label>
+        <input id="dispenseQty" type="number" min="1" value="1">
+      </div>
+
+      <div class="actions">
+        <button id="btnDispense" class="btn primary">صرف المنتج</button>
+        <button id="btnReserve" class="btn secondary">احجز (Reserve)</button>
+      </div>
+
+      <div id="statusMsg" class="small"></div>
+
+      <div id="notes" class="notice" style="display:none"></div>
+    </div>
+  </div>
+</div>
+
+<!-- simple modal for confirmation -->
+<div id="modal" class="modal" role="dialog" aria-hidden="true">
+  <div class="card">
+    <h3 id="modalTitle">تأكيد الصرف</h3>
+    <div id="modalBody" class="small">...</div>
+    <div style="display:flex;gap:8px;margin-top:12px;justify-content:flex-end">
+      <button id="modalCancel" class="btn ghost">إلغاء</button>
+      <button id="modalConfirm" class="btn primary">تأكيد</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/*
+  product_detail.html
+  - Loads product via /health_vet/api/get_product.php?ProductID=...
+  - Loads available variants from response. User selects attribute options.
+  - JS finds matching variant by comparing OptionIDs sets (order-insensitive).
+  - "صرف المنتج" (Dispense) posts to /health_vet/api/variant_checkout.php to decrement quantity safely (transaction + log).
+  - If no variant matches but product has Quantity (global), we can decrement product Quantity directly via same endpoint (variantId null).
+*/
+
+const apiBase = '/health_vet/api/';
+let currentLang = 'ar';
+let product = null;
+let variants = []; // array of variant objects from get_product.php
+let attributesMeta = []; // attributes returned previously if needed
+const ProductID = new URLSearchParams(window.location.search).get('ProductID');
+
+// elements
+const productImageEl = document.getElementById('productImage');
+const productNameEl = document.getElementById('productName');
+const productCodeEl = document.getElementById('productCode');
+const productSupplierEl = document.getElementById('productSupplier');
+const attributesListEl = document.getElementById('attributesList');
+const stockInfoEl = document.getElementById('stockInfo');
+const dispenseQtyInput = document.getElementById('dispenseQty');
+const btnDispense = document.getElementById('btnDispense');
+const btnReserve = document.getElementById('btnReserve');
+const statusMsg = document.getElementById('statusMsg');
+const notesEl = document.getElementById('notes');
+const langToggle = document.getElementById('langToggle');
+
+// modal
+const modal = document.getElementById('modal');
+const modalTitle = document.getElementById('modalTitle');
+const modalBody = document.getElementById('modalBody');
+const modalCancel = document.getElementById('modalCancel');
+const modalConfirm = document.getElementById('modalConfirm');
+
+function setStatus(msg, ok=true) {
+  statusMsg.textContent = msg;
+  statusMsg.style.color = ok ? 'green' : 'crimson';
+}
+
+function setNotice(text) {
+  if (!text) { notesEl.style.display = 'none'; notesEl.textContent = ''; }
+  else { notesEl.style.display = 'block'; notesEl.textContent = text; }
+}
+
+// helper: compare two arrays as sets
+function arraysEqualAsSet(a, b) {
+  if (!Array.isArray(a) || !Array.isArray(b)) return false;
+  if (a.length !== b.length) return false;
+  const sa = a.map(x=>String(x)).sort();
+  const sb = b.map(x=>String(x)).sort();
+  return sa.every((v,i)=>v===sb[i]);
+}
+
+// load product and variants
+async function loadProduct(pid) {
+  if (!pid) { setStatus('ProductID مفقود', false); return; }
+  setStatus(currentLang==='ar' ? 'جارٍ تحميل المنتج...' : 'Loading product...');
+  try {
+    const res = await fetch(`${apiBase}get_product.php?ProductID=${encodeURIComponent(pid)}`, { credentials: 'same-origin' });
+    const j = await res.json();
+    if (!j.success) { setStatus(j.message || 'Product not found', false); return; }
+    product = j.product;
+    attributesMeta = j.attributes_meta || []; // optional if API provides meta
+    variants = j.variants || [];
+    renderProduct();
+    setStatus('');
+  } catch (e) {
+    console.error(e);
+    setStatus(currentLang==='ar' ? 'فشل تحميل المنتج' : 'Failed to load product', false);
+  }
+}
+
+function renderProduct() {
+  if (!product) return;
+  productImageEl.src = product.ProductImage ? `/health_vet/uploads/ProductImage/${product.ProductImage}` : '/health_vet/uploads/ProductImage/default.png';
+  productImageEl.alt = (currentLang==='ar' ? (product.Name_AR || product.Name_EN) : (product.Name_EN || product.Name_AR));
+  productNameEl.textContent = (currentLang==='ar' ? (product.Name_AR || product.Name_EN) : (product.Name_EN || product.Name_AR)) || product.Product_Code;
+  productCodeEl.textContent = (currentLang==='ar' ? 'كود: ' : 'Code: ') + (product.Product_Code || '—');
+  productSupplierEl.textContent = (currentLang==='ar' ? 'المورد: ' : 'Supplier: ') + (product.Supplier || '—');
+
+  // build attributes UI from server attribute metadata if available; otherwise, derive from variants
+  // We'll construct attributes map: AttributeID -> { name_ar, name_en, options: [{OptionID, Name_AR, Name_EN}] }
+  const map = {};
+  // Prefer using attributesMeta if returned (not mandatory). Try to build from variants options as fallback.
+  // Build from product.attributes if present (ProductAttributeValues), else attempt to fetch get_product_attributes.php.
+  if (Array.isArray(product.attributes) && product.attributes.length) {
+    // product.attributes is array of attribute values; but may not include full options list.
+    // Fallback: fetch get_product_attributes.php to show full lists.
+  }
+  // Fetch full attributes list for this product (so user can pick options)
+  fetch(`${apiBase}get_product_attributes.php?lang=${currentLang}`, { credentials: 'same-origin' })
+    .then(r=>r.json())
+    .then(data=>{
+      if (data.success && Array.isArray(data.data)) {
+        renderAttributesFromMeta(data.data);
+      } else {
+        // fallback: try gather options used in variants
+        renderAttributesFromVariants();
+      }
+    }).catch(()=>renderAttributesFromVariants());
+  
+  // show product-level stock
+  stockInfoEl.textContent = (currentLang==='ar' ? 'الكمية المتاحة: ' : 'Available: ') + (product.Quantity ?? 0);
+}
+
+// render attributes using metadata from get_product_attributes.php
+function renderAttributesFromMeta(metaList) {
+  attributesListEl.innerHTML = '';
+  metaList.forEach(attr=>{
+    const group = document.createElement('div');
+    group.className = 'attrGroup';
+    const title = document.createElement('div'); title.className='attrTitle'; title.textContent = currentLang==='ar' ? (attr.Name_AR || attr.Name_EN) : (attr.Name_EN || attr.Name_AR);
+    const wrap = document.createElement('div'); wrap.className='attrOptions';
+    (attr.Options || []).forEach(opt=>{
+      const btn = document.createElement('button');
+      btn.className = 'optBtn';
+      btn.dataset.attributeid = attr.AttributeID;
+      btn.dataset.optionid = opt.OptionID;
+      btn.textContent = currentLang==='ar' ? (opt.Name_AR || opt.Name_EN) : (opt.Name_EN || opt.Name_AR);
+      btn.addEventListener('click', onOptionClick);
+      wrap.appendChild(btn);
+    });
+    group.appendChild(title);
+    group.appendChild(wrap);
+    attributesListEl.appendChild(group);
+  });
+  // update current variant display
+  updateVariantSelectionUI();
+}
+
+// fallback: build attributes from variants' option names (if no meta)
+function renderAttributesFromVariants() {
+  attributesListEl.innerHTML = '';
+  // collect optionID -> optionName mapping and attribute grouping not available here; show flat options
+  const optMap = {};
+  variants.forEach(v=>{
+    if (!v.Options) return;
+    v.Options.forEach(o=>{
+      optMap[o.OptionID] = o;
+    });
+  });
+  // present as simple list (not grouped)
+  const wrap = document.createElement('div'); wrap.className='attrOptions';
+  Object.values(optMap).forEach(opt=>{
+    const btn = document.createElement('button'); btn.className='optBtn';
+    btn.dataset.attributeid = opt.AttributeID || 0;
+    btn.dataset.optionid = opt.OptionID;
+    btn.textContent = currentLang==='ar' ? (opt.Name_AR || opt.Name_EN) : (opt.Name_EN || opt.Name_AR);
+    btn.addEventListener('click', onOptionClick);
+    wrap.appendChild(btn);
+  });
+  attributesListEl.appendChild(wrap);
+  updateVariantSelectionUI();
+}
+
+/* option selection state */
+function onOptionClick(e) {
+  const btn = e.currentTarget;
+  // toggle active within same attribute group: allow multi-select across different attributes, but within same attribute prefer single-select
+  const attrId = btn.dataset.attributeid;
+  // within same attribute, unselect other buttons (we require one choice per attribute for variant matching)
+  const siblings = attributesListEl.querySelectorAll(`button.optBtn[data-attributeid="${attrId}"]`);
+  siblings.forEach(s=>s.classList.remove('active'));
+  btn.classList.add('active');
+  updateVariantSelectionUI();
+}
+
+function getSelectedOptionIDsInOrder() {
+  // produce array of selected optionIDs in attribute order as present in DOM
+  const selected = [];
+  const groups = attributesListEl.querySelectorAll('.attrGroup');
+  if (groups.length) {
+    groups.forEach(g=>{
+      const active = g.querySelector('button.optBtn.active');
+      if (active) selected.push(parseInt(active.dataset.optionid));
+    });
+  } else {
+    // fallback: treat any active optBtn
+    attributesListEl.querySelectorAll('button.optBtn.active').forEach(b => selected.push(parseInt(b.dataset.optionid)));
+  }
+  return selected;
+}
+
+// find variant by comparing sets of OptionIDs
+function findMatchingVariant() {
+  const selected = getSelectedOptionIDsInOrder();
+  if (!selected.length) return null;
+  for (const v of variants) {
+    const vOptionIDs = v.OptionIDs && v.OptionIDs.length ? v.OptionIDs.map(x=>parseInt(x)) : (v.Options ? v.Options.map(o=>parseInt(o.OptionID)) : []);
+    if (arraysEqualAsSet(selected, vOptionIDs)) return v;
+  }
+  return null;
+}
+
+function updateVariantSelectionUI() {
+  const variant = findMatchingVariant();
+  if (variant) {
+    stockInfoEl.textContent = (currentLang==='ar' ? 'الكمية المتاحة للنسخة المحددة: ' : 'Available for selected variant: ') + (variant.Quantity ?? 0);
+    dispenseQtyInput.max = Math.max(1, variant.Quantity ?? 0);
+    setNotice('');
+  } else {
+    // no matching variant -> show product general stock
+    stockInfoEl.textContent = (currentLang==='ar' ? 'الكمية المتاحة (عام): ' : 'Available (global): ') + (product.Quantity ?? 0);
+    dispenseQtyInput.max = Math.max(1, product.Quantity ?? 0);
+    setNotice(currentLang==='ar' ? 'لا توجد نسخة مطابقة، سيُخصم من رصيد المنتج العام' : 'No exact variant match; deduction will affect product global quantity');
+  }
+}
+
+// modal / confirm
+function openConfirmDialog(title, body, onConfirm) {
+  modalTitle.textContent = title;
+  modalBody.textContent = body;
+  modal.classList.add('show');
+  modalConfirm.onclick = ()=> { modal.classList.remove('show'); onConfirm(); };
+  modalCancel.onclick = ()=> { modal.classList.remove('show'); };
+}
+
+// dispense/reserve actions
+btnDispense.addEventListener('click', ()=> {
+  const qty = parseInt(dispenseQtyInput.value) || 0;
+  if (qty <= 0) { setStatus(currentLang==='ar' ? 'اختر كمية صحيحة' : 'Enter a valid quantity', false); return; }
+  const variant = findMatchingVariant();
+  const msg = currentLang==='ar' ? `تأكيد صرف الكمية ${qty}؟` : `Confirm dispense quantity ${qty}?`;
+  openConfirmDialog(currentLang==='ar' ? 'تأكيد الصرف' : 'Confirm Dispense', msg, ()=> performCheckout(variant ? variant.VariantID : null, qty));
+});
+
+btnReserve.addEventListener('click', ()=> {
+  const qty = parseInt(dispenseQtyInput.value) || 0;
+  if (qty <= 0) { setStatus(currentLang==='ar' ? 'اختر كمية صحيحة' : 'Enter a valid quantity', false); return; }
+  const variant = findMatchingVariant();
+  const msg = currentLang==='ar' ? `تأكيد حجز الكمية ${qty}؟` : `Confirm reserve quantity ${qty}?`;
+  openConfirmDialog(currentLang==='ar' ? 'تأكيد الحجز' : 'Confirm Reserve', msg, ()=> performCheckout(variant ? variant.VariantID : null, qty, true));
+});
+
+// call server endpoint to decrement quantity (or reserve if reserve flag)
+async function performCheckout(variantID, quantity, reserve=false) {
+  setStatus(currentLang==='ar' ? (reserve ? 'جارٍ الحجز...' : 'جارٍ الصرف...') : (reserve ? 'Reserving...' : 'Processing...'));
+  try {
+    const fd = new FormData();
+    if (variantID) fd.set('VariantID', variantID);
+    else fd.set('VariantID', '');
+    fd.set('ProductID', product.Product_ID);
+    fd.set('Quantity', quantity);
+    fd.set('Reserve', reserve ? 1 : 0);
+    const res = await fetch(`${apiBase}variant_checkout.php`, { method: 'POST', body: fd, credentials: 'same-origin' });
+    const j = await res.json();
+    if (!j.success) {
+      setStatus(j.message || (currentLang==='ar' ? 'فشل الإجراء' : 'Operation failed'), false);
+      return;
+    }
+    // success: update UI: refresh product/variants
+    setStatus(j.message || (currentLang==='ar' ? 'تم التنفيذ' : 'Done'), true);
+    await loadProduct(product.Product_ID);
+  } catch (e) {
+    console.error(e);
+    setStatus(currentLang==='ar' ? 'خطأ في الخادم' : 'Server error', false);
+  }
+}
+
+// language toggle (minimal)
+document.getElementById('langToggle').addEventListener('click', ()=>{
+  currentLang = currentLang === 'ar' ? 'en' : 'ar';
+  document.getElementById('pageTitle').textContent = currentLang==='ar' ? 'تفاصيل المنتج' : 'Product details';
+  // re-render strings
+  renderProduct();
+});
+
+// init
+if (ProductID) loadProduct(ProductID);
+else setStatus(currentLang==='ar' ? 'معرّف المنتج غير موجود في الرابط ?ProductID=...' : 'ProductID missing in URL', false);
+</script>
+</body>
+</html>

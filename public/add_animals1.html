@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تسجيل حيوان جديد</title>
+<style>
+:root {
+    --primary-green: #28a745;
+    --secondary-beige: #f5f5dc;
+    --background-white: #ffffff;
+    --text-dark: #343a40;
+    --border-color: #ced4da;
+}
+body {
+    font-family: 'Tahoma', sans-serif;
+    padding: 40px;
+    background-color: var(--secondary-beige);
+    color: var(--text-dark);
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+.container {
+    width: 100%;
+    max-width: 700px;
+    background-color: var(--background-white);
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+h2 { color: var(--primary-green); border-bottom: 2px solid var(--secondary-beige); padding-bottom: 10px; }
+label { display: block; margin-top: 15px; font-weight: bold; }
+input[type="text"], input[type="email"], input[type="tel"], input[type="date"], select, textarea {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+button { background-color: var(--primary-green); color: white; padding: 12px 25px; border: none; border-radius: 5px; cursor: pointer; margin-top: 10px; font-size: 1em; }
+#unique_display { background-color: #e9ecef; padding: 10px; border-radius: 5px; margin-top: 10px; font-weight: bold; }
+#auth_status { margin-top: 20px; padding: 15px; border-radius: 5px; font-weight: bold; }
+.success { background-color: #e6ffed; color: #1e7e34; border: 1px solid #b8da8f; }
+.error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+.info { background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+</style>
+</head>
+<body>
+<div class="container">
+<h2>تسجيل حيوان جديد</h2>
+<div id="auth_status" class="info">جارٍ التحقق من الصلاحيات...</div>
+<form id="addAnimalForm" style="display:none;">
+    <label for="animal_type">نوع الحيوان</label>
+    <select id="animal_type" name="animal_type" required>
+        <option value="">اختر النوع</option>
+        <option value="Cats">Cats</option>
+        <option value="Dogs">Dogs</option>
+    </select>
+
+    <label for="animal_source">مصدر الحيوان</label>
+    <select id="animal_source" name="animal_source" required>
+        <option value="">اختر المصدر</option>
+        <option value="Stray">Stray</option>
+        <option value="Adoption">Adoption</option>
+    </select>
+
+    <label for="registration_date">تاريخ التسجيل</label>
+    <input type="date" id="registration_date" name="registration_date" required>
+
+    <div id="unique_display">
+        <strong>الرمز الفريد:</strong> <span id="animal_code_value"></span>
+    </div>
+
+    <div id="delivered_fields_container" style="display:none;">
+        <h3>بيانات المُسلّم (موظف)</h3>
+        <label>اسم المُسلّم</label>
+        <select id="delivered_by_select">
+            <option value="">اختر موظف...</option>
+        </select>
+        <input type="hidden" id="delivered_by_empid" name="delivered_by_empid">
+        <input type="hidden" id="delivered_by_name" name="delivered_by_name">
+    </div>
+
+    <div id="owner_fields_container" style="display:none;">
+        <h3>بيانات المالك</h3>
+        <label for="owner_name">اسم المالك</label>
+        <input type="text" id="owner_name" name="owner_name">
+        <label for="owner_phone">هاتف المالك</label>
+        <input type="tel" id="owner_phone" name="owner_phone">
+        <label for="owner_email">بريد المالك</label>
+        <input type="email" id="owner_email" name="owner_email">
+    </div>
+
+    <label for="notes">ملاحظات</label>
+    <textarea id="notes" name="notes" rows="4"></textarea>
+
+    <button type="submit" id="submit_button">حفظ البيانات</button>
+</form>
+<div id="message"></div>
+</div>
+
+<script>
+let currentUserId = null;
+
+// تعيين التاريخ الافتراضي
+function setDefaultDate() {
+    const now = new Date();
+    document.getElementById('registration_date').value = now.toISOString().slice(0,10);
+}
+
+// جلب الموظفين
+async function loadEmployees() {
+    try {
+        const res = await fetch('../api/get_employees.php');
+        const data = await res.json();
+        const select = document.getElementById('delivered_by_select');
+        select.innerHTML = '<option value="">اختر موظف...</option>';
+        if(data.success && Array.isArray(data.data)) {
+            data.data.forEach(emp => {
+                const opt = document.createElement('option');
+                opt.value = emp.EmpID;
+                opt.textContent = emp.EmpName;
+                select.appendChild(opt);
+            });
+        }
+    } catch(e) {
+        console.error(e);
+    }
+}
+
+// تحديث الحقول حسب المصدر
+function toggleFields() {
+    const source = document.getElementById('animal_source').value;
+    const delivered = document.getElementById('delivered_fields_container');
+    const owner = document.getElementById('owner_fields_container');
+    document.getElementById('delivered_by_empid').value = '';
+    document.getElementById('delivered_by_name').value = '';
+    if(source==='Stray') {
+        delivered.style.display='block';
+        owner.style.display='none';
+    } else if(source==='Adoption') {
+        delivered.style.display='none';
+        owner.style.display='block';
+    } else {
+        delivered.style.display='none';
+        owner.style.display='none';
+    }
+}
+
+// توليد الرمز الفريد تلقائي
+function generateCode() {
+    const type = document.getElementById('animal_type').value;
+    const source = document.getElementById('animal_source').value;
+    const date = document.getElementById('registration_date').value;
+    if(type && source && date) {
+        const code = Math.floor(Math.random()*900+100)+'-'+type+'-'+source+'-'+date.slice(0,4);
+        document.getElementById('animal_code_value').textContent = code;
+    }
+}
+
+// عند اختيار الموظف
+document.getElementById('delivered_by_select').addEventListener('change', function(){
+    const opt = this.options[this.selectedIndex];
+    document.getElementById('delivered_by_empid').value = opt.value;
+    document.getElementById('delivered_by_name').value = opt.textContent;
+});
+
+// تحميل البيانات عند فتح الصفحة
+async function loadResources() {
+    setDefaultDate();
+    await loadEmployees();
+    const form = document.getElementById('addAnimalForm');
+    const authDiv = document.getElementById('auth_status');
+    try {
+        const res = await fetch('../api/user_data.php?action=get_user_data');
+        const user = await res.json();
+        if(user.success && user.user_data && user.user_data.EmpID) {
+            currentUserId = user.user_data.EmpID;
+            form.style.display='block';
+            authDiv.style.display='none';
+        } else {
+            authDiv.textContent='يرجى تسجيل الدخول.';
+            authDiv.classList.add('error');
+        }
+    } catch(e){
+        authDiv.textContent='خطأ في الاتصال بالخادم';
+        authDiv.classList.add('error');
+    }
+}
+
+// تحديث الرمز والحقول عند تغيّر أي مدخل أساسي
+['animal_type','animal_source','registration_date'].forEach(id=>{
+    document.getElementById(id).addEventListener('change', ()=>{
+        toggleFields();
+        generateCode();
+    });
+});
+
+// إرسال النموذج
+document.getElementById('addAnimalForm').addEventListener('submit', async function(e){
+    e.preventDefault();
+    const formData = new FormData(this);
+    formData.append('animal_code', document.getElementById('animal_code_value').textContent);
+    formData.append('created_by', currentUserId);
+
+    try{
+        const res = await fetch('../api/add_animals.php', {method:'POST', body: formData});
+        const data = await res.json();
+        const msgDiv = document.getElementById('message');
+        msgDiv.className='';
+        if(data.success){
+            msgDiv.innerHTML=`<div class="success">${data.message}<br>الرمز الفريد: ${data.animal_code}</div>`;
+            this.reset();
+            setDefaultDate();
+            toggleFields();
+            generateCode();
+        } else {
+            msgDiv.innerHTML=`<div class="error">${data.message}</div>`;
+        }
+    } catch(e){
+        console.error(e);
+    }
+});
+
+loadResources();
+</script>
+</body>
+</html>

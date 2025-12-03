@@ -1,0 +1,1368 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title id="title">إضافة/إدارة منتج ونسخه</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+:root{
+  --brand-dark-green: #2b5d34;
+  --brand-gold: #c79b3c;
+  --brand-dark-beige: #b89b7a;
+  --bg: #f6f8f6;
+  --card-bg: #ffffff;
+  --text: #222;
+  --muted: #666;
+  --radius: 10px;
+  --max-width: 100%;
+  --gap: 12px;
+  --shadow: 0 8px 30px rgba(43,93,52,0.08);
+  --border-color: rgba(0,0,0,0.04);
+  --beige-bg: #f9f5f0;
+  font-family: "Tajawal", "Segoe UI", Roboto, Arial, sans-serif;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:linear-gradient(180deg,#f2f5f0 0%,var(--bg) 100%);
+  color:var(--text);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  padding:8px;
+  font-size:14px;
+  line-height:1.4;
+}
+.container{
+  width:100%;
+  margin:0 auto;
+  background:var(--card-bg);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  padding:12px;
+}
+.header{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:8px;
+  padding-bottom:12px;
+  border-bottom:1px solid var(--border-color);
+}
+.brand{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.logo{
+  width:44px;
+  height:44px;
+  border-radius:8px;
+  background:linear-gradient(135deg,var(--brand-dark-green),#1f4b2a);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  color:white;
+  font-weight:700;
+}
+.langToggle{
+  margin-left:auto;
+  background:var(--brand-dark-green);
+  color:#fff;
+  border:none;
+  padding:8px 12px;
+  border-radius:8px;
+  cursor:pointer;
+  transition:background 0.3s;
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+.langToggle:hover{
+  background:#1f4b2a;
+}
+.section{
+  border:1px solid var(--border-color);
+  padding:12px;
+  border-radius:10px;
+  margin-bottom:12px;
+  background:var(--beige-bg);
+  box-shadow:0 2px 10px rgba(43,93,52,0.05);
+  transition:all 0.3s ease;
+}
+.section:hover{
+  box-shadow:0 4px 15px rgba(43,93,52,0.1);
+}
+.section h2, .section h3{
+  font-weight:700;
+  color:var(--brand-dark-green);
+  border-bottom:2px solid var(--brand-gold);
+  padding-bottom:8px;
+  margin-bottom:10px;
+  font-size:1.1rem;
+}
+.section h3{
+  font-size:1rem;
+}
+.row{
+  display:flex;
+  gap:var(--gap);
+  flex-wrap:wrap;
+}
+.col{
+  flex:1 1 260px;
+  min-width:180px;
+}
+label{
+  display:block;
+  font-weight:600;
+  margin-top:8px;
+  color:var(--brand-dark-green);
+  font-size:0.9rem;
+}
+input[type="text"], input[type="number"], input[type="date"], select, textarea{
+  width:100%;
+  padding:10px;
+  border-radius:8px;
+  border:1px solid #e6ebe6;
+  background:white;
+  color:var(--text);
+  transition:border-color 0.3s;
+  font-size:0.9rem;
+}
+input:focus, select:focus{
+  outline:none;
+  border-color:var(--brand-gold);
+  box-shadow:0 0 0 2px rgba(199,155,60,0.1);
+}
+input[readonly]{
+  background-color:#f5f5f5;
+  color:#666;
+  cursor:not-allowed;
+}
+.small{
+  font-size:0.8rem;
+  color:var(--muted);
+}
+.button{
+  border:none;
+  padding:10px 14px;
+  border-radius:8px;
+  cursor:pointer;
+  color:#fff;
+  transition:background 0.3s, transform 0.2s;
+  font-size:0.9rem;
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+}
+.button.primary{
+  background:var(--brand-dark-green);
+  box-shadow:0 2px 8px rgba(43,93,52,0.2);
+}
+.button.primary:hover{
+  background:#1f4b2a;
+  transform:translateY(-1px);
+}
+.button.ghost{
+  background:transparent;
+  border:1px solid var(--border-color);
+  color:var(--text);
+}
+.button.ghost:hover{
+  background:var(--brand-dark-beige);
+  color:#fff;
+}
+.button.danger{
+  background:#c0392b;
+}
+.button.danger:hover{
+  background:#a93226;
+}
+.table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:12px;
+  overflow:hidden;
+  border-radius:8px;
+  font-size:0.85rem;
+}
+.table th{
+  background:var(--brand-dark-green);
+  color:#fff;
+  padding:10px 8px;
+  text-align:right;
+  font-weight:600;
+  border:none;
+  font-size:0.85rem;
+}
+.table td{
+  padding:8px;
+  border-bottom:1px solid var(--border-color);
+  vertical-align:middle;
+  font-size:0.85rem;
+  background:var(--card-bg);
+  transition:background 0.3s;
+}
+.table tr:hover td{
+  background:rgba(199,155,60,0.05);
+}
+.table tr:nth-child(even) td{
+  background:rgba(246,248,246,0.5);
+}
+.thumb{
+  max-width:84px;
+  max-height:64px;
+  border-radius:6px;
+  box-shadow:0 2px 6px rgba(0,0,0,0.1);
+}
+.hint{
+  color:var(--brand-gold);
+  font-weight:600;
+}
+.muted{
+  color:var(--brand-dark-beige);
+}
+.hidden{
+  display:none;
+}
+.inline-input{
+  width:120px;
+  padding:6px;
+  border-radius:6px;
+  border:1px solid #e6ebe6;
+  display:inline-block;
+  font-size:0.85rem;
+}
+.attr-row{
+  margin-bottom:12px;
+  padding:10px;
+  border:1px solid var(--border-color);
+  border-radius:8px;
+  background:rgba(199,155,60,0.03);
+  transition:background 0.3s;
+}
+.attr-row:hover{
+  background:rgba(199,155,60,0.06);
+}
+.attr-label{
+  font-weight:700;
+  margin-bottom:6px;
+  color:var(--brand-dark-green);
+}
+.attributes-mode-toggle{
+  display:inline-block;
+  margin-left:8px;
+  padding:4px 8px;
+  background:var(--brand-gold);
+  color:#fff;
+  border-radius:4px;
+  font-size:0.85rem;
+  cursor:pointer;
+}
+.variant-preview-table{
+  max-width:100%;
+  overflow-x:auto;
+}
+.variant-preview-table .table th{
+  background:var(--brand-dark-green);
+  color:#fff;
+}
+.variant-preview-table .table td{
+  background:var(--card-bg);
+}
+.product-saved-info{
+  color:var(--brand-gold);
+  font-weight:600;
+}
+.status{
+  color:var(--brand-dark-beige);
+}
+.table-responsive{
+  overflow-x:auto;
+}
+.variant-image-input{
+  width:100%;
+  padding:4px;
+}
+.checkbox-container{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  cursor:pointer;
+}
+.checkbox-container input{
+  width:auto;
+}
+/* تحسينات للهواتف */
+@media (max-width:768px){
+  body{
+    padding:6px;
+    font-size:14px;
+  }
+  .container{
+    padding:10px;
+    border-radius:8px;
+  }
+  .section{
+    padding:10px;
+    margin-bottom:10px;
+    border-radius:8px;
+  }
+  .header{
+    flex-direction:row;
+    gap:8px;
+    text-align:right;
+    padding-bottom:10px;
+    margin-bottom:6px;
+  }
+  .brand .text{
+    display:block;
+  }
+  .logo{
+    width:40px;
+    height:40px;
+    font-size:0.9rem;
+  }
+  .langToggle{
+    padding:6px 10px;
+    font-size:0.85rem;
+  }
+  .row{
+    flex-direction:column;
+    gap:8px;
+  }
+  .col{
+    flex:1 1 100%;
+    min-width:100%;
+    margin-bottom:0;
+  }
+  label{
+    margin-top:6px;
+    margin-bottom:4px;
+    font-size:0.9rem;
+  }
+  input[type="text"], input[type="number"], input[type="date"], select, textarea{
+    padding:10px;
+    font-size:0.9rem;
+    margin-bottom:0;
+  }
+  .button{
+    padding:10px 12px;
+    font-size:0.9rem;
+    width:100%;
+    justify-content:center;
+    margin-bottom:6px;
+  }
+  .table{
+    font-size:0.8rem;
+  }
+  .inline-input{
+    width:100%;
+    margin-bottom:4px;
+  }
+  .table-responsive{
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+  }
+  .table thead, .table tbody, .table tr, .table th, .table td{
+    display:block;
+  }
+  .table thead tr{
+    position:absolute;
+    top:-9999px;
+    left:-9999px;
+  }
+  .table tr{
+    border:1px solid var(--border-color);
+    margin-bottom:8px;
+    border-radius:6px;
+    padding:8px;
+    background:var(--card-bg);
+  }
+  .table td{
+    border:none;
+    border-bottom:1px solid var(--border-color);
+    position:relative;
+    padding-left:50%;
+    text-align:right;
+    padding-top:6px;
+    padding-bottom:6px;
+  }
+  .table td:before{
+    content:attr(data-label);
+    position:absolute;
+    left:6px;
+    width:45%;
+    padding-right:10px;
+    white-space:nowrap;
+    font-weight:600;
+    color:var(--brand-dark-beige);
+    font-size:0.8rem;
+  }
+  .table td:last-child{
+    border-bottom:0;
+  }
+  .attr-row{
+    padding:8px;
+    margin-bottom:8px;
+  }
+  .variant-preview-table .table td{
+    padding-left:50%;
+  }
+  .variant-preview-table .table td:before{
+    font-size:0.75rem;
+  }
+  #variantPreviewSection > div {
+    flex-direction:column;
+    gap:8px;
+  }
+  #variantPreviewSection > div > label {
+    margin-bottom:0;
+    width:100%;
+  }
+  #variantPreviewSection > div > input {
+    width:100%;
+    margin-bottom:6px;
+  }
+  #variantPreviewSection > div > button {
+    width:100%;
+    margin-bottom:10px;
+  }
+  .checkbox-container{
+    width:100%;
+    justify-content:flex-start;
+    margin-top:8px;
+  }
+  .product-saved-info{
+    text-align:center;
+    width:100%;
+    margin-top:8px;
+  }
+  #productStatus{
+    text-align:center;
+  }
+}
+@media (max-width:480px){
+  body{
+    padding:4px;
+    font-size:13px;
+  }
+  .container{
+    padding:8px;
+  }
+  .section{
+    padding:8px;
+  }
+  .header{
+    flex-direction:column;
+    gap:6px;
+  }
+  .langToggle{
+    align-self:stretch;
+    text-align:center;
+    justify-content:center;
+  }
+  .brand{
+    justify-content:center;
+  }
+  input[type="text"], input[type="number"], input[type="date"], select, textarea{
+    padding:8px;
+  }
+  .button{
+    padding:8px 10px;
+  }
+  .table td{
+    padding-left:45%;
+  }
+}
+</style>
+</head>
+<body>
+<div class="container" role="main">
+  <div class="header">
+    <div class="brand">
+      <div class="logo">HV</div>
+      <div class="text">
+        <div style="font-weight:800;font-size:1.05rem;color:var(--brand-dark-green)">HealthVet</div>
+        <div class="small muted">Product / Inventory Management</div>
+      </div>
+    </div>
+    <button id="langToggle" class="langToggle"><i class="fas fa-globe"></i> English</button>
+  </div>
+  <div class="section" aria-labelledby="productFormTitle">
+    <h2 id="productFormTitle"><i class="fas fa-cube"></i> إضافة / تعديل منتج</h2>
+    <form id="productForm" enctype="multipart/form-data" autocomplete="off">
+      <input type="hidden" id="ProductID" name="ProductID" value="">
+      <input type="hidden" id="editMode" value="false">
+      <div class="row">
+        <div class="col">
+          <label for="productNameAr">اسم المنتج (عربي)</label>
+          <input id="productNameAr" name="Name_AR" type="text" placeholder="مثال: حبوب فيتامين">
+        </div>
+        <div class="col">
+          <label for="productNameEn">Product Name (EN)</label>
+          <input id="productNameEn" name="Name_EN" type="text" placeholder="e.g. Vitamin Tablets">
+        </div>
+        <div class="col">
+          <label for="medCode">كود المنتج</label>
+          <input id="medCode" name="Product_Code" type="text" placeholder="">
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <label for="mainCategory">القائمة الرئيسية</label>
+          <select id="mainCategory" name="InventoryItemID"></select>
+        </div>
+        <div class="col">
+          <label for="subCategory">القائمة الفرعية</label>
+          <select id="subCategory" name="SubInventoryItemID"></select>
+        </div>
+        <div class="col">
+          <label for="supplier">المورد</label>
+          <input id="supplier" name="Supplier" type="text">
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <label for="productImage">صورة المنتج (≤5MB - سيتم ضغطها إذا تجاوزت 1MB)</label>
+          <input id="productImage" name="ProductImage" type="file" accept="image/*">
+        </div>
+        <div class="col"></div>
+        <div class="col"></div>
+      </div>
+      <div id="attributesWrapper" style="margin-top:8px">
+        <span id="attributesModeToggle" class="attributes-mode-toggle hidden" style="background:var(--brand-gold)">عرض الكل</span>
+        <div id="attributesList" class="small">جارٍ تحميل السمات...</div>
+        <div style="margin-top:10px">
+          <button type="button" id="addVariantBtn" class="button primary"><i class="fas fa-plus"></i> إضافة نسخة جديدة</button>
+          <span class="small muted">اختر خياراً واحداً من كل سمة ثم أضف النسخة الجديدة لتعديل تفاصيلها في الجدول.</span>
+        </div>
+      </div>
+      <div id="variantPreviewSection" class="section hidden" style="margin-top:12px">
+        <h3><i class="fas fa-table"></i> معاينة النسخ المضافة</h3>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
+          <label class="small">تطبيق كمية على الكل</label>
+          <input id="bulkQty" type="number" min="0" value="0" style="width:110px;padding:6px">
+          <button type="button" id="applyBulkQty" class="button ghost"><i class="fas fa-check"></i> تطبيق</button>
+          <label class="small" style="margin-left:12px">تعيين تاريخ انتهاء على الكل</label>
+          <input id="bulkExpiry" type="date" style="width:160px;padding:6px">
+          <button type="button" id="applyBulkExpiry" class="button ghost"><i class="fas fa-check"></i> تطبيق</button>
+          <label class="checkbox-container" style="margin-left:auto">
+            <input id="autoSku" type="checkbox">
+            <span><i class="fas fa-barcode"></i> توليد SKU تلقائياً</span>
+          </label>
+        </div>
+        <div class="variant-preview-table">
+          <table class="table" id="variantPreviewTable" style="margin-top:10px">
+            <thead>
+              <tr>
+                <th>اختيار</th><th>SKU</th><th>OptionIDs</th><th>التركيبة</th>
+                <th>الكمية (عبوات)</th><th>Min</th><th>Expiry</th><th>UnitsPerPack</th><th>BaseUnit</th><th>QuantityBase</th><th>صورة النسخة</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:10px;align-items:center;flex-wrap:wrap">
+        <button type="submit" id="saveProduct" class="button primary"><i class="fas fa-save"></i> حفظ المنتج والنسخ</button>
+        <button type="button" id="deleteProduct" class="button danger"><i class="fas fa-trash"></i> حذف المنتج وكافة النسخ</button>
+        <button type="button" id="clearProduct" class="button ghost"><i class="fas fa-eraser"></i> مسح الحقول</button>
+        <div style="margin-left:auto" id="productSavedInfo" class="product-saved-info"></div>
+      </div>
+      <p id="productStatus" class="status small"></p>
+    </form>
+  </div>
+  <div class="section" id="variantsSection">
+    <h3><i class="fas fa-copy"></i> إدارة النسخ (Variants)</h3>
+    <div class="row">
+      <div class="col">
+        <label>عرض نسخ (ProductID)</label>
+        <input id="variantsProductFilter" placeholder="ProductID" readonly>
+      </div>
+      <div class="col">
+        <label>بحث</label>
+        <input id="variantsQuery" placeholder="SKU أو كود أو خيار">
+      </div>
+      <div class="col" style="align-self:end">
+        <button id="btnLoadVariants" class="button primary"><i class="fas fa-sync-alt"></i> عرض</button>
+        <button id="btnNewVariant" class="button ghost"><i class="fas fa-plus"></i> جديد</button>
+      </div>
+    </div>
+    <p id="variantsStatus" class="small muted"></p>
+    <div class="table-responsive">
+      <table class="table" id="variantsTable">
+        <thead><tr><th>VariantID</th><th>SKU</th><th>Options</th><th>Qty</th><th>Min</th><th>Expiry</th><th>BaseUnit</th><th>UnitsPerPack</th><th>QuantityBase</th><th>صورة</th><th>إجراءات</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<script>
+const apiBase = '/health_vet/api/';
+let currentLang = 'ar';
+let translations = {};
+let attributesMeta = [];
+let inventoryData = [];
+let unitsData = [];
+let previewVariants = [];
+let selectedAttributes = [];
+let attributesCache = new Map();
+const ProductIDInput = document.getElementById('ProductID');
+const editModeInput = document.getElementById('editMode');
+const productNameAr = document.getElementById('productNameAr');
+const productNameEn = document.getElementById('productNameEn');
+const medCodeInput = document.getElementById('medCode');
+const mainCategory = document.getElementById('mainCategory');
+const subCategory = document.getElementById('subCategory');
+const attributesList = document.getElementById('attributesList');
+const attributesModeToggle = document.getElementById('attributesModeToggle');
+const addVariantBtn = document.getElementById('addVariantBtn');
+const variantPreviewSection = document.getElementById('variantPreviewSection');
+const variantPreviewTableBody = document.querySelector('#variantPreviewTable tbody');
+const autoSkuCheckbox = document.getElementById('autoSku');
+const productImageInput = document.getElementById('productImage');
+const deleteProductBtn = document.getElementById('deleteProduct');
+function escapeHtml(s){ return (s==null)?'':String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function t(key, fallback = '') {
+  return translations[key] || fallback;
+}
+function clearAttributeSelects() {
+  attributesMeta.forEach(attr => {
+    const sel = document.querySelector(`select[name="attr_select_${attr.AttributeID}"]`);
+    if (sel) sel.value = '';
+    const txt = document.querySelector(`input[name="attr_text_${attr.AttributeID}"]`);
+    if (txt) txt.value = '';
+  });
+}
+async function loadTranslations(lang) {
+  try {
+    const res = await fetch(`/health_vet/languages/${lang}_add_Products.json`, { credentials:'same-origin' });
+    const data = await res.json();
+    translations = data;
+    applyTranslations();
+  } catch(e) {
+    console.error('loadTranslations', e);
+    translations = {};
+  }
+}
+async function loadUnits(lang='ar') {
+  try {
+    const res = await fetch(`${apiBase}get_units.php?lang=${lang}`, { credentials:'same-origin' });
+    const data = await res.json();
+    unitsData = data.success ? (data.data || []) : [];
+  } catch(e) {
+    console.error('loadUnits', e);
+    unitsData = [{ UnitID: null, Code: 'unit', Name_AR: 'وحدة', Name_EN: 'Unit' }];
+  }
+}
+function applyTranslations() {
+  document.getElementById('title').textContent = t('title', 'Add/Manage Product and Variants');
+  document.getElementById('productFormTitle').textContent = t('productFormTitle', 'Add / Edit Product');
+  document.querySelector('label[for="productNameAr"]').textContent = t('productNameArLabel', 'Product Name (Arabic)');
+  document.getElementById('productNameAr').placeholder = t('productNameArPlaceholder', 'e.g. Vitamin Tablets');
+  document.querySelector('label[for="productNameEn"]').textContent = t('productNameEnLabel', 'Product Name (English)');
+  document.getElementById('productNameEn').placeholder = t('productNameEnPlaceholder', 'مثال: حبوب فيتامين');
+  document.querySelector('label[for="medCode"]').textContent = t('medCodeLabel', 'Product Code');
+  document.querySelector('label[for="mainCategory"]').textContent = t('mainCategoryLabel', 'Main Category');
+  document.querySelector('label[for="subCategory"]').textContent = t('subCategoryLabel', 'Sub Category');
+  document.querySelector('label[for="supplier"]').textContent = t('supplierLabel', 'Supplier');
+  document.querySelector('label[for="productImage"]').textContent = t('productImageLabel', 'Product Image (≤5MB - Compressed if >1MB)');
+  addVariantBtn.innerHTML = `<i class="fas fa-plus"></i> ${t('addVariant', 'Add New Variant')}`;
+  document.querySelector('#variantPreviewSection h3').textContent = t('variantPreviewTitle', 'Added Variants Preview');
+  const bulkQtyLabel = document.querySelector('#variantPreviewSection > div > label:nth-of-type(1)');
+  if (bulkQtyLabel) bulkQtyLabel.firstChild.textContent = t('bulkQtyLabel', 'Apply Quantity to All');
+  document.querySelector('#applyBulkQty').textContent = t('apply', 'Apply');
+  const bulkExpiryLabel = document.querySelector('#variantPreviewSection > div > label:nth-of-type(2)');
+  if (bulkExpiryLabel) bulkExpiryLabel.firstChild.textContent = t('bulkExpiryLabel', 'Set Expiry Date to All');
+  document.querySelector('#applyBulkExpiry').textContent = t('apply', 'Apply');
+  const autoSkuLabel = autoSkuCheckbox.parentNode;
+  if (autoSkuLabel) autoSkuLabel.innerHTML = '<input id="autoSku" type="checkbox">' + t('autoSkuLabel', ' Auto Generate SKU');
+  document.querySelector('#saveProduct').textContent = t('saveProduct', 'Save Product and Variants');
+  document.querySelector('#deleteProduct').textContent = t('deleteProduct', 'Delete Product and All Variants');
+  document.querySelector('#clearProduct').textContent = t('clearProduct', 'Clear Fields');
+  document.querySelector('#variantsSection h3').textContent = t('variantsManagement', 'Manage Variants');
+  const variantsFilterLabel = document.querySelector('#variantsProductFilter').previousElementSibling;
+  if (variantsFilterLabel) variantsFilterLabel.textContent = t('variantsFilterLabel', 'Show Variants (ProductID)');
+  const searchLabel = document.querySelector('#variantsQuery').previousElementSibling;
+  if (searchLabel) searchLabel.textContent = t('searchLabel', 'Search');
+  document.querySelector('#btnLoadVariants').textContent = t('show', 'Show');
+  document.querySelector('#btnNewVariant').textContent = t('newVariant', 'New');
+  const previewThs = document.querySelectorAll('#variantPreviewTable th');
+  if (previewThs.length >= 11) {
+    previewThs[0].textContent = t('select', 'Select');
+    previewThs[1].textContent = t('sku', 'SKU');
+    previewThs[2].textContent = t('optionIds', 'OptionIDs');
+    previewThs[3].textContent = t('combination', 'Combination');
+    previewThs[4].textContent = t('quantity', 'Quantity (Packs)');
+    previewThs[5].textContent = t('min', 'Min');
+    previewThs[6].textContent = t('expiry', 'Expiry');
+    previewThs[7].textContent = t('unitsPerPack', 'UnitsPerPack');
+    previewThs[8].textContent = t('baseUnit', 'BaseUnit');
+    previewThs[9].textContent = t('quantityBase', 'QuantityBase');
+    previewThs[10].textContent = t('variantImage', 'Variant Image');
+  }
+  const variantsThs = document.querySelectorAll('#variantsTable th');
+  if (variantsThs.length >= 11) {
+    variantsThs[0].textContent = t('variantId', 'VariantID');
+    variantsThs[1].textContent = t('sku', 'SKU');
+    variantsThs[2].textContent = t('options', 'Options');
+    variantsThs[3].textContent = t('qty', 'Qty');
+    variantsThs[4].textContent = t('min', 'Min');
+    variantsThs[5].textContent = t('expiry', 'Expiry');
+    variantsThs[6].textContent = t('baseUnit', 'BaseUnit');
+    variantsThs[7].textContent = t('unitsPerPack', 'UnitsPerPack');
+    variantsThs[8].textContent = t('quantityBase', 'QuantityBase');
+    variantsThs[9].textContent = t('image', 'Image');
+    variantsThs[10].textContent = t('actions', 'Actions');
+  }
+}
+attributesModeToggle.addEventListener('click', () => {
+  // Removed toggle logic as it's no longer needed for single-select
+});
+async function loadInventory(lang='ar'){
+  try{
+    const res = await fetch(`${apiBase}get_inventory_list.php?lang=${lang}`, { credentials:'same-origin' });
+    const data = await res.json();
+    inventoryData = data.success ? (data.data||[]) : [];
+    renderMainCategories();
+  }catch(e){ console.error('loadInventory', e); mainCategory.innerHTML = '<option>--</option>'; }
+}
+function renderMainCategories(){
+  mainCategory.innerHTML = `<option value="">-- ${t('select', 'Select')} --</option>`;
+  inventoryData.filter(i=>i.Type==='Category').forEach(it=>{
+    const o = document.createElement('option'); o.value=it.ItemID; o.textContent = currentLang === 'ar' ? (it.Name_AR || it.Name) : (it.Name_EN || it.Name); mainCategory.appendChild(o);
+  });
+  subCategory.innerHTML = `<option value="">-- ${t('select', 'Select')} --</option>`;
+}
+mainCategory.addEventListener('change', handleCategoryChange);
+subCategory.addEventListener('change', handleCategoryChange);
+async function handleCategoryChange(e) {
+  let itemId = parseInt(subCategory.value) || 0;
+  if (!itemId && e && e.target.id === 'mainCategory') {
+    itemId = parseInt(mainCategory.value) || 0;
+    subCategory.innerHTML = `<option value="">-- ${t('select', 'Select')} --</option>`;
+    if (itemId) {
+      inventoryData.filter(i=>i.Type==='SubCategory' && parseInt(i.ParentID)===itemId).forEach(s=>{ const o=document.createElement('option'); o.value=s.ItemID; o.textContent = currentLang === 'ar' ? (s.Name_AR || s.Name) : (s.Name_EN || s.Name); subCategory.appendChild(o); });
+    }
+  }
+  attributesList.innerHTML = '';
+  attributesMeta = [];
+  if (!itemId) {
+    renderAttributes(editModeInput.value === 'true');
+    return;
+  }
+  if (attributesCache.has(itemId)) {
+    attributesMeta = attributesCache.get(itemId);
+    renderAttributes(editModeInput.value === 'true');
+    return;
+  }
+  attributesList.innerHTML = t('loadingAttributes', 'Loading attributes...');
+  try {
+    const res = await fetch(`${apiBase}get_product_attributes.php?item_id=${itemId}&lang=${currentLang}`, { credentials:'same-origin' });
+    const data = await res.json();
+    if(!data.success){ attributesList.innerHTML = data.message || t('noAttributes', 'No attributes'); return; }
+    attributesMeta = data.data || [];
+    attributesCache.set(itemId, attributesMeta);
+    renderAttributes(editModeInput.value === 'true');
+  }catch(e){ console.error('loadAttributes', e); attributesList.innerHTML = t('failed', 'Failed'); }
+}
+function renderAttributes(isEdit = false){
+  attributesList.innerHTML = '';
+  if(!attributesMeta.length){ attributesList.innerHTML = `<div class="small muted">${t('noAttributes', 'No attributes')}</div>`; return; }
+  // Always render all attributes, no filtering for single-select
+  attributesMeta.forEach(attr=>{
+    const container = document.createElement('div'); container.className='attr-row';
+    const lbl = document.createElement('div'); lbl.className='attr-label'; lbl.textContent = currentLang === 'ar' ? (attr.Name_AR||attr.Name_EN||attr.Name) : (attr.Name_EN||attr.Name_AR||attr.Name);
+    container.appendChild(lbl);
+    if(attr.Options && attr.Options.length){
+      const select = document.createElement('select'); select.name = `attr_select_${attr.AttributeID}`;
+      select.innerHTML = `<option value="">-- ${t('select', 'Select')} --</option>`;
+      attr.Options.forEach(opt=>{
+        const o = document.createElement('option'); o.value = opt.OptionID;
+        o.textContent = currentLang === 'ar' ? (opt.Name_AR||opt.Name_EN) : (opt.Name_EN||opt.Name_AR);
+        select.appendChild(o);
+      });
+      container.appendChild(select);
+    } else {
+      const input = document.createElement('input'); input.type='text'; input.name = `attr_text_${attr.AttributeID}`; input.placeholder = t('enterValue', 'Enter value...');
+      container.appendChild(input);
+    }
+    attributesList.appendChild(container);
+  });
+  // No prefill for single-select; user fills for new variants
+  // Hide toggle always
+  attributesModeToggle.classList.add('hidden');
+}
+function getSelectedOptionsMap(){
+  const map = {};
+  attributesMeta.forEach(attr=>{
+    const aid = attr.AttributeID;
+    if(attr.Options && attr.Options.length){
+      const sel = document.querySelector(`select[name="attr_select_${aid}"]`);
+      if(sel && sel.value){
+        map[aid] = [parseInt(sel.value)];
+      }
+    }
+  });
+  return map;
+}
+function cartesianProduct(arrays){
+  let res=[[]];
+  for(const a of arrays){
+    const out=[];
+    for(const r of res) for(const v of a) out.push([...r, v]);
+    res = out;
+  }
+  return res;
+}
+function buildVariantsFromSelected(){
+  const map = getSelectedOptionsMap();
+  const keys = Object.keys(map).map(k=>parseInt(k));
+  let combos;
+  if(!keys.length) {
+    combos = [[]];
+  } else {
+    const arrays = keys.map(k=>map[k]);
+    combos = cartesianProduct(arrays);
+  }
+  // Since single per attr, combos will have one entry
+  return combos.map((combo, idx)=>({
+    VariantIndex: previewVariants.length + idx + 1,
+    OptionIDs: combo.map(x=>parseInt(x)),
+    SKU: '',
+    Quantity: 0,
+    MinQuantity: 0,
+    ExpiryDate: '',
+    UnitsPerPack: 1.0000,
+    BaseUnit: 'unit',
+    QuantityBase: 0.000,
+    ProductImage: null
+  }));
+}
+addVariantBtn.addEventListener('click', ()=>{
+  const newVariants = buildVariantsFromSelected();
+  if(!newVariants.length){ 
+    if(!confirm(t('addEmptyVariant', 'Add empty variant?'))) return;
+    // Add empty if confirmed
+    const emptyVariant = [{
+      VariantIndex: previewVariants.length + 1,
+      OptionIDs: [],
+      SKU: '',
+      Quantity: 0,
+      MinQuantity: 0,
+      ExpiryDate: '',
+      UnitsPerPack: 1.0000,
+      BaseUnit: 'unit',
+      QuantityBase: 0.000,
+      ProductImage: null
+    }];
+    previewVariants.push(...emptyVariant);
+    renderVariantPreviewTable(previewVariants);
+    clearAttributeSelects();
+    return;
+  }
+  previewVariants.push(...newVariants);
+  renderVariantPreviewTable(previewVariants);
+  clearAttributeSelects();
+  variantPreviewSection.classList.remove('hidden');
+});
+function createBaseUnitSelect(currentValue) {
+  const select = document.createElement('select');
+  select.className = 'inline-input baseunit-select';
+  const defaultOpt = document.createElement('option');
+  defaultOpt.value = 'unit';
+  defaultOpt.textContent = currentLang === 'ar' ? 'وحدة' : 'Unit';
+  if (String(currentValue) === 'unit') defaultOpt.selected = true;
+  select.appendChild(defaultOpt);
+  unitsData.forEach(u => {
+    const opt = document.createElement('option');
+    opt.value = u.UnitID || u.Code;
+    opt.textContent = currentLang === 'ar' ? (u.Name_AR || u.Name) : (u.Name_EN || u.Name);
+    if (String(currentValue) === String(opt.value)) opt.selected = true;
+    select.appendChild(opt);
+  });
+  return select.outerHTML;
+}
+function renderVariantPreviewTable(variants){
+  variantPreviewTableBody.innerHTML = '';
+  const auto = autoSkuCheckbox.checked;
+  variants.forEach((v, idx)=>{
+    if(auto) v.SKU = (medCodeInput.value.trim()||t('defaultSku', 'PRD')) + '-' + (v.OptionIDs.join('-') || (idx+1));
+    v.QuantityBase = (v.UnitsPerPack && v.Quantity) ? (v.Quantity * v.UnitsPerPack) : 0;
+    const readable = v.OptionIDs.map(oid=>{
+      for(const a of attributesMeta){
+        const opt = (a.Options||[]).find(o=>o.OptionID==oid);
+        if(opt) return currentLang==='ar' ? (opt.Name_AR||opt.Name_EN) : (opt.Name_EN||opt.Name_AR);
+      }
+      return oid;
+    }).join(', ');
+    const tr = document.createElement('tr'); tr.dataset.optionids = v.OptionIDs.join(',');
+    if (v.VariantID) tr.dataset.variantid = v.VariantID;
+    const optionKey = v.OptionIDs.join(',');
+    const imageHtml = v.ProductImage ? `<img class="thumb" src="/health_vet/uploads/ProductImage/${escapeHtml(v.ProductImage)}" alt="Current Image">` : '';
+    const baseUnitSelectHtml = createBaseUnitSelect(v.BaseUnit || 'unit');
+    tr.innerHTML = `<td data-label="${t('select', 'Select')}"><input type="checkbox" class="variant-select" checked></td>
+      <td data-label="${t('sku', 'SKU')}"><input class="inline-input sku-input" value="${escapeHtml(v.SKU)}"></td>
+      <td data-label="${t('optionIds', 'OptionIDs')}">${v.OptionIDs.join(',')}</td>
+      <td data-label="${t('combination', 'Combination')}">${escapeHtml(readable)}</td>
+      <td data-label="${t('quantity', 'Quantity')}"><input type="number" class="inline-input qty-input" min="0" step="0.001" value="${v.Quantity}"></td>
+      <td data-label="${t('min', 'Min')}"><input type="number" class="inline-input min-input" min="0" step="1" value="${v.MinQuantity}"></td>
+      <td data-label="${t('expiry', 'Expiry')}"><input type="date" class="expiry-input" value="${v.ExpiryDate}"></td>
+      <td data-label="${t('unitsPerPack', 'UnitsPerPack')}"><input type="number" step="0.0001" class="inline-input unitsperpack-input" value="${parseFloat(v.UnitsPerPack || 1.0000).toFixed(4)}"></td>
+      <td data-label="${t('baseUnit', 'BaseUnit')}">${baseUnitSelectHtml}</td>
+      <td data-label="${t('quantityBase', 'QuantityBase')}"><input type="number" step="0.001" class="inline-input qbase-input" value="${parseFloat(v.QuantityBase || 0).toFixed(3)}" readonly></td>
+      <td data-label="${t('variantImage', 'Variant Image')}">
+        ${imageHtml}
+        <input type="file" accept="image/*" class="variant-image-input" data-optionkey="${optionKey}">
+      </td>`;
+    variantPreviewTableBody.appendChild(tr);
+    const qtyEl = tr.querySelector('.qty-input');
+    const unitsEl = tr.querySelector('.unitsperpack-input');
+    const qbaseEl = tr.querySelector('.qbase-input');
+    function recalcRow(){
+      let q = parseFloat(qtyEl.value) || 0;
+      let u = parseFloat(unitsEl.value);
+      if (!isFinite(u) || u <= 0) u = 1.0000;
+      const qb = q * u;
+      qbaseEl.value = parseFloat(qb).toFixed(3);
+    }
+    qtyEl.addEventListener('input', recalcRow);
+    unitsEl.addEventListener('input', recalcRow);
+    recalcRow();
+  });
+}
+function parseOptionIDs(optionIdsStr){
+  if(!optionIdsStr) return [];
+  return optionIdsStr.toString().split(',').map(s=>s.trim()).filter(s=>s!=='').map(Number);
+}
+async function loadVariantsForPreview(productID){
+  if(!productID) return;
+  try{
+    const params = new URLSearchParams();
+    params.set('product_id', productID);
+    const res = await fetch(`${apiBase}get_variants_with_unit_names.php?${params.toString()}&lang=${currentLang}`, { credentials:'same-origin' });
+    const j = await res.json();
+    if(!j.success) return;
+    const variants = (j.variants || []).map((it) => {
+      const optionIDs = (it.OptionIDs && typeof it.OptionIDs === 'string') ? parseOptionIDs(it.OptionIDs) :
+                        (it.OptionIDs && Array.isArray(it.OptionIDs) ? it.OptionIDs.map(Number) : []);
+      const units = (it.UnitsPerPack !== undefined && it.UnitsPerPack !== null && it.UnitsPerPack !== '') ? parseFloat(it.UnitsPerPack) : 1.0000;
+      const qty = (it.Quantity !== undefined && it.Quantity !== null && it.Quantity !== '') ? parseFloat(it.Quantity) : 0;
+      const qbase = (it.QuantityBase !== undefined && it.QuantityBase !== null && it.QuantityBase !== '') ? parseFloat(it.QuantityBase) : (qty * units);
+      return {
+        VariantID: it.VariantID,
+        VariantIndex: it.VariantID || 1,
+        OptionIDs: optionIDs,
+        SKU: it.SKU || '',
+        Quantity: qty,
+        MinQuantity: parseInt(it.MinQuantity) || 0,
+        ExpiryDate: it.ExpiryDate || '',
+        UnitsPerPack: units,
+        BaseUnit: it.ResolvedUnitID || it.BaseUnit || 'unit',
+        QuantityBase: qbase,
+        ProductImage: it.ProductImage || null,
+        unit_label: it.unit_label
+      };
+    });
+    previewVariants = variants.length ? variants : [{
+      VariantIndex: 1,
+      OptionIDs: [],
+      SKU: '',
+      Quantity: 0,
+      MinQuantity: 0,
+      ExpiryDate: '',
+      UnitsPerPack: 1.0000,
+      BaseUnit: 'unit',
+      QuantityBase: 0.000,
+      ProductImage: null,
+      unit_label: currentLang === 'ar' ? 'وحدة' : 'Unit'
+    }];
+    renderVariantPreviewTable(previewVariants);
+  }catch(err){
+    console.error('loadVariantsForPreview error', err);
+  }
+}
+medCodeInput.addEventListener('input', ()=> {
+  if(!autoSkuCheckbox.checked) return;
+  variantPreviewTableBody.querySelectorAll('.sku-input').forEach((el, idx) => {
+    const optionIds = (el.closest('tr').dataset.optionids || '').replace(/,/g,'-');
+    const prefix = medCodeInput.value.trim() || t('defaultSku', 'PRD');
+    el.value = `${prefix}-${optionIds || (idx+1)}`;
+  });
+});
+autoSkuCheckbox.addEventListener('change', ()=> {
+  if(autoSkuCheckbox.checked){
+    medCodeInput.dispatchEvent(new Event('input'));
+  }
+});
+document.getElementById('applyBulkQty').addEventListener('click', ()=>{ const v=parseFloat(document.getElementById('bulkQty').value)||0; variantPreviewTableBody.querySelectorAll('.qty-input').forEach(i=>{ i.value=v; i.dispatchEvent(new Event('input')); }); });
+document.getElementById('applyBulkExpiry').addEventListener('click', ()=>{ const d=document.getElementById('bulkExpiry').value||''; variantPreviewTableBody.querySelectorAll('.expiry-input').forEach(i=>i.value=d); });
+function gatherAttributesPayload(){
+  // Collect unique used options from preview variants + text attrs
+  const usedOptionIds = new Set();
+  previewVariants.forEach(v => {
+    v.OptionIDs.forEach(oid => usedOptionIds.add(oid));
+  });
+  const payload = [];
+  // For option-based attributes: add all used options
+  attributesMeta.filter(attr => attr.Options && attr.Options.length).forEach(attr => {
+    attr.Options.filter(opt => usedOptionIds.has(opt.OptionID)).forEach(opt => {
+      payload.push({ AttributeID: attr.AttributeID, OptionID: opt.OptionID, Value: String(opt.OptionID), Quantity: 0 });
+    });
+  });
+  // For text attributes
+  attributesMeta.filter(attr => !attr.Options || !attr.Options.length).forEach(attr => {
+    const txt = document.querySelector(`input[name="attr_text_${attr.AttributeID}"]`);
+    if(txt && txt.value.trim()) {
+      payload.push({ AttributeID: attr.AttributeID, OptionID: null, Value: txt.value.trim(), Quantity:0 });
+    }
+  });
+  return payload;
+}
+function gatherVariantsFromPreview(){
+  const rows = Array.from(variantPreviewTableBody.querySelectorAll('tr'));
+  const out=[];
+  rows.forEach(tr=>{
+    if(!tr.querySelector('.variant-select').checked) return;
+    const optionIDs = tr.dataset.optionids.split(',').map(x=>parseInt(x));
+    const sku = (tr.querySelector('.sku-input').value || '').trim() || null;
+    const qty = parseFloat(tr.querySelector('.qty-input').value) || 0;
+    const minq = parseFloat(tr.querySelector('.min-input').value) || 0;
+    const expiry = tr.querySelector('.expiry-input').value || null;
+    let unitsPerPack = parseFloat(tr.querySelector('.unitsperpack-input').value);
+    if (!isFinite(unitsPerPack) || unitsPerPack <= 0) unitsPerPack = 1.0000;
+    const baseUnit = (tr.querySelector('.baseunit-select') ? tr.querySelector('.baseunit-select').value : tr.querySelector('.baseunit-input')?.value) || 'unit';
+    let qBase = parseFloat(tr.querySelector('.qbase-input').value);
+    if (!isFinite(qBase) || qBase <= 0) qBase = qty * unitsPerPack;
+    const variantId = tr.dataset.variantid || null;
+    const optionKey = optionIDs.join(',');
+    out.push({
+      VariantID: variantId,
+      OptionIDs: optionIDs,
+      SKU: sku,
+      Quantity: qty,
+      MinQuantity: minq,
+      ExpiryDate: expiry,
+      UnitsPerPack: parseFloat(unitsPerPack).toFixed(4),
+      BaseUnit: baseUnit,
+      QuantityBase: parseFloat(qBase).toFixed(3),
+      OptionKey: optionKey
+    });
+  });
+  return out;
+}
+document.getElementById('productForm').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  document.getElementById('productStatus').textContent = t('saving', 'Saving...');
+  const inv = subCategory.value || mainCategory.value || '';
+  if(!inv){ document.getElementById('productStatus').textContent = t('chooseInventory', 'Choose inventory'); return; }
+  const fileInput = document.getElementById('productImage');
+  if(fileInput.files && fileInput.files[0] && fileInput.files[0].size > 5*1024*1024){
+    document.getElementById('productStatus').textContent = t('imageTooLarge', 'Image > 5MB - too large even for compression');
+    return;
+  }
+  const fd = new FormData();
+  const pid = ProductIDInput.value;
+  if(pid) fd.set('ProductID', pid);
+  fd.set('InventoryItemID', inv);
+  fd.set('Name_AR', productNameAr.value || '');
+  fd.set('Name_EN', productNameEn.value || '');
+  fd.set('Product_Code', medCodeInput.value || '');
+  fd.set('Supplier', document.getElementById('supplier').value || '');
+  fd.set('Attributes', JSON.stringify(gatherAttributesPayload()));
+  const variantsData = gatherVariantsFromPreview();
+  if (!variantsData.length) {
+    document.getElementById('productStatus').textContent = t('noVariants', 'يجب إنشاء على الأقل نسخة واحدة');
+    return;
+  }
+  fd.set('Variants', JSON.stringify(variantsData));
+  if(fileInput.files && fileInput.files[0]) fd.append('ProductImage', fileInput.files[0]);
+  variantPreviewTableBody.querySelectorAll('.variant-image-input').forEach((fileInput, idx) => {
+    if (fileInput.files && fileInput.files[0]) {
+      const optionKey = fileInput.dataset.optionkey || variantsData[idx]?.OptionKey || `new_${idx}`;
+      const fieldName = `VariantImage_${optionKey.replace(/,/g, '_')}`;
+      fd.append(fieldName, fileInput.files[0]);
+    }
+  });
+  try{
+    const res = await fetch(`${apiBase}add_Products.php`, { method:'POST', body: fd, credentials:'same-origin' });
+    const j = await res.json();
+    if(j.success){
+      document.getElementById('productStatus').textContent = j.message || t('saved', 'Saved');
+      if(j.ProductID){
+        ProductIDInput.value = j.ProductID;
+        document.getElementById('productSavedInfo').textContent = `ProductID: ${j.ProductID}`;
+        loadVariants(j.ProductID);
+        await loadVariantsForPreview(j.ProductID);
+      }
+    } else {
+      document.getElementById('productStatus').textContent = j.message || t('error', 'Error');
+      console.warn('save errors', j);
+    }
+  }catch(err){
+    console.error(err);
+    document.getElementById('productStatus').textContent = t('requestFailed', 'Request failed') + (err.message?': '+err.message:'');
+  }
+});
+const btnLoadVariants = document.getElementById('btnLoadVariants');
+const variantsTableBody = document.querySelector('#variantsTable tbody');
+btnLoadVariants.addEventListener('click', async ()=> {
+  const pid = document.getElementById('variantsProductFilter').value.trim() || ProductIDInput.value || null;
+  await loadVariants(pid);
+  if(pid) ProductIDInput.value = pid;
+});
+async function loadVariants(productID=null){
+  variantsTableBody.innerHTML=''; document.getElementById('variantsStatus').textContent = t('loadingVariants', 'Loading variants...');
+  try{
+    const params = new URLSearchParams();
+    if(productID) params.set('product_id',productID);
+    const res = await fetch(`${apiBase}get_variants_with_unit_names.php?${params.toString()}&lang=${currentLang}`, { credentials:'same-origin' });
+    const j = await res.json();
+    if(!j.success){ document.getElementById('variantsStatus').textContent = j.message || t('error', 'Error'); return; }
+    let variants = j.variants || [];
+    const query = document.getElementById('variantsQuery').value.trim().toLowerCase();
+    if (query) {
+      variants = variants.filter(v => 
+        (v.SKU || '').toLowerCase().includes(query) ||
+        (v.OptionIDs || '').toLowerCase().includes(query)
+      );
+    }
+    renderVariantsTable(variants);
+    document.getElementById('variantsStatus').textContent = `${t('total', 'Total')}: ${variants.length}`;
+  }catch(e){ console.error(e); document.getElementById('variantsStatus').textContent = t('failed', 'Failed'); }
+}
+function renderVariantsTable(items){
+  variantsTableBody.innerHTML='';
+  if(!items.length){ variantsTableBody.innerHTML = `<tr><td colspan="11" data-label="${t('noResults', 'No results')}">${t('noResults', 'No results')}</td></tr>`; return; }
+  items.forEach(it=>{
+    const opts = it.OptionIDsArray ? it.OptionIDsArray.map(oid=>{
+      for(const a of attributesMeta){
+        const opt = (a.Options||[]).find(o=>o.OptionID==oid);
+        if(opt) return (currentLang==='ar'? (opt.Name_AR||opt.Name_EN) : (opt.Name_EN||opt.Name_AR)) + `(${oid})`;
+      }
+      return oid;
+    }).join(', ') : (it.OptionIDs || '');
+    const units = (it.UnitsPerPack !== undefined && it.UnitsPerPack !== null && it.UnitsPerPack !== '') ? parseFloat(it.UnitsPerPack).toFixed(4) : '1.0000';
+    const qbase = (it.QuantityBase !== undefined && it.QuantityBase !== null && it.QuantityBase !== '') ? parseFloat(it.QuantityBase).toFixed(3) : (parseFloat(it.Quantity || 0) * parseFloat(it.UnitsPerPack || 1)).toFixed(3);
+    const buDisplay = it.unit_label || it.BaseUnit || 'unit';
+    const tr = document.createElement('tr');
+    const editText = t('edit', 'Edit');
+    const deleteText = t('delete', 'Delete');
+    const imageHtml = it.ProductImage ? `<img class="thumb" src="/health_vet/uploads/ProductImage/${escapeHtml(it.ProductImage)}" alt="Variant Image">` : '';
+    tr.innerHTML = `<td data-label="${t('variantId', 'VariantID')}">${it.VariantID}</td>
+      <td data-label="${t('sku', 'SKU')}">${escapeHtml(it.SKU||'')}</td>
+      <td data-label="${t('options', 'Options')}">${escapeHtml(opts)}</td>
+      <td data-label="${t('qty', 'Qty')}">${escapeHtml(parseFloat(it.Quantity || 0).toFixed(4))}</td>
+      <td data-label="${t('min', 'Min')}">${escapeHtml(parseInt(it.MinQuantity || 0))}</td>
+      <td data-label="${t('expiry', 'Expiry')}">${escapeHtml(it.ExpiryDate||'')}</td>
+      <td data-label="${t('baseUnit', 'BaseUnit')}">${escapeHtml(buDisplay)}</td>
+      <td data-label="${t('unitsPerPack', 'UnitsPerPack')}">${escapeHtml(units)}</td>
+      <td data-label="${t('quantityBase', 'QuantityBase')}">${escapeHtml(qbase)}</td>
+      <td data-label="${t('image', 'Image')}">${imageHtml}</td>
+      <td data-label="${t('actions', 'Actions')}">
+        <button onclick="editVariant(${it.VariantID})" class="button ghost" style="margin-left:4px"><i class="fas fa-edit"></i> ${editText}</button>
+        <button onclick="deleteVariant(${it.VariantID})" class="button ghost"><i class="fas fa-trash"></i> ${deleteText}</button>
+      </td>`;
+    variantsTableBody.appendChild(tr);
+  });
+}
+window.editVariant = async function(id){
+  const pid = document.getElementById('variantsProductFilter').value.trim() || ProductIDInput.value;
+  if(!pid){
+    alert(t('noProductSelected', 'No product selected'));
+    return;
+  }
+  await loadProduct(pid);
+  variantPreviewSection.scrollIntoView({behavior: 'smooth'});
+};
+window.deleteVariant = async function(id){
+  if(!confirm(t('confirmDelete', 'Confirm?'))) return;
+  try{
+    const res = await fetch(`${apiBase}delete_variant.php?VariantID=${id}`,{credentials:'same-origin'});
+    const j = await res.json();
+    if(j.success){
+      const pid = document.getElementById('variantsProductFilter').value.trim() || ProductIDInput.value;
+      await loadVariants(pid);
+      if(ProductIDInput.value && ProductIDInput.value === pid){
+        await loadVariantsForPreview(pid);
+      }
+    } else {
+      alert(j.message);
+    }
+  }catch(e){
+    console.error(e);
+    alert(t('error', 'Error'));
+  }
+};
+deleteProductBtn.addEventListener('click', async () => {
+  const productID = ProductIDInput.value.trim();
+  if (!productID) {
+    alert(t('noProductSelected', 'No product selected'));
+    return;
+  }
+  if (!confirm(t('confirmDeleteProduct', 'Are you sure you want to delete the product and all its variants?'))) {
+    return;
+  }
+  try {
+    const res = await fetch(`${apiBase}delete_product.php?ProductID=${encodeURIComponent(productID)}`, { credentials: 'same-origin' });
+    const j = await res.json();
+    if (j.success) {
+      alert(t('productDeleted', 'Product and all variants deleted successfully'));
+      document.getElementById('clearProduct').click();
+      variantsTableBody.innerHTML = '';
+      document.getElementById('variantsStatus').textContent = '';
+      document.getElementById('variantsProductFilter').value = '';
+      variantPreviewSection.classList.add('hidden');
+      variantPreviewTableBody.innerHTML = '';
+    } else {
+      alert(j.message || t('error', 'Error deleting product'));
+    }
+  } catch (e) {
+    console.error('Delete product error:', e);
+    alert(t('error', 'Error') + ': ' + (e.message || ''));
+  }
+});
+function qs(name){ return new URLSearchParams(location.search).get(name); }
+async function loadProduct(productID){
+  if(!productID) return;
+  editModeInput.value = 'true';
+  try{
+    const res = await fetch(`${apiBase}get_product.php?ProductID=${encodeURIComponent(productID)}`, { credentials:'same-origin' });
+    const j = await res.json();
+    if(!j.success){ alert(j.message || t('productNotFound', 'Product not found')); return; }
+    const p = j.product || {};
+    ProductIDInput.value = p.Product_ID || '';
+    productNameAr.value = p.Name_AR || '';
+    productNameEn.value = p.Name_EN || '';
+    medCodeInput.value = p.Product_Code || '';
+    document.getElementById('supplier').value = p.Supplier || '';
+    document.getElementById('productSavedInfo').textContent = `ProductID: ${p.Product_ID || ''}`;
+    if(p.InventoryItemID){
+      const sub = inventoryData.find(i=>i.ItemID == p.InventoryItemID && i.Type === 'SubCategory');
+      if(sub){
+        mainCategory.value = sub.ParentID;
+        mainCategory.dispatchEvent(new Event('change'));
+        subCategory.value = p.InventoryItemID;
+        subCategory.dispatchEvent(new Event('change'));
+      } else {
+        mainCategory.value = p.InventoryItemID;
+        mainCategory.dispatchEvent(new Event('change'));
+      }
+    }
+    selectedAttributes = j.attributes || [];
+    document.getElementById('variantsProductFilter').value = p.Product_ID;
+    await loadVariants(p.Product_ID);
+    await loadVariantsForPreview(p.Product_ID);
+    renderAttributes(true);
+  }catch(e){ console.error(e); alert(t('failedToLoadProduct', 'Failed to load product')); }
+}
+document.getElementById('clearProduct').addEventListener('click', () => {
+  ProductIDInput.value = '';
+  editModeInput.value = 'false';
+  productNameAr.value = '';
+  productNameEn.value = '';
+  medCodeInput.value = '';
+  document.getElementById('supplier').value = '';
+  productImageInput.value = '';
+  mainCategory.value = '';
+  subCategory.value = '';
+  subCategory.innerHTML = `<option value="">-- ${t('select', 'Select')} --</option>`;
+  attributesList.innerHTML = '';
+  variantPreviewSection.classList.add('hidden');
+  previewVariants = [];
+  variantPreviewTableBody.innerHTML = '';
+  document.getElementById('productSavedInfo').textContent = '';
+  document.getElementById('variantsProductFilter').value = '';
+  variantsTableBody.innerHTML = '';
+  selectedAttributes = [];
+  attributesMeta = [];
+  attributesModeToggle.classList.add('hidden');
+});
+document.getElementById('langToggle').addEventListener('click', async () => {
+  const currentPid = ProductIDInput.value.trim();
+  currentLang = currentLang === 'ar' ? 'en' : 'ar';
+  document.documentElement.lang = currentLang;
+  document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+  document.getElementById('langToggle').innerHTML = currentLang === 'ar' ? '<i class="fas fa-globe"></i> English' : '<i class="fas fa-globe"></i> العربية';
+  await loadTranslations(currentLang);
+  await loadInventory(currentLang);
+  await loadUnits(currentLang);
+  renderMainCategories();
+  if (currentPid) {
+    await loadProduct(currentPid);
+  } else {
+    const pid = ProductIDInput.value || document.getElementById('variantsProductFilter').value;
+    if(pid) {
+      await loadVariants(pid);
+      await loadVariantsForPreview(pid);
+    }
+  }
+});
+document.getElementById('btnNewVariant').addEventListener('click', async () => {
+  const pid = ProductIDInput.value || document.getElementById('variantsProductFilter').value;
+  if (!pid) {
+    alert(t('noProductSelected', 'No product selected'));
+    return;
+  }
+  editModeInput.value = 'true';
+  ProductIDInput.value = pid;
+  document.getElementById('variantsProductFilter').value = pid;
+  productNameAr.value = '';
+  productNameEn.value = '';
+  medCodeInput.value = '';
+  document.getElementById('supplier').value = '';
+  productImageInput.value = '';
+  selectedAttributes = [];
+  document.getElementById('productSavedInfo').textContent = `ProductID: ${pid}`;
+  try {
+    const res = await fetch(`${apiBase}get_product.php?ProductID=${encodeURIComponent(pid)}`, { credentials:'same-origin' });
+    const j = await res.json();
+    if (j.success) {
+      const p = j.product || {};
+      if (p.InventoryItemID) {
+        const sub = inventoryData.find(i => i.ItemID == p.InventoryItemID && i.Type === 'SubCategory');
+        if (sub) {
+          mainCategory.value = sub.ParentID;
+          mainCategory.dispatchEvent(new Event('change'));
+          subCategory.value = p.InventoryItemID;
+          subCategory.dispatchEvent(new Event('change'));
+        } else {
+          mainCategory.value = p.InventoryItemID;
+          mainCategory.dispatchEvent(new Event('change'));
+        }
+      }
+    }
+  } catch (e) {
+    console.error('Load product for new variant error:', e);
+  }
+  attributesModeToggle.classList.add('hidden'); // Hidden always now
+  previewVariants = [{
+    VariantIndex: 1,
+    OptionIDs: [],
+    SKU: '',
+    Quantity: 0,
+    MinQuantity: 0,
+    ExpiryDate: '',
+    UnitsPerPack: 1.0000,
+    BaseUnit: 'unit',
+    QuantityBase: 0.000,
+    ProductImage: null,
+    unit_label: currentLang === 'ar' ? 'وحدة' : 'Unit'
+  }];
+  renderVariantPreviewTable(previewVariants);
+  clearAttributeSelects();
+  variantPreviewSection.classList.remove('hidden');
+});
+(async function init(){
+  previewVariants = [];
+  await loadTranslations(currentLang);
+  await loadInventory(currentLang);
+  await loadUnits(currentLang);
+  const pid = qs('ProductID'); if(pid) loadProduct(pid);
+})();
+</script>
+</body>
+</html>

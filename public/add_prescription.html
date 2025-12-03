@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Animal Prescriptions</title>
+<style>
+body { font-family: Arial, sans-serif; margin: 20px; background: #f8f8f8; }
+h1 { color: #333; }
+form { background: #fff; padding: 20px; border-radius: 6px; box-shadow: 0 0 10px rgba(0,0,0,0.1); margin-bottom: 30px; }
+input, select, textarea { width: 100%; padding: 8px; margin: 5px 0 15px 0; border: 1px solid #ccc; border-radius: 4px; }
+button { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; background: #28a745; color: #fff; }
+button.delete { background: #dc3545; }
+table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+table, th, td { border: 1px solid #ccc; }
+th, td { padding: 10px; text-align: left; }
+tr:nth-child(even) { background-color: #f2f2f2; }
+</style>
+</head>
+<body>
+
+<h1>Animal Prescriptions</h1>
+
+<form id="prescriptionForm">
+    <input type="hidden" id="prescription_id">
+    <label>Visit ID</label>
+    <input type="number" id="visit_id" required>
+
+    <label>Animal Code</label>
+    <input type="text" id="animal_code" required placeholder="e.g. 1-CA-ST-2025">
+
+    <label>Medicine Name</label>
+    <input type="text" id="medicine_name" required>
+
+    <label>Dosage</label>
+    <input type="text" id="dosage">
+
+    <label>Frequency</label>
+    <input type="text" id="frequency">
+
+    <label>Duration</label>
+    <input type="text" id="duration">
+
+    <label>Notes</label>
+    <textarea id="notes" rows="3"></textarea>
+
+    <label>Prescribed By (Doctor)</label>
+    <select id="prescribed_by" required></select>
+
+    <button type="submit">Save Prescription</button>
+</form>
+
+<h2>All Prescriptions</h2>
+<table id="prescriptionsTable">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Visit ID</th>
+            <th>Animal Code</th>
+            <th>Medicine Name</th>
+            <th>Dosage</th>
+            <th>Frequency</th>
+            <th>Duration</th>
+            <th>Notes</th>
+            <th>Prescribed By</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+<script src="session_check.js"></script>
+<script>
+// Load doctors
+async function loadDoctors(){
+    const res = await fetch('/health_vet/api/get_employees.php');
+    const data = await res.json();
+    const select = document.getElementById('prescribed_by');
+    select.innerHTML = '<option value="">Select Doctor</option>';
+    data.data.forEach(d=>{
+        select.innerHTML += `<option value="${d.EmpID}">${d.EmpName}</option>`;
+    });
+}
+
+// Load prescriptions
+async function loadPrescriptions(){
+    const res = await fetch('/health_vet/api/prescriptions_api.php?action=get_all');
+    const data = await res.json();
+    const tbody = document.querySelector('#prescriptionsTable tbody');
+    tbody.innerHTML = '';
+    if(data.success){
+        data.prescriptions.forEach(p=>{
+            tbody.innerHTML += `
+            <tr>
+                <td>${p.id}</td>
+                <td>${p.visit_id}</td>
+                <td>${p.animal_code}</td>
+                <td>${p.medicine_name}</td>
+                <td>${p.dosage || ''}</td>
+                <td>${p.frequency || ''}</td>
+                <td>${p.duration || ''}</td>
+                <td>${p.notes || ''}</td>
+                <td>${p.prescribed_by_name}</td>
+                <td>
+                    <button onclick="editPrescription(${p.id})">Edit</button>
+                    <button class="delete" onclick="deletePrescription(${p.id})">Delete</button>
+                </td>
+            </tr>`;
+        });
+    }
+}
+
+// Save prescription
+document.getElementById('prescriptionForm').addEventListener('submit', async e=>{
+    e.preventDefault();
+    const id = document.getElementById('prescription_id').value;
+    const action = id ? 'update' : 'add';
+    const formData = new FormData();
+    formData.append('action', action);
+    if(id) formData.append('id', id);
+    formData.append('visit_id', document.getElementById('visit_id').value);
+    formData.append('animal_code', document.getElementById('animal_code').value);
+    formData.append('medicine_name', document.getElementById('medicine_name').value);
+    formData.append('dosage', document.getElementById('dosage').value);
+    formData.append('frequency', document.getElementById('frequency').value);
+    formData.append('duration', document.getElementById('duration').value);
+    formData.append('notes', document.getElementById('notes').value);
+    formData.append('prescribed_by', document.getElementById('prescribed_by').value);
+
+    const res = await fetch('/health_vet/api/prescriptions_api.php',{method:'POST',body:formData});
+    const data = await res.json();
+    alert(data.message);
+    document.getElementById('prescriptionForm').reset();
+    loadPrescriptions();
+});
+
+// Edit prescription
+async function editPrescription(id){
+    const res = await fetch('/health_vet/api/prescriptions_api.php?action=get_all');
+    const data = await res.json();
+    const p = data.prescriptions.find(x=>x.id==id);
+    if(p){
+        document.getElementById('prescription_id').value = p.id;
+        document.getElementById('visit_id').value = p.visit_id;
+        document.getElementById('animal_code').value = p.animal_code;
+        document.getElementById('medicine_name').value = p.medicine_name;
+        document.getElementById('dosage').value = p.dosage || '';
+        document.getElementById('frequency').value = p.frequency || '';
+        document.getElementById('duration').value = p.duration || '';
+        document.getElementById('notes').value = p.notes || '';
+        document.getElementById('prescribed_by').value = p.prescribed_by;
+    }
+}
+
+// Delete prescription
+async function deletePrescription(id){
+    if(!confirm('Are you sure to delete this prescription?')) return;
+    const formData = new FormData();
+    formData.append('action','delete');
+    formData.append('id',id);
+    const res = await fetch('/health_vet/api/prescriptions_api.php',{method:'POST',body:formData});
+    const data = await res.json();
+    alert(data.message);
+    loadPrescriptions();
+}
+
+// Initialize
+loadDoctors();
+loadPrescriptions();
+</script>
+
+</body>
+</html>

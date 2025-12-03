@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تسجيل/تعديل شكوى</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* -------------------- التصميم المُحسن والتجاوبي -------------------- */
+:root {
+    --primary-green: #028a48; /* الأخضر الأساسي */
+    --secondary-beige: #f4f7f4; /* خلفية هادئة */
+    --background-white: #ffffff;
+    --text-dark: #34495e;
+    --border-color: #dcdcdc;
+}
+body {
+    font-family: 'Cairo', sans-serif;
+    padding: 20px 10px;
+    background-color: var(--secondary-beige);
+    color: var(--text-dark);
+    margin: 0;
+}
+.container {
+    width: 100%;
+    max-width: 800px; /* زيادة العرض قليلاً */
+    margin: auto;
+    background-color: var(--background-white);
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+h2 { color: var(--primary-green); text-align: center; margin-bottom: 20px; }
+label { display: block; margin-top: 10px; font-weight: 600; font-size: 0.95em; }
+input:not([type="checkbox"]):not([type="radio"]), select, textarea {
+    width: 100%;
+    padding: 9px;
+    margin-top: 5px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    box-sizing: border-box;
+    font-size: 0.9em;
+    transition: border-color 0.2s;
+}
+input:focus, select:focus, textarea:focus { border-color: var(--primary-green); outline: none; }
+textarea { resize: vertical; min-height: 80px; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+.full-width { grid-column: 1 / -1; }
+
+/* تنسيق حقول الإدارة */
+#managerFields {
+    background: #fdfde9;
+    border: 1px dashed #e6e6b4;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 20px;
+}
+
+/* زر الموقع الجغرافي */
+#coordinates-container {
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+}
+#map-pin-btn {
+    background-color: #3498db;
+    color: white;
+    padding: 9px 12px;
+    font-size: 0.9em;
+    width: auto;
+    flex-shrink: 0;
+}
+#map-pin-btn:hover { background-color: #2980b9; }
+#map { height: 250px; margin-top: 10px; border-radius: 8px; border: 1px solid var(--border-color); }
+
+/* أزرار الإجراءات */
+button.action-btn { 
+    background-color: var(--primary-green); 
+    color: white; 
+    padding: 12px 25px; 
+    border: none; 
+    border-radius: 6px; 
+    cursor: pointer; 
+    margin-top: 20px; 
+    font-size: 1em; 
+    width: auto;
+}
+#searchForm button { margin: 0; padding: 10px 15px; }
+#delete_button { background-color: #e74c3c; margin-right: 10px; }
+#delete_button:hover { background-color: #c0392b; }
+
+/* رسائل النظام */
+#message, #auth_status { margin-top: 15px; padding: 10px; border-radius: 6px; text-align: center; }
+.success { background-color: #e8f5e9; color: #1e7e34; }
+.error { background-color: #fbecec; color: #c0392b; }
+.info { background-color: #eaf4fb; color: #2980b9; }
+
+/* للتجاوب مع الشاشات الصغيرة */
+@media (max-width: 600px) {
+    .form-grid { grid-template-columns: 1fr; }
+    .container { padding: 20px; }
+    button.action-btn { width: 100%; margin-top: 15px; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <h2>تسجيل/تعديل الشكاوى</h2>
+
+    <form id="searchForm" class="full-width" style="margin-bottom: 20px; display: flex; gap: 10px;">
+        <input type="text" id="complaintSearchInput" placeholder="بحث برقم الشكوى لتعديلها..." style="flex-grow: 1;">
+        <button type="submit">بحث</button>
+        <button type="button" onclick="resetForm()">+ شكوى جديدة</button>
+    </form>
+    
+    <div id="auth_status" class="info">جارٍ التحقق من الصلاحيات...</div>
+
+    <form id="complaintForm" style="display:none;" autocomplete="off">
+        <input type="hidden" name="ComplaintID" id="ComplaintID">
+
+        <div class="form-grid">
+            <div>
+                <label>رقم الشكوى:</label>
+                <input type="text" id="ComplaintNo" readonly>
+            
+                <label for="ComplainantName">اسم المشتكي:</label>
+                <input type="text" name="ComplainantName" id="ComplainantName">
+
+                <label for="ComplainantPhone">رقم الهاتف:</label>
+                <input type="text" name="ComplainantPhone" id="ComplainantPhone">
+
+                <label for="Source">مصدر الشكوى:</label>
+                <select name="Source" id="Source">
+                    <option value="Hotline">هاتف ساخن</option>
+                    <option value="In-person">شخصياً</option>
+                    <option value="Department">قسم</option>
+                    <option value="Email">بريد إلكتروني</option>
+                    <option value="SocialMedia">شبكات اجتماعية</option>
+                </select>
+                
+                <label for="ComplaintType">نوع الشكوى:</label>
+                <select name="ComplaintType" id="ComplaintType">
+                    <option value="Cats">قطط</option>
+                    <option value="Dogs">كلاب</option>
+                </select>
+
+                <label for="AnimalCount">عدد الحيوانات:</label>
+                <input type="number" name="AnimalCount" id="AnimalCount" min="1" value="1">
+            </div>
+
+            <div>
+                <label for="ComplaintDate">تاريخ ووقت الشكوى:</label>
+                <input type="datetime-local" name="ComplaintDate" id="ComplaintDate" required>
+                
+                <label for="ReceivedDate">تاريخ الاستلام:</label>
+                <input type="datetime-local" name="ReceivedDate" id="ReceivedDate">
+
+                <label for="ReceivedByEmpID">الموظف المُستلِم:</label>
+                <select name="ReceivedByEmpID" id="ReceivedByEmpID">
+                    <option value="">اختر موظف...</option>
+                </select>
+                <label for="ResponsePriority">أولوية الاستجابة:</label>
+                <select name="ResponsePriority" id="ResponsePriority">
+                    <option value="Scheduled">مجدولة</option>
+                    <option value="Emergency">طارئة</option>
+                </select>
+
+                <label for="City">المدينة:</label>
+                <input type="text" name="City" id="City" value="Sharjah">
+                
+                <label for="Area">المنطقة:</label>
+                <input type="text" name="Area" id="Area">
+            </div>
+
+            <div class="full-width">
+                <label for="Coordinates">الإحداثيات (خط العرض، خط الطول):</label>
+                <div id="coordinates-container">
+                    <input type="text" name="Coordinates" id="Coordinates" readonly placeholder="انقر على الخريطة أو زر تحديد الموقع">
+                    <button type="button" id="map-pin-btn">📍 تحديد الموقع</button>
+                </div>
+                <div id="map"></div>
+            </div>
+
+            <div class="full-width">
+                <label for="ComplainantStatement">وصف الشكوى (بيان المشتكي):</label>
+                <textarea name="ComplainantStatement" id="ComplainantStatement"></textarea>
+            </div>
+
+            <div class="form-grid">
+                <div>
+                    <label for="KPI_Method">طريقة التعامل:</label>
+                    <select name="KPI_Method" id="KPI_Method">
+                        <option value="Cage">قفص</option>
+                        <option value="Net">شبكة</option>
+                        <option value="Manual">يدوي</option>
+                        <option value="Other">أخرى</option>
+                    </select>
+                    
+                    <label for="FollowUpDate">تاريخ المتابعة:</label>
+                    <input type="datetime-local" name="FollowUpDate" id="FollowUpDate">
+                </div>
+                <div>
+                    <label for="FollowUpAction">إجراء المتابعة:</label>
+                    <textarea name="FollowUpAction" id="FollowUpAction"></textarea>
+                </div>
+            </div>
+
+            <div class="full-width">
+                <label for="TeamFollowUp">تعليق الفريق:</label>
+                <textarea name="TeamFollowUp" id="TeamFollowUp"></textarea>
+            </div>
+
+            <div id="managerFields" class="full-width" style="display: none;">
+                <label for="ManagerComment">ملاحظات المدير (إداري فقط):</label>
+                <textarea name="ManagerComment" id="ManagerComment"></textarea>
+                
+                <div class="form-grid">
+                    <div>
+                        <label for="FinalStatus">الحالة النهائية:</label>
+                        <select name="FinalStatus" id="FinalStatus">
+                            <option value="Pending Close">قيد الإغلاق</option>
+                            <option value="Closed">مغلقة</option>
+                            <option value="Rejected">مرفوضة</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="CloseDate">تاريخ الإغلاق:</label>
+                        <input type="datetime-local" name="CloseDate" id="CloseDate">
+                    </div>
+                </div>
+            </div>
+
+            <div id="photoContainer" class="full-width" style="margin:10px 0;"></div>
+
+            <div class="full-width" style="text-align: right;">
+                <button type="submit" class="action-btn" id="submit_button">💾 حفظ/تعديل الشكوى</button>
+                <button type="button" class="action-btn" id="delete_button" style="display:none;">🗑 حذف الشكوى</button>
+            </div>
+        </div>
+    </form>
+    <div id="message"></div>
+</div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+// متغيرات عامة
+let currentUser = null;
+let map, marker;
+const API_URL = '../api/complaints_crud.php';
+
+// تعيين التاريخ والوقت الحالي كقيمة افتراضية (للحقول التي لم يتم تحديدها)
+function setDefaultDateTime(id) {
+    const input = document.getElementById(id);
+    if (!input.value) {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        input.value = `${year}-${month}-${day}T${hours}:${minutes}`;
+    }
+}
+
+// جلب الموظفين وتعبئة قائمة ReceivedByEmpID
+async function loadEmployees() {
+    try {
+        // تفترض أن هذا المسار يجلب قائمة EmpID و EmpName
+        const res = await fetch('../api/get_employees.php'); 
+        const data = await res.json();
+        const select = document.getElementById('ReceivedByEmpID');
+        if (data.success && Array.isArray(data.data)) {
+            data.data.forEach(emp => {
+                const opt = document.createElement('option');
+                opt.value = emp.EmpID;
+                opt.textContent = emp.EmpName;
+                select.appendChild(opt);
+            });
+        }
+    } catch(e) {
+        console.error("Error loading employees:", e);
+    }
+}
+
+// تهيئة الخريطة
+function initMap(lat=25.357, lng=55.395) { // إحداثيات افتراضية (الشارقة)
+    if (map) map.remove();
+
+    map = L.map('map').setView([lat, lng], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    marker = L.marker([lat, lng], { draggable: true }).addTo(map);
+    
+    // تحديث الإحداثيات عند سحب الدبوس
+    marker.on('dragend', function(e) {
+        const coords = e.target.getLatLng();
+        document.getElementById('Coordinates').value = `${coords.lat.toFixed(6)}, ${coords.lng.toFixed(6)}`;
+    });
+
+    // تحديث الإحداثيات عند النقر على الخريطة
+    map.on('click', function(e) {
+        marker.setLatLng(e.latlng);
+        document.getElementById('Coordinates').value = `${e.latlng.lat.toFixed(6)}, ${e.latlng.lng.toFixed(6)}`;
+    });
+}
+
+// دالة لتعبئة النموذج ببيانات شكوى معينة (للتعديل)
+async function loadComplaint(id) {
+    resetForm(false);
+    document.getElementById('ComplaintID').value = id;
+    document.getElementById('submit_button').textContent = '💾 حفظ التعديلات';
+    document.getElementById('delete_button').style.display = (currentUser?.permissions?.canDelete || currentUser?.permissions?.isAdmin) ? 'inline-block' : 'none';
+
+    try {
+        const form = new FormData();
+        form.append('action', 'get');
+        form.append('ComplaintID', id);
+        const res = await fetch(API_URL, { method: 'POST', body: form });
+        const d = await res.json();
+
+        if (d.success) {
+            const c = d.data;
+            // تعبئة الحقول الأساسية
+            document.getElementById('ComplaintNo').value = c.ComplaintNo;
+            document.getElementById('ComplainantName').value = c.ComplainantName || '';
+            document.getElementById('ComplainantPhone').value = c.ComplainantPhone || '';
+            document.getElementById('Source').value = c.Source || 'Hotline';
+            document.getElementById('ComplaintType').value = c.ComplaintType || 'Cats';
+            document.getElementById('AnimalCount').value = c.AnimalCount || 1;
+            document.getElementById('ResponsePriority').value = c.ResponsePriority || 'Scheduled';
+            document.getElementById('City').value = c.City || 'Sharjah';
+            document.getElementById('Area').value = c.Area || '';
+            document.getElementById('ComplainantStatement').value = c.ComplainantStatement || '';
+            document.getElementById('KPI_Method').value = c.KPI_Method || 'Cage';
+            document.getElementById('FollowUpAction').value = c.FollowUpAction || '';
+            document.getElementById('TeamFollowUp').value = c.TeamFollowUp || '';
+
+            // حقول التاريخ
+            document.getElementById('ComplaintDate').value = c.ComplaintDate?.slice(0, 16) || '';
+            document.getElementById('ReceivedDate').value = c.ReceivedDate?.slice(0, 16) || ''; // الحقل الجديد
+            document.getElementById('FollowUpDate').value = c.FollowUpDate?.slice(0, 16) || '';
+            document.getElementById('CloseDate').value = c.CloseDate?.slice(0, 16) || '';
+
+            // حقل الموظف المستلم
+            document.getElementById('ReceivedByEmpID').value = c.ReceivedByEmpID || '';
+            
+            // حقول المدير
+            if (currentUser?.permissions?.isAdmin) { // فقط إذا كان إدارياً
+                document.getElementById('ManagerComment').value = c.ManagerComment || '';
+                document.getElementById('FinalStatus').value = c.FinalStatus || 'Pending Close';
+            }
+
+            // الإحداثيات والخريطة
+            document.getElementById('Coordinates').value = c.Coordinates || '';
+            if (c.Coordinates) {
+                const [lat, lng] = c.Coordinates.split(',').map(s => parseFloat(s.trim()));
+                if (!isNaN(lat) && !isNaN(lng)) {
+                    initMap(lat, lng);
+                    marker.setLatLng([lat, lng]);
+                }
+            } else {
+                initMap(); // العودة للإحداثيات الافتراضية إذا لم تتوفر
+            }
+            
+            // عرض الصور
+            let photoHtml = '';
+            if(c.PhotoURLs){
+                c.PhotoURLs.split('|').forEach(url=>{
+                    photoHtml += `<img class="preview" src="/health_vet/${url}?t=${Date.now()}" style="width:60px; height:60px; object-fit:cover; border-radius:5px; border:1px solid #ccc; margin-left:3px;">`;
+                });
+            }
+            document.getElementById('photoContainer').innerHTML = photoHtml;
+            
+            document.getElementById('message').innerHTML = `<div class="success">✅ تم تحميل الشكوى #${c.ComplaintNo} للتعديل.</div>`;
+
+        } else {
+            document.getElementById('message').innerHTML = `<div class="error">❌ ${d.message || 'فشل تحميل بيانات الشكوى'}</div>`;
+            resetForm();
+        }
+    } catch (e) {
+        document.getElementById('message').innerHTML = `<div class="error">خطأ في الاتصال: ${e.message}</div>`;
+    }
+}
+
+// وظيفة إعادة تعيين النموذج لشكوى جديدة
+function resetForm(clearInput=true) {
+    document.getElementById('complaintForm').reset();
+    document.getElementById('ComplaintID').value = '';
+    document.getElementById('ComplaintNo').value = 'يتم التوليد تلقائياً';
+    document.getElementById('submit_button').textContent = '💾 حفظ الشكوى الجديدة';
+    document.getElementById('delete_button').style.display = 'none';
+    document.getElementById('photoContainer').innerHTML = '';
+    document.getElementById('Coordinates').value = '';
+    
+    if(clearInput) document.getElementById('complaintSearchInput').value = '';
+
+    setDefaultDateTime('ComplaintDate');
+    setDefaultDateTime('ReceivedDate');
+    initMap(); // إعادة تهيئة الخريطة للموقع الافتراضي
+}
+
+// جلب صلاحيات المستخدم عند التحميل
+async function getUserRights() {
+    const authDiv = document.getElementById('auth_status');
+    try {
+        const res = await fetch('../api/user_data.php?action=get_user_data');
+        currentUser = await res.json();
+        
+        if (currentUser.success && currentUser.user_data?.EmpID) {
+            authDiv.style.display = 'none';
+            document.getElementById('complaintForm').style.display = 'block';
+            
+            // التحكم في حقول المدير
+            const isAdmin = currentUser.permissions.isAdmin;
+            document.getElementById('managerFields').style.display = isAdmin ? 'block' : 'none';
+            
+            resetForm(); // تهيئة النموذج بعد التحقق
+
+            // التحقق من وجود رقم شكوى في الرابط (للتعديل المباشر)
+            const urlParams = new URLSearchParams(window.location.search);
+            const complaintId = urlParams.get('id');
+            if (complaintId) {
+                loadComplaint(complaintId);
+            }
+
+        } else {
+            authDiv.textContent = 'يرجى تسجيل الدخول أو لا تملك صلاحية الوصول.';
+            authDiv.className = 'error';
+        }
+    } catch(e) {
+        authDiv.textContent = 'خطأ في الاتصال بالخادم: ' + e.message;
+        authDiv.className = 'error';
+    }
+}
+
+// إضافة حدث البحث
+document.getElementById('searchForm').onsubmit = async function(e) {
+    e.preventDefault();
+    const complaintNo = document.getElementById('complaintSearchInput').value.trim();
+    if (complaintNo) {
+        // يجب أن نستخدم API جديد للبحث برقم الشكوى وتحويله إلى ID
+        try {
+            const form = new FormData();
+            form.append('action', 'search_by_no'); // إجراء جديد
+            form.append('ComplaintNo', complaintNo);
+            const res = await fetch(API_URL, { method: 'POST', body: form });
+            const d = await res.json();
+            
+            if (d.success && d.data) {
+                loadComplaint(d.data.ComplaintID);
+                document.getElementById('message').innerHTML = `<div class="success">✅ تم تحميل الشكوى #${d.data.ComplaintNo}.</div>`;
+            } else {
+                document.getElementById('message').innerHTML = `<div class="error">❌ الشكوى رقم ${complaintNo} غير موجودة.</div>`;
+            }
+        } catch(e) {
+            document.getElementById('message').innerHTML = `<div class="error">خطأ في البحث: ${e.message}</div>`;
+        }
+    } else {
+        document.getElementById('message').innerHTML = `<div class="info">الرجاء إدخال رقم الشكوى.</div>`;
+    }
+};
+
+// حدث حفظ/تعديل النموذج
+document.getElementById('complaintForm').onsubmit = async function(e) {
+    e.preventDefault();
+    const isUpdate = document.getElementById('ComplaintID').value;
+    const action = isUpdate ? 'update' : 'add';
+
+    const formData = new FormData(this);
+    formData.append('action', action);
+    formData.append('EmpID', currentUser.user_data.EmpID); // لإضافة الشكوى باسم المستخدم الحالي
+
+    // يجب هنا التعامل مع رفع الصور إذا كان هذا النموذج يسمح بذلك.
+    // (لم يتم تضمين حقول رفع الصور في HTML/JS لتعقيدها، لكنها موجودة في PHP).
+    
+    document.getElementById('submit_button').disabled = true;
+    
+    try {
+        const res = await fetch(API_URL, { method: 'POST', body: formData });
+        const d = await res.json();
+        
+        if (d.success) {
+            document.getElementById('message').innerHTML = `<div class="success">✅ ${d.message}. رقم الشكوى: ${d.ComplaintNo || formData.get('ComplaintNo')}</div>`;
+            if (!isUpdate) {
+                resetForm(); // إعادة تعيين لشكوى جديدة
+            } else {
+                loadComplaint(isUpdate); // إعادة تحميل البيانات بعد التعديل
+            }
+        } else {
+            document.getElementById('message').innerHTML = `<div class="error">❌ ${d.message}</div>`;
+        }
+    } catch(e) {
+        document.getElementById('message').innerHTML = `<div class="error">خطأ في الإرسال: ${e.message}</div>`;
+    } finally {
+        document.getElementById('submit_button').disabled = false;
+    }
+};
+
+// حذف الشكوى
+document.getElementById('delete_button').onclick = async function() {
+    if (!confirm('هل أنت متأكد من حذف هذه الشكوى نهائياً؟')) return;
+
+    const id = document.getElementById('ComplaintID').value;
+    const form = new FormData();
+    form.append('action', 'delete');
+    form.append('ComplaintID', id);
+
+    try {
+        const res = await fetch(API_URL, { method: 'POST', body: form });
+        const d = await res.json();
+        
+        if (d.success) {
+            document.getElementById('message').innerHTML = `<div class="success">✅ ${d.message}</div>`;
+            resetForm();
+        } else {
+            document.getElementById('message').innerHTML = `<div class="error">❌ ${d.message}</div>`;
+        }
+    } catch (e) {
+        document.getElementById('message').innerHTML = `<div class="error">خطأ في الحذف: ${e.message}</div>`;
+    }
+};
+
+// تحديد الموقع يدوياً
+document.getElementById('map-pin-btn').onclick = function() {
+    const coords = document.getElementById('Coordinates').value.split(',').map(s => parseFloat(s.trim()));
+    if (coords.length === 2 && !isNaN(coords[0]) && !isNaN(coords[1])) {
+        map.setView(coords, 15);
+        marker.setLatLng(coords);
+    } else {
+        alert('الرجاء إدخال الإحداثيات يدوياً أولاً لتحديدها على الخريطة.');
+    }
+};
+
+
+// تشغيل التحميلات الأولية
+window.onload = function() {
+    loadEmployees();
+    getUserRights();
+    initMap(); // تهيئة الخريطة الأولية
+};
+
+</script>
+</body>
+</html>

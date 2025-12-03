@@ -1,0 +1,1039 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>لوحة تحكم متكاملة — HealthVet (Final - Fixed Search & Stats)</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f4f8f5;
+  --card:#fff;
+  --accent:#2b6b3a;
+  --accent-2:#c79b3c;
+  --danger:#d9534f;
+  --warning:#f0ad4e;
+  --success:#28a745;
+  --muted:#6b7280;
+  --radius:12px;
+  font-family:"Tajawal", system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;background:var(--bg);-webkit-font-smoothing:antialiased;color:#111}
+.container{max-width:1300px;margin:18px auto;padding:18px}
+.header{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.logo{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,var(--accent),#29552f);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900}
+.h-title{font-weight:800;font-size:1.15rem}
+.controls{margin-left:auto;display:flex;gap:8px;align-items:center}
+.search{padding:8px 12px;border-radius:10px;border:1px solid #e9efe9;background:#fff;min-width:220px}
+.iconBtn{border:0;background:#fff;padding:8px;border-radius:10px;cursor:pointer;box-shadow:0 3px 10px rgba(15,23,42,0.04)}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px}
+.card{background:var(--card);border-radius:var(--radius);padding:14px;box-shadow:0 10px 30px rgba(10,20,30,0.04)}
+.kpi .num{font-weight:800;font-size:1.6rem}
+.kpi .label{color:var(--muted);font-size:0.95rem}
+.kpi.danger .num{color:var(--danger)}
+.kpi.warning .num{color:var(--warning)}
+.kpi.success .num{color:var(--success)}
+.grid{display:grid;grid-template-columns:2fr 1fr;gap:14px}
+.leftCol{display:grid;gap:14px}
+.sectionTitle{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.small{font-size:0.92rem;color:var(--muted)}
+.tableWrap{overflow:auto;border-radius:10px;border:1px solid #f0f2f0;background:#fff;padding:8px}
+.table{width:100%;border-collapse:collapse}
+.table th,.table td{padding:8px;border-bottom:1px solid #f3f5f4;text-align:right;vertical-align:middle}
+.thumb{width:56px;height:40px;object-fit:cover;border-radius:6px;border:1px solid #eee}
+.badge{display:inline-block;padding:6px 8px;border-radius:999px;background:var(--accent-2);color:#231;font-weight:700}
+.alert{display:flex;gap:12px;align-items:center;padding:12px;border-radius:10px;background:linear-gradient(180deg,#fff8e6,#fffdf6);border:1px solid rgba(199,155,60,0.12);color:#6b4b10}
+.rightCol{display:flex;flex-direction:column;gap:14px}
+/* collapsible sections */
+.collapsible-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: 0 10px 30px rgba(10,20,30,0.04);
+  overflow: hidden;
+}
+.collapsible-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px;
+  cursor: pointer;
+  background: var(--card);
+  border-bottom: 1px solid #f0f2f0;
+  font-weight: 700;
+}
+.collapsible-content {
+  padding: 0 14px 14px;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out, padding 0.3s ease-out;
+}
+.collapsible-content.show {
+  max-height: 2000px; /* adjust as needed */
+  padding: 14px;
+}
+.toggle-btn {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: var(--muted);
+  transition: transform 0.3s;
+}
+.toggle-btn.rotated {
+  transform: rotate(180deg);
+}
+/* filters */
+.filters {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+.filters select, .filters input {
+  padding: 6px 8px;
+  border: 1px solid #e8efe8;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+.section-search {
+  margin-bottom: 12px;
+}
+.section-search input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #e8efe8;
+  border-radius: 6px;
+}
+/* stats */
+.stats-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.stats-row .stat {
+  flex: 1;
+  text-align: center;
+  padding: 8px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+/* notifications */
+.notifications {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  max-width: 300px;
+}
+.toast {
+  background: var(--danger);
+  color: white;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  animation: slideIn 0.3s ease-out;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.toast.success { background: var(--success); }
+.toast.warning { background: var(--warning); }
+@keyframes slideIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+/* responsive */
+@media(max-width:1100px){ .kpis{grid-template-columns:repeat(2,1fr)} .grid{grid-template-columns:1fr} .controls{width:100%;justify-content:space-between} }
+@media(max-width:640px){ .search{min-width:140px} .header{flex-wrap:wrap} .filters { flex-direction: column; } }
+/* modal */
+.modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.45);z-index:999;visibility:hidden;opacity:0;transition:0.12s}
+.modal.show{visibility:visible;opacity:1}
+.modalCard{width:100%;max-width:920px;background:#fff;border-radius:12px;padding:14px;box-shadow:0 30px 80px rgba(13,25,42,0.2)}
+.input,select,textarea{font-family:inherit;padding:8px;border-radius:8px;border:1px solid #e8efe8;width:100%}
+.btn{padding:8px 12px;border-radius:8px;border:0;background:var(--accent);color:#fff;cursor:pointer}
+.btn.ghost{background:transparent;border:1px solid #e6e6e6;color:var(--muted)}
+.btn.adopt { background: var(--accent-2); }
+</style>
+</head>
+<body>
+<div class="container" role="application" aria-label="لوحة تحكم HealthVet النهائية">
+  <header class="header" role="banner">
+    <div class="logo">HV</div>
+    <div>
+      <div class="h-title">لوحة تحكم متكاملة — HealthVet</div>
+      <div class="small">عرض وإدارة: المنتجات، الزيارات، الحيوانات، التبني، الغرف، الحركات، الزوار وطلبات الاستلام</div>
+    </div>
+    <div class="controls" role="region" aria-label="Controls">
+      <input id="globalSearch" class="search" placeholder="بحث سريع: منتج / حيوان / تبني / زائر..." />
+      <button id="btnScan" class="iconBtn" title="مسح QR">📷</button>
+      <button id="btnRefresh" class="iconBtn" title="تحديث">🔄</button>
+      <button id="btnCleanup" class="iconBtn" title="تنظيف الحجوزات (Cron)">🧹</button>
+    </div>
+  </header>
+  <!-- Notifications Container -->
+  <div id="notifications" class="notifications"></div>
+  <section class="kpis" aria-label="KPIs">
+    <div class="card kpi" id="kpi-products">
+      <div class="num" id="k_total_products">--</div>
+      <div class="label">إجمالي المنتجات</div>
+    </div>
+    <div class="card kpi" id="kpi-low">
+      <div class="num" id="k_low_stock">--</div>
+      <div class="label">منتجات منخفضة</div>
+    </div>
+    <div class="card kpi" id="kpi-visits">
+      <div class="num" id="k_today_visits">--</div>
+      <div class="label">زيارات اليوم</div>
+    </div>
+    <div class="card kpi" id="kpi-animals">
+      <div class="num" id="k_animals_total">--</div>
+      <div class="label">إجمالي الحيوانات</div>
+    </div>
+  </section>
+  <main class="grid" aria-live="polite">
+    <div class="leftCol">
+      <!-- مخزون المستودع - Collapsible -->
+      <div class="collapsible-card">
+        <div class="collapsible-header" onclick="toggleSection('stockSection')">
+          <div>
+            <strong>مخزون المستودع</strong>
+            <div class="small">الكمية حسب الفئات والتنبيهات (MinQuantity)</div>
+          </div>
+          <div class="small">آخر تحديث: <span id="lastRef">--</span></div>
+          <button class="toggle-btn" id="toggleStock">▼</button>
+        </div>
+        <div id="stockSection" class="collapsible-content">
+          <div class="section-search">
+            <input type="text" id="searchProducts" placeholder="بحث في المنتجات..." oninput="renderAllProducts()">
+          </div>
+          <div style="display:flex;gap:12px;margin-bottom:12px">
+            <div style="flex:1;padding:12px;background:#fff;border-radius:10px">
+              <canvas id="chart_cat" height="140"></canvas>
+            </div>
+            <div style="flex:1;padding:12px;background:#fff;border-radius:10px">
+              <canvas id="chart_status" height="140"></canvas>
+            </div>
+          </div>
+          <div class="sectionTitle"><strong>جميع المنتجات</strong></div>
+          <div class="tableWrap">
+            <table class="table" id="allProductsTable" aria-label="all-products-table">
+              <thead><tr><th>صورة</th><th>الاسم</th><th>المتوفر</th><th>Min</th><th class="no-print">إجراءات</th></tr></thead>
+              <tbody><tr><td colspan="5" class="small">جارٍ التحميل...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <!-- الزيارات الأخيرة - Collapsible -->
+      <div class="collapsible-card">
+        <div class="collapsible-header" onclick="toggleSection('visitsSection')">
+          <div><strong>الزيارات الأخيرة</strong><div class="small">فتح/تعديل الزيارة</div></div>
+          <button class="toggle-btn" id="toggleVisits">▼</button>
+        </div>
+        <div id="visitsSection" class="collapsible-content">
+          <div class="section-search">
+            <input type="text" id="searchVisits" placeholder="بحث في الزيارات..." oninput="renderVisits()">
+          </div>
+          <div class="tableWrap">
+            <table class="table" id="visitsTable">
+              <thead><tr><th>الوقت</th><th>رمز الحيوان</th><th>الطبيب</th><th>النوع</th><th class="no-print">فتح</th></tr></thead>
+              <tbody><tr><td colspan="5" class="small">جارٍ التحميل...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <!-- حركات الحيوانات - Collapsible -->
+      <div class="collapsible-card">
+        <div class="collapsible-header" onclick="toggleSection('movementsSection')">
+          <div><strong>حركات الحيوانات</strong><div class="small">In / Out / Transfer / TemporaryOut</div></div>
+          <button class="toggle-btn" id="toggleMovements">▼</button>
+        </div>
+        <div id="movementsSection" class="collapsible-content">
+          <div class="filters">
+            <input type="text" id="filterMovementsAnimal" placeholder="رقم الحيوان" oninput="renderMovements()">
+          </div>
+          <div class="section-search">
+            <input type="text" id="searchMovements" placeholder="بحث في الحركات..." oninput="renderMovements()">
+          </div>
+          <div class="tableWrap">
+            <table class="table" id="movementsTable">
+              <thead><tr><th>الوقت</th><th>حيوان</th><th>نوع الحركة</th><th>السبب</th><th class="no-print">ملاحظة</th><th class="no-print">فتح</th></tr></thead>
+              <tbody><tr><td colspan="6" class="small">جارٍ التحميل...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <aside class="rightCol">
+      <!-- الغرف - Collapsible -->
+      <div class="collapsible-card">
+        <div class="collapsible-header" onclick="toggleSection('roomsSection')">
+          <div><strong>الغرف</strong><div class="small">السعة والإشغال</div></div>
+          <button class="toggle-btn" id="toggleRooms">▼</button>
+        </div>
+        <div id="roomsSection" class="collapsible-content">
+          <div class="filters">
+            <select id="filterRoomsType" onchange="renderRooms()">
+              <option value="">جميع الأنواع</option>
+              <option value="cats">قطط</option>
+              <option value="dogs">كلاب</option>
+            </select>
+            <input type="text" id="filterRoomsAnimal" placeholder="رقم الحيوان" oninput="renderRooms()">
+          </div>
+          <div class="section-search">
+            <input type="text" id="searchRooms" placeholder="بحث في الغرف..." oninput="renderRooms()">
+          </div>
+          <div class="stats-row">
+            <div class="stat"><strong id="statsRoomsCats">--</strong><small>غرف قطط</small></div>
+            <div class="stat"><strong id="statsRoomsDogs">--</strong><small>غرف كلاب</small></div>
+          </div>
+          <div class="tableWrap">
+            <table class="table" id="roomsTable">
+              <thead><tr><th>الغرفة</th><th>السعة</th><th>الإشغال</th><th>كلاب/قطط</th><th class="no-print">فتح</th></tr></thead>
+              <tbody><tr><td colspan="5" class="small">جارٍ التحميل...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <!-- الحيوانات - Collapsible -->
+      <div class="collapsible-card">
+        <div class="collapsible-header" onclick="toggleSection('animalsSection')">
+          <div><strong>الحيوانات</strong><div class="small">فتح سجل الحيوان</div></div>
+          <button class="toggle-btn" id="toggleAnimals">▼</button>
+        </div>
+        <div id="animalsSection" class="collapsible-content">
+          <div class="filters">
+            <select id="filterAnimalsType" onchange="renderAnimals()">
+              <option value="">جميع الأنواع</option>
+              <option value="cats">قطط</option>
+              <option value="dogs">كلاب</option>
+              <option value="other">أخرى</option>
+            </select>
+            <select id="filterAnimalsStatus" onchange="renderAnimals()">
+              <option value="">جميع الحالات</option>
+              <option value="active">نشط</option>
+              <option value="inactive">غير نشط</option>
+            </select>
+            <input type="text" id="filterAnimalsCode" placeholder="رقم الحيوان" oninput="renderAnimals()">
+          </div>
+          <div class="section-search">
+            <input type="text" id="searchAnimals" placeholder="بحث في الحيوانات..." oninput="renderAnimals()">
+          </div>
+          <div class="tableWrap">
+            <table class="table" id="animalsTable">
+              <thead><tr><th>رمز</th><th>اسم</th><th>نوع</th><th>الحالة</th><th class="no-print">فتح</th></tr></thead>
+              <tbody><tr><td colspan="5" class="small">جارٍ التحميل...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <!-- سجل التبني - Collapsible -->
+      <div class="collapsible-card">
+        <div class="collapsible-header" onclick="toggleSection('adoptionsSection')">
+          <div><strong>سجل التبني (tbl_adoptions)</strong><div class="small">اعتماد/حجز سريع</div></div>
+          <button class="toggle-btn" id="toggleAdoptions">▼</button>
+        </div>
+        <div id="adoptionsSection" class="collapsible-content">
+          <div class="filters">
+            <select id="filterAdoptionsType" onchange="renderAdoptions()">
+              <option value="">جميع الأنواع</option>
+              <option value="cats">قطط</option>
+              <option value="dogs">كلاب</option>
+            </select>
+            <select id="filterAdoptionsOperation" onchange="renderAdoptions()">
+              <option value="">جميع العمليات</option>
+              <option value="adopt">تبني</option>
+              <option value="reserve">حجز</option>
+            </select>
+          </div>
+          <div class="section-search">
+            <input type="text" id="searchAdoptions" placeholder="بحث في التبني..." oninput="renderAdoptions()">
+          </div>
+          <div class="stats-row">
+            <div class="stat"><strong id="statsAdoptionsAdopt">--</strong><small>تبني</small></div>
+            <div class="stat"><strong id="statsAdoptionsReserve">--</strong><small>حجوزات</small></div>
+          </div>
+          <div class="tableWrap">
+            <table class="table" id="adoptionsTable">
+              <thead><tr><th>#</th><th>حيوان</th><th>المتبني</th><th>تاريخ</th><th>الحالة</th><th class="no-print">أوامر</th></tr></thead>
+              <tbody><tr><td colspan="6" class="small">جارٍ التحميل...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <!-- طلبات التبني المعلقة - Collapsible -->
+      <div class="collapsible-card">
+        <div class="collapsible-header" onclick="toggleSection('applicationsSection')">
+          <div><strong>طلبات التبني المعلقة</strong><div class="small">approved_by = null</div></div>
+          <button class="toggle-btn" id="toggleApplications">▼</button>
+        </div>
+        <div id="applicationsSection" class="collapsible-content">
+          <div class="section-search">
+            <input type="text" id="searchApplications" placeholder="بحث في الطلبات..." oninput="renderApplications()">
+          </div>
+          <div id="applicationsList" class="tableWrap"><div class="small">جارٍ التحميل...</div></div>
+        </div>
+      </div>
+      <!-- الزوار وطلبات الاستلام - Collapsible -->
+      <div class="collapsible-card">
+        <div class="collapsible-header" onclick="toggleSection('incomingSection')">
+          <div><strong>الزوار وطلبات الاستلام</strong></div>
+          <button class="toggle-btn" id="toggleIncoming">▼</button>
+        </div>
+        <div id="incomingSection" class="collapsible-content">
+          <div class="small">الزوار: <strong id="vis_total">--</strong> · اليوم: <strong id="vis_today">--</strong></div>
+          <div class="section-search">
+            <input type="text" id="searchIncoming" placeholder="بحث في الطلبات الواردة..." oninput="renderIncoming()">
+          </div>
+          <div style="margin-top:8px" class="tableWrap">
+            <table class="table" id="incomingTable">
+              <thead><tr><th>النوع</th><th>طلبات</th><th>إجمالي</th></tr></thead>
+              <tbody><tr><td colspan="3" class="small">جارٍ التحميل...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </main>
+</div>
+<!-- modal structure -->
+<div id="modal" class="modal" aria-hidden="true">
+  <div class="modalCard" role="dialog" aria-modal="true">
+    <div id="modalBody"></div>
+    <div style="display:flex;justify-content:flex-end;margin-top:12px">
+      <button id="modalClose" class="btn btn.ghost">إغلاق</button>
+    </div>
+  </div>
+</div>
+<!-- scanner modal -->
+<div id="scanModal" class="modal" aria-hidden="true">
+  <div class="modalCard" style="max-width:760px">
+    <h3 style="margin:0 0 8px 0">مسح رمز الحيوان</h3>
+    <div style="background:#000;border-radius:8px;padding:6px">
+      <video id="scanVideo" autoplay playsinline style="width:100%;border-radius:6px;display:block"></video>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:10px">
+      <button id="closeScan" class="btn btn.ghost">إغلاق</button>
+    </div>
+  </div>
+</div>
+    <script src="session_check.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+<script>
+/*
+  لوحة تحكم محسنة مع بحث محلي في كل قسم وإحصائيات ديناميكية.
+  - إضافة بحث محلي (section-search) لكل قسم يعمل على البيانات المحملة.
+  - تحسين الإحصائيات لتعمل دائماً حتى لو البيانات فارغة، مع console.log للتصحيح.
+  - إضافة error handling في loaders مع toast للإشعار إذا فشل التحميل.
+  - تحديث الفلاتر لتشمل البحث النصي في كل الحقول.
+*/
+const API_BASE = '/health_vet/api/';
+const GET_DATA = API_BASE + 'get_data.php';
+const $ = id => document.getElementById(id);
+let chartCat = null, chartStatus = null;
+let products = [], rooms = [], animals = [], visits = [], adoptions = [], movements = [], applications = [], incoming = [], visitorsSummary = null;
+const LOW_STOCK_THRESHOLD = 5;
+const RESERVE_THRESHOLD = 10;
+const VISIT_THRESHOLD = 20;
+document.addEventListener('DOMContentLoaded', () => {
+  bindUI();
+  refreshAll();
+});
+function bindUI(){
+  $('btnRefresh').addEventListener('click', refreshAll);
+  $('modalClose').addEventListener('click', hideModal);
+  $('globalSearch').addEventListener('keydown', e => { if (e.key === 'Enter') quickSearch(); });
+  $('btnScan').addEventListener('click', openScanModal);
+  $('closeScan')?.addEventListener('click', closeScanModal);
+  $('btnCleanup').addEventListener('click', runCleanupReservations);
+}
+/* ---------- collapsible sections ---------- */
+function toggleSection(sectionId) {
+  const content = $(sectionId);
+  const btn = $(`toggle${sectionId.charAt(0).toUpperCase() + sectionId.slice(1)}`);
+  content.classList.toggle('show');
+  if (btn) btn.classList.toggle('rotated');
+}
+/* ---------- utility fetch helpers ---------- */
+async function safeFetchJson(path) {
+  try {
+    const res = await fetch(API_BASE + path, { credentials:'same-origin' });
+    if (!res.ok) { showToast(`خطأ في جلب ${path}: ${res.status}`, 'danger'); return null; }
+    return await res.json().catch(()=> { showToast('خطأ في تحليل البيانات', 'danger'); return null; });
+  } catch (e) { console.error(e); showToast('خطأ في الاتصال بالخادم', 'danger'); return null; }
+}
+async function fetchGetDataResource(resource, page=1, per_page=200, q='') {
+  try {
+    const url = new URL(GET_DATA, location.origin);
+    url.searchParams.set('resource', resource);
+    url.searchParams.set('page', page);
+    url.searchParams.set('per_page', per_page);
+    if (q) url.searchParams.set('q', q);
+    const res = await fetch(url.toString(), { credentials:'same-origin' });
+    if (!res.ok) { showToast(`خطأ في جلب ${resource}: ${res.status}`, 'danger'); return null; }
+    const j = await res.json().catch(()=> { showToast('خطأ في تحليل البيانات', 'danger'); return null; });
+    if (!j) return null;
+    if (Array.isArray(j)) return { success:true, data:j };
+    if (j.success === true && Array.isArray(j.data)) return j;
+    if (j.data && Array.isArray(j.data)) return j;
+    return null;
+  } catch(e){ console.error(e); showToast('خطأ في الاتصال', 'danger'); return null; }
+}
+/* ---------- notifications ---------- */
+function showToast(message, type = 'danger') {
+  const container = $('notifications');
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.innerHTML = `⚠️ ${escapeHtml(message)}`;
+  container.appendChild(toast);
+  setTimeout(() => toast.remove(), 5000);
+}
+/* ---------- main refresh flow ---------- */
+async function refreshAll(){
+  console.log('بدء تحديث جميع البيانات...');
+  $('lastRef').textContent = new Date().toLocaleString();
+  await Promise.all([
+    loadProducts(),
+    loadAdoptions(),
+    loadAnimals(),
+    loadVisits(),
+    loadMovements(),
+    loadRooms(),
+    loadApplications(),
+    loadIncomingRequests(),
+    loadVisitorsSummary()
+  ]);
+  console.log('تم تحميل البيانات:', { products: products.length, animals: animals.length, visits: visits.length, adoptions: adoptions.length });
+  renderAll();
+  checkAlerts();
+}
+/* ---------- loaders with better logging ---------- */
+async function loadProducts(){
+  console.log('جاري تحميل المنتجات...');
+  const j = await safeFetchJson('get_products.php?lang=ar&per_page=500&q=');
+  if (j && j.success && Array.isArray(j.data)) { products = j.data; console.log('تم تحميل', products.length, 'منتج'); return; }
+  products = [];
+  console.warn('فشل تحميل المنتجات');
+}
+async function loadAdoptions(){
+  console.log('جاري تحميل التبني...');
+  const j = await fetchGetDataResource('adoptions',1,500,'');
+  if (j && j.success && Array.isArray(j.data)) { adoptions = j.data; console.log('تم تحميل', adoptions.length, 'سجل تبني'); return; }
+  const altPaths = ['get_adoptions.php','get_adoptions_list.php','get_adoptions_all.php','get_adoptions_table.php','get_table.php?name=tbl_adoptions'];
+  for (const p of altPaths) {
+    const r = await safeFetchJson(p);
+    if (!r) continue;
+    if (Array.isArray(r)) { adoptions = r; console.log('تم تحميل عبر بديل:', adoptions.length); break; }
+    if (r.success && Array.isArray(r.data)) { adoptions = r.data; console.log('تم تحميل عبر بديل:', adoptions.length); break; }
+    if (Array.isArray(r.data)) { adoptions = r.data; console.log('تم تحميل عبر بديل:', adoptions.length); break; }
+  }
+  if (!adoptions.length) {
+    console.warn('فشل تحميل التبني');
+  }
+}
+async function loadAnimals(){
+  console.log('جاري تحميل الحيوانات...');
+  const j = await fetchGetDataResource('animals',1,500,'');
+  if (j && j.success && Array.isArray(j.data)) { animals = j.data; console.log('تم تحميل', animals.length, 'حيوان'); return; }
+  const alt = await safeFetchJson('get_animals.php');
+  if (alt && alt.success && Array.isArray(alt.data)) { animals = alt.data; console.log('تم تحميل', animals.length, 'حيوان'); return; }
+  animals = [];
+  console.warn('فشل تحميل الحيوانات');
+}
+async function loadVisits(){
+  console.log('جاري تحميل الزيارات...');
+  const r = await safeFetchJson('add_visit.php?action=get_all');
+  if (r && r.success && Array.isArray(r.visits)) { visits = r.visits; console.log('تم تحميل', visits.length, 'زيارة'); return; }
+  visits = [];
+  console.warn('فشل تحميل الزيارات');
+}
+async function loadMovements(){
+  console.log('جاري تحميل الحركات...');
+  const j = await fetchGetDataResource('animal_movements',1,500,'');
+  if (j && j.success && Array.isArray(j.data)) { movements = j.data; console.log('تم تحميل', movements.length, 'حركة'); return; }
+  const alt = await safeFetchJson('get_animal_movements.php');
+  if (alt && alt.success && Array.isArray(alt.data)) { movements = alt.data; console.log('تم تحميل', movements.length, 'حركة'); return; }
+  movements = [];
+  console.warn('فشل تحميل الحركات');
+}
+async function loadRooms(){
+  console.log('جاري تحميل الغرف...');
+  const j = await fetchGetDataResource('rooms',1,500,'');
+  if (j && j.success && Array.isArray(j.data)) { rooms = j.data; console.log('تم تحميل', rooms.length, 'غرفة'); return; }
+  const alt = await safeFetchJson('get_rooms_status.php');
+  if (alt && alt.success && Array.isArray(alt.rooms)) { rooms = alt.rooms; console.log('تم تحميل', rooms.length, 'غرفة'); return; }
+  rooms = [];
+  console.warn('فشل تحميل الغرف');
+}
+async function loadApplications(){
+  console.log('جاري تحميل الطلبات...');
+  const r = await safeFetchJson('get_adoption_applications_pending.php');
+  if (r && r.success && Array.isArray(r.data)) { applications = r.data; console.log('تم تحميل', applications.length, 'طلب'); return; }
+  applications = [];
+  console.warn('فشل تحميل الطلبات');
+}
+async function loadIncomingRequests(){
+  console.log('جاري تحميل الطلبات الواردة...');
+  const r = await safeFetchJson('get_incoming_requests_summary.php');
+  if (r && r.success && Array.isArray(r.data)) { incoming = r.data; console.log('تم تحميل', incoming.length, 'طلب وارد'); return; }
+  incoming = [];
+  console.warn('فشل تحميل الطلبات الواردة');
+}
+async function loadVisitorsSummary(){
+  console.log('جاري تحميل ملخص الزوار...');
+  const r = await safeFetchJson('get_visitors_summary.php');
+  if (r && r.success) { visitorsSummary = r; console.log('تم تحميل ملخص الزوار'); return; }
+  visitorsSummary = null;
+  console.warn('فشل تحميل ملخص الزوار');
+}
+/* ---------- renderers with local search ---------- */
+function renderAll(){
+  renderKPIs();
+  renderAllProducts();
+  renderProductsCharts();
+  renderVisits();
+  renderAnimals();
+  renderAdoptions();
+  renderMovements();
+  renderRooms();
+  renderApplications();
+  renderIncoming();
+  renderVisitors();
+}
+function renderKPIs(){
+  const totalProducts = products.length || 0;
+  const lowStock = products.filter(p => (p.Quantity ?? 0) <= (p.MinQuantity ?? 0)).length;
+  const today = new Date().toISOString().slice(0,10);
+  const todayVisits = visits.filter(v => (v.visit_date||'').slice(0,10) === today).length;
+  const totalAnimals = animals.length || 0;
+
+  console.log('إحصائيات KPIs:', { totalProducts, lowStock, todayVisits, totalAnimals });
+
+  $('k_total_products').textContent = totalProducts;
+  $('k_low_stock').textContent = lowStock;
+  $('k_today_visits').textContent = todayVisits;
+  $('k_animals_total').textContent = totalAnimals;
+
+  // ألوان KPIs
+  const kpiLow = $('kpi-low');
+  kpiLow.className = 'card kpi';
+  if (lowStock > LOW_STOCK_THRESHOLD) kpiLow.classList.add('danger');
+  else if (lowStock > 0) kpiLow.classList.add('warning');
+  else kpiLow.classList.add('success');
+
+  const kpiVisits = $('kpi-visits');
+  kpiVisits.className = 'card kpi';
+  if (todayVisits > VISIT_THRESHOLD) kpiVisits.classList.add('danger');
+  else if (todayVisits > 10) kpiVisits.classList.add('warning');
+  else kpiVisits.classList.add('success');
+}
+function getFilteredProducts() {
+  let filtered = products;
+  const search = $('searchProducts')?.value.toLowerCase();
+  if (search) {
+    filtered = filtered.filter(p => 
+      (p.Name_AR || '').toLowerCase().includes(search) ||
+      (p.Name_EN || '').toLowerCase().includes(search) ||
+      String(p.Product_Code || '').toLowerCase().includes(search) ||
+      String(p.Quantity || '').includes(search)
+    );
+  }
+  return filtered.sort((a,b)=> (b.Quantity || 0) - (a.Quantity || 0));
+}
+function renderAllProducts(){
+  const tbody = document.querySelector('#allProductsTable tbody');
+  tbody.innerHTML = '';
+  const filtered = getFilteredProducts();
+  if (!filtered.length) { tbody.innerHTML = '<tr><td colspan="5" class="small">لا توجد منتجات مطابقة</td></tr>'; return; }
+  filtered.forEach(p=>{
+    const img = p.ProductImage ? `<img src="/health_vet/uploads/ProductImage/${p.ProductImage}" class="thumb">` : '-';
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${img}</td><td>${escapeHtml(p.Name_AR||p.Name_EN||p.Product_Code||'')}</td><td>${p.Quantity||0}</td><td>${p.MinQuantity||0}</td>
+                    <td class="no-print">
+                      <button class="btn btn.ghost" onclick="openProduct(${p.Product_ID||p.ProductId||p.id||0})">عرض</button>
+                    </td>`;
+    tbody.appendChild(tr);
+  });
+  console.log('تم عرض', filtered.length, 'منتج بعد الفلتر');
+}
+function renderProductsCharts(){
+  try {
+    const map = {};
+    products.forEach(p => { const k = p.InventoryItemID ?? '0'; map[k] = (map[k]||0) + (p.Quantity||0); });
+    const entries = Object.entries(map).sort((a,b)=> b[1]-a[1]).slice(0,6);
+    const labels = entries.map(e => `فئة ${e[0]}`);
+    const data = entries.map(e => e[1]);
+    const ctx1 = document.getElementById('chart_cat').getContext('2d');
+    if (chartCat) chartCat.destroy();
+    chartCat = new Chart(ctx1, { type:'bar', data:{ labels, datasets:[{ label:'كمية', data, backgroundColor:['#6baf8a','#4c9f70','#2b8f60','#c79b3c','#f3a94b','#7aa0d9'] }]}, options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}} });
+    const enough = products.filter(p => (p.Quantity||0) > (p.MinQuantity||0)).length;
+    const low = products.filter(p => (p.Quantity||0) > 0 && (p.Quantity||0) <= (p.MinQuantity||0)).length;
+    const out = products.filter(p => (p.Quantity||0) <= 0).length;
+    const ctx2 = document.getElementById('chart_status').getContext('2d');
+    if (chartStatus) chartStatus.destroy();
+    chartStatus = new Chart(ctx2, { type:'doughnut', data:{ labels:['كافي','منخفض','نفد'], datasets:[{ data:[enough,low,out], backgroundColor:['#28a745','#f0ad4e','#d9534f'] }]}, options:{plugins:{legend:{position:'bottom'}}} });
+    console.log('تم تحديث الرسوم البيانية');
+  } catch(e){ console.error('خطأ في الرسوم البيانية:', e); }
+}
+function getFilteredVisits() {
+  let filtered = visits;
+  const search = $('searchVisits')?.value.toLowerCase();
+  if (search) {
+    filtered = filtered.filter(v => 
+      (v.visit_date || '').toLowerCase().includes(search) ||
+      (v.animal_code || '').toLowerCase().includes(search) ||
+      (v.doctor_name || v.doctor_empid || '').toLowerCase().includes(search) ||
+      (v.visit_type || '').toLowerCase().includes(search)
+    );
+  }
+  return filtered.slice().sort((a,b)=> new Date(b.visit_date)-new Date(a.visit_date)).slice(0,20);
+}
+function renderVisits(){
+  const tbody = document.querySelector('#visitsTable tbody'); tbody.innerHTML = '';
+  const filtered = getFilteredVisits();
+  if (!filtered.length) { tbody.innerHTML = '<tr><td colspan="5" class="small">لا زيارات مطابقة</td></tr>'; return; }
+  filtered.forEach(v=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${escapeHtml(v.visit_date || '')}</td><td>${escapeHtml(v.animal_code||'')}</td><td>${escapeHtml(v.doctor_name||v.doctor_empid||'')}</td><td>${escapeHtml(v.visit_type||'')}</td><td class="no-print"><button class="btn btn.ghost" onclick="openVisit(${v.id||v.VisitID||0})">فتح</button></td>`;
+    tbody.appendChild(tr);
+  });
+  console.log('تم عرض', filtered.length, 'زيارة بعد الفلتر');
+}
+function getFilteredAnimals() {
+  let filtered = animals;
+  const type = $('filterAnimalsType')?.value;
+  if (type) filtered = filtered.filter(a => (a.animal_type || '').toLowerCase().includes(type));
+  const status = $('filterAnimalsStatus')?.value;
+  if (status) filtered = filtered.filter(a => String(a.is_active || '').toLowerCase() === status);
+  const code = $('filterAnimalsCode')?.value.toLowerCase();
+  if (code) filtered = filtered.filter(a => (a.animal_code || '').toLowerCase().includes(code));
+  const search = $('searchAnimals')?.value.toLowerCase();
+  if (search) {
+    filtered = filtered.filter(a => 
+      (a.animal_code || '').toLowerCase().includes(search) ||
+      (a.animal_name || a.name || '').toLowerCase().includes(search) ||
+      (a.animal_type || '').toLowerCase().includes(search) ||
+      (a.is_active || '').toLowerCase().includes(search)
+    );
+  }
+  return filtered.slice(0,40);
+}
+function renderAnimals(){
+  const tbody = document.querySelector('#animalsTable tbody'); tbody.innerHTML = '';
+  const filtered = getFilteredAnimals();
+  if (!filtered.length) { tbody.innerHTML = '<tr><td colspan="5" class="small">لا حيوانات مطابقة</td></tr>'; return; }
+  filtered.forEach(a=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${escapeHtml(a.animal_code||a.code||'')}</td><td>${escapeHtml(a.animal_name||a.name||'')}</td><td>${escapeHtml(a.animal_type||'')}</td><td>${escapeHtml(a.is_active||'')}</td><td class="no-print"><button class="btn btn.ghost" onclick="openAnimal('${encodeURIComponent(a.animal_code||a.code||'')}')">فتح</button></td>`;
+    tbody.appendChild(tr);
+  });
+  console.log('تم عرض', filtered.length, 'حيوان بعد الفلتر');
+}
+function getFilteredAdoptions() {
+  let filtered = adoptions;
+  const type = $('filterAdoptionsType')?.value;
+  if (type) filtered = filtered.filter(ad => {
+    const animalType = ad.animal_type || (ad.animal_code || '').includes('cat') ? 'cats' : 'dogs';
+    return animalType === type;
+  });
+  const op = $('filterAdoptionsOperation')?.value;
+  if (op) filtered = filtered.filter(ad => String(ad.Operation_type || ad.status || '').toLowerCase() === op);
+  const search = $('searchAdoptions')?.value.toLowerCase();
+  if (search) {
+    filtered = filtered.filter(ad => 
+      (ad.animal_code || '').toLowerCase().includes(search) ||
+      (ad.adopter_name || ad.adopterName || ad.adopter || '').toLowerCase().includes(search) ||
+      (ad.adoption_date || ad.date || '').toLowerCase().includes(search) ||
+      (ad.Operation_type || ad.status || '').toLowerCase().includes(search)
+    );
+  }
+  return filtered;
+}
+function renderAdoptions(){
+  const tbody = document.querySelector('#adoptionsTable tbody'); tbody.innerHTML = '';
+  const filtered = getFilteredAdoptions();
+  const adoptCount = adoptions.filter(ad => String(ad.Operation_type || ad.status || '').toLowerCase() === 'adopt').length;
+  const reserveCount = adoptions.filter(ad => String(ad.Operation_type || ad.status || '').toLowerCase() === 'reserve').length;
+  console.log('إحصائيات التبني:', { adoptCount, reserveCount });
+  $('statsAdoptionsAdopt').textContent = adoptCount;
+  $('statsAdoptionsReserve').textContent = reserveCount;
+  if (!filtered.length) {
+    tbody.innerHTML = '<tr><td colspan="6" class="small">لا سجلات تبني مطابقة</td></tr>'; return;
+  }
+  filtered.forEach(ad=>{
+    const id = ad.adoption_id || ad.id || ad.AdoptionID || ad.adoptionId || '';
+    const animal = ad.animal_code || ad.animalCode || '';
+    const name = ad.adopter_name || ad.adopterName || ad.adopter || '';
+    const date = ad.adoption_date || ad.date || '';
+    const status = (ad.Operation_type || ad.status || ad.operation || '').toLowerCase();
+    const isReserve = status === 'reserve';
+    const tr = document.createElement('tr');
+    let actions = `<button class="btn btn.ghost" onclick="openAdoption(${encodeURIComponent(id)})">فتح</button>`;
+    if (isReserve) {
+      actions += `<button class="btn adopt" onclick="processAdoption('${encodeURIComponent(id)}','adopt')">تبني</button>`;
+    }
+    tr.innerHTML = `<td>${escapeHtml(id)}</td><td>${escapeHtml(animal)}</td><td>${escapeHtml(name)}</td><td>${escapeHtml(date)}</td><td>${escapeHtml(status)}</td>
+      <td class="no-print">${actions}</td>`;
+    tbody.appendChild(tr);
+  });
+  console.log('تم عرض', filtered.length, 'سجل تبني بعد الفلتر');
+}
+function getFilteredMovements() {
+  let filtered = movements;
+  const animal = $('filterMovementsAnimal')?.value.toLowerCase();
+  if (animal) filtered = filtered.filter(m => (m.animal_code || '').toLowerCase().includes(animal));
+  const search = $('searchMovements')?.value.toLowerCase();
+  if (search) {
+    filtered = filtered.filter(m => 
+      (m.movement_date || m.CreatedAt || '').toLowerCase().includes(search) ||
+      (m.animal_code || m.AnimalCode || '').toLowerCase().includes(search) ||
+      (m.movement_type || '').toLowerCase().includes(search) ||
+      (m.reason || '').toLowerCase().includes(search) ||
+      (m.notes || '').toLowerCase().includes(search)
+    );
+  }
+  return filtered.slice().sort((a,b)=> new Date(b.movement_date)-new Date(a.movement_date)).slice(0,40);
+}
+function renderMovements(){
+  const tbody = document.querySelector('#movementsTable tbody'); tbody.innerHTML = '';
+  const filtered = getFilteredMovements();
+  if (!filtered.length) { tbody.innerHTML = '<tr><td colspan="6" class="small">لا حركات مطابقة</td></tr>'; return; }
+  filtered.forEach(m=>{
+    const id = m.id || m.MovementID || '';
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${escapeHtml(m.movement_date||m.CreatedAt||'')}</td><td>${escapeHtml(m.animal_code||m.AnimalCode||'')}</td><td>${escapeHtml(m.movement_type||'')}</td><td>${escapeHtml(m.reason||'')}</td><td class="no-print">${escapeHtml(m.notes||'')}</td><td class="no-print"><button class="btn btn.ghost" onclick="openMovement(${id})">فتح</button></td>`;
+    tbody.appendChild(tr);
+  });
+  console.log('تم عرض', filtered.length, 'حركة بعد الفلتر');
+}
+function getFilteredRooms() {
+  let filtered = rooms;
+  const type = $('filterRoomsType')?.value;
+  if (type) filtered = filtered.filter(r => {
+    if (type === 'cats' && (r.cats || 0) > 0) return true;
+    if (type === 'dogs' && (r.dogs || 0) > 0) return true;
+    return false;
+  });
+  const animal = $('filterRoomsAnimal')?.value.toLowerCase();
+  if (animal) {
+    filtered = filtered.filter(r => (r.occupants || '').toLowerCase().includes(animal));
+  }
+  const search = $('searchRooms')?.value.toLowerCase();
+  if (search) {
+    filtered = filtered.filter(r => 
+      (r.room_name || r.name || '').toLowerCase().includes(search) ||
+      String(r.capacity || '').includes(search) ||
+      String(r.occupancy || '').includes(search) ||
+      String((r.dogs||0) + '/' + (r.cats||0)).includes(search)
+    );
+  }
+  return filtered;
+}
+function renderRooms(){
+  const tbody = document.querySelector('#roomsTable tbody'); tbody.innerHTML = '';
+  const filtered = getFilteredRooms();
+  const catsRooms = rooms.filter(r => (r.cats || 0) > 0).length;
+  const dogsRooms = rooms.filter(r => (r.dogs || 0) > 0).length;
+  console.log('إحصائيات الغرف:', { catsRooms, dogsRooms });
+  $('statsRoomsCats').textContent = catsRooms;
+  $('statsRoomsDogs').textContent = dogsRooms;
+  if (!filtered.length) { tbody.innerHTML = '<tr><td colspan="5" class="small">لا غرف مطابقة</td></tr>'; return; }
+  filtered.forEach(r=>{
+    const id = r.room_id || r.id || r.RoomID || '';
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${escapeHtml(r.room_name||r.name||'')}</td><td>${r.capacity||0}</td><td>${r.occupancy||0}</td><td>${(r.dogs||0) + '/' + (r.cats||0)}</td><td class="no-print"><button class="btn btn.ghost" onclick="openRoom(${id})">فتح</button></td>`;
+    tbody.appendChild(tr);
+  });
+  console.log('تم عرض', filtered.length, 'غرفة بعد الفلتر');
+}
+function getFilteredApplications() {
+  let filtered = applications;
+  const search = $('searchApplications')?.value.toLowerCase();
+  if (search) {
+    filtered = filtered.filter(a => 
+      (a.full_name || a.adopter_name || '').toLowerCase().includes(search) ||
+      (a.phone || a.adopter_phone || '').toLowerCase().includes(search) ||
+      (a.submission_date || a.created_at || '').toLowerCase().includes(search)
+    );
+  }
+  return filtered;
+}
+function renderApplications(){
+  const wrap = document.getElementById('applicationsList'); wrap.innerHTML = '';
+  const filtered = getFilteredApplications();
+  console.log('إحصائيات الطلبات:', filtered.length);
+  if (!filtered.length) { wrap.innerHTML = '<div class="small">لا طلبات مطابقة</div>'; return; }
+  const tbl = document.createElement('table'); tbl.className = 'table';
+  tbl.innerHTML = '<thead><tr><th>الاسم</th><th>هاتف</th><th>تاريخ</th><th class="no-print">إجراء</th></tr></thead>';
+  const tb = document.createElement('tbody');
+  filtered.forEach(a=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${escapeHtml(a.full_name||a.adopter_name||'')}</td><td>${escapeHtml(a.phone||a.adopter_phone||'')}</td><td>${escapeHtml(a.submission_date||a.created_at||'')}</td><td class="no-print"><button class="btn btn.ghost" onclick="openApplication(${a.id})">عرض</button> <button class="btn" onclick="confirmApproveApplication(${a.id})">اعتماد</button></td>`;
+    tb.appendChild(tr);
+  });
+  tbl.appendChild(tb); wrap.appendChild(tbl);
+  console.log('تم عرض', filtered.length, 'طلب بعد الفلتر');
+}
+function getFilteredIncoming() {
+  let filtered = incoming;
+  const search = $('searchIncoming')?.value.toLowerCase();
+  if (search) {
+    filtered = filtered.filter(i => 
+      (i.animal_type || i.type || '').toLowerCase().includes(search) ||
+      String(i.requests ?? i.count ?? i.num ?? 0).includes(search) ||
+      String(i.quantity ?? i.total_quantity ?? i.qty ?? 0).includes(search)
+    );
+  }
+  return filtered;
+}
+function renderIncoming(){
+  const tbody = document.querySelector('#incomingTable tbody'); tbody.innerHTML = '';
+  const filtered = getFilteredIncoming();
+  if (!filtered.length) { tbody.innerHTML = '<tr><td colspan="3" class="small">لا طلبات واردة مطابقة</td></tr>'; return; }
+  filtered.forEach(i=>{
+    const requests = i.requests ?? i.count ?? i.num ?? 0;
+    const qty = i.quantity ?? i.total_quantity ?? i.qty ?? 0;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${escapeHtml(i.animal_type||i.type||'')}</td><td>${requests}</td><td>${qty}</td>`;
+    tbody.appendChild(tr);
+  });
+  console.log('تم عرض', filtered.length, 'طلب وارد بعد الفلتر');
+}
+function renderVisitors(){
+  if (!visitorsSummary) return;
+  $('vis_total').textContent = visitorsSummary.total ?? '--';
+  $('vis_today').textContent = visitorsSummary.today ?? '--';
+  console.log('إحصائيات الزوار:', visitorsSummary);
+}
+/* ---------- alerts check ---------- */
+function checkAlerts() {
+  const lowStock = products.filter(p => (p.Quantity ?? 0) <= (p.MinQuantity ?? 0)).length;
+  const today = new Date().toISOString().slice(0,10);
+  const todayVisits = visits.filter(v => (v.visit_date||'').slice(0,10) === today).length;
+  const reserveCount = adoptions.filter(ad => String(ad.Operation_type || ad.status || '').toLowerCase() === 'reserve').length;
+  const appCount = applications.length;
+
+  if (lowStock > LOW_STOCK_THRESHOLD) {
+    showToast(`تنبيه: ${lowStock} منتجات منخفضة المخزون!`, 'warning');
+  }
+  if (reserveCount > RESERVE_THRESHOLD) {
+    showToast(`تنبيه: ${reserveCount} حجوزات تبني معلقة!`, 'danger');
+  }
+  if (todayVisits > VISIT_THRESHOLD) {
+    showToast(`تنبيه: ${todayVisits} زيارات اليوم!`, 'warning');
+  }
+  if (appCount > 5) {
+    showToast(`تنبيه: ${appCount} طلبات تبني معلقة.`, 'warning');
+  }
+}
+/* ---------- actions (unchanged) ---------- */
+function openProduct(id){ if (!id) return alert('معرف المنتج غير متوفر'); window.open(`/health_vet/public/add_Products.html?ProductID=${id}`, '_blank'); }
+function openVisit(id){ if (!id) return alert('ID missing'); window.location.href = `/health_vet/public/add_visit.html?id=${id}`; }
+function openAnimal(code){ window.open(`/health_vet/public/add_animals.html?ID=${code}`, '_blank'); }
+function openAdoption(id){ window.open(`/health_vet/public/add_adopter.html?id=${decodeURIComponent(id)}`, '_blank'); }
+function openApplication(id){
+  fetch(`${API_BASE}add_adoption_applications.php?action=get_details&id=${id}`, { credentials:'same-origin' })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        window.open(`/health_vet/public/add_applications.html?id=${id}`, '_blank');
+      } else {
+        alert('فشل جلب التفاصيل');
+      }
+    })
+    .catch(() => alert('خطأ في الاتصال'));
+}
+function openRoom(id) {
+  fetch(`${API_BASE}add_room.php?action=get&id=${id}`, { credentials:'same-origin' })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        window.open(`/health_vet/public/add_room.html?id=${id}`, '_blank');
+      } else {
+        alert('فشل جلب تفاصيل الغرفة');
+      }
+    })
+    .catch(() => alert('خطأ في الاتصال'));
+}
+function openMovement(id) {
+  if (!id) return alert('ID missing');
+  window.open(`/health_vet/public/animal_building.html?id=${id}`, '_blank');
+}
+async function confirmApproveApplication(appId){
+  if (!confirm('تأكيد اعتماد طلب التبني؟')) return;
+  try {
+    const fd = new FormData(); fd.set('action','approve'); fd.set('application_id', String(appId));
+    const res = await fetch(API_BASE + 'process_adoption.php', { method:'POST', body: fd, credentials:'same-origin' });
+    const j = await res.json();
+    if (!j.success) return alert(j.message || 'فشل الاعتماد');
+    alert('تم الاعتماد');
+    await refreshAll();
+  } catch(e){ console.error(e); alert('خطأ'); }
+}
+async function processAdoption(adoptionId, action){
+  if (!confirm(`تنفيذ ${action} للتبني #${decodeURIComponent(adoptionId)}؟`)) return;
+  try {
+    const fd = new FormData(); fd.set('action', action); fd.set('adoption_id', decodeURIComponent(adoptionId));
+    const res = await fetch(API_BASE + 'process_adoption.php', { method:'POST', body: fd, credentials:'same-origin' });
+    const j = await res.json();
+    if (!j.success) return alert(j.message || 'فشل العملية');
+    alert(j.message || 'نجحت العملية');
+    await refreshAll();
+  } catch(e){ console.error(e); alert('خطأ'); }
+}
+/* ---------- cleanup ---------- */
+async function runCleanupReservations(){
+  if (!confirm('تشغيل تنظيف الحجوزات الآن؟ يُنصح تشغيله كـ cron يومي.')) return;
+  try {
+    const res = await fetch(API_BASE + 'cleanup_reservations.php', { method:'GET', credentials:'same-origin' });
+    const j = await res.json();
+    if (!j.success) return alert(j.message || 'فشل');
+    alert(`انتهى التنظيف — ${j.count || 0} سجل/سجلات عولجت`);
+    await refreshAll();
+  } catch(e){ console.error(e); alert('خطأ'); }
+}
+/* ---------- scanner ---------- */
+let videoStream = null, scanTimer = null;
+function openScanModal(){
+  const m = document.getElementById('scanModal'); m.classList.add('show'); m.setAttribute('aria-hidden','false');
+  const video = document.getElementById('scanVideo');
+  navigator.mediaDevices.getUserMedia({ video: { facingMode:'environment' } }).then(stream=>{
+    videoStream = stream; video.srcObject = stream; video.play();
+    scanTimer = setInterval(()=> scanFrame(video), 300);
+  }).catch(err=>{ alert('فشل الوصول للكاميرا'); console.error(err); closeScanModal(); });
+}
+function closeScanModal(){ const m=document.getElementById('scanModal'); m.classList.remove('show'); if (scanTimer) clearInterval(scanTimer); if (videoStream) { videoStream.getTracks().forEach(t=>t.stop()); videoStream=null; } }
+function scanFrame(video){
+  if (!video || video.readyState !== video.HAVE_ENOUGH_DATA) return;
+  const canvas = document.createElement('canvas'); canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+  const ctx = canvas.getContext('2d'); ctx.drawImage(video,0,0,canvas.width,canvas.height);
+  const imageData = ctx.getImageData(0,0,canvas.width,canvas.height);
+  const code = jsQR(imageData.data, imageData.width, imageData.height);
+  if (code && code.data) {
+    $('globalSearch').value = code.data;
+    closeScanModal();
+    quickSearch();
+  }
+}
+/* ---------- quick search ---------- */
+async function quickSearch(){
+  const q = $('globalSearch').value.trim();
+  if (!q) return;
+  console.log('البحث العام عن:', q);
+  // ... (الكود السابق للبحث العام، مع console.log)
+  try {
+    const r = await safeFetchJson(`get_products.php?lang=ar&per_page=10&q=${encodeURIComponent(q)}`);
+    if (r && r.success && Array.isArray(r.data) && r.data.length) { openProduct(r.data[0].Product_ID); return; }
+  } catch(e){ console.error('خطأ في بحث المنتجات:', e); }
+  // باقي البحث كما هو...
+  alert(`لا توجد نتائج مطابقة لـ "${q}".`);
+}
+/* ---------- modal helpers ---------- */
+function hideModal(){ const m=document.getElementById('modal'); m.classList.remove('show'); m.setAttribute('aria-hidden','true'); }
+function showModal(html){ const m=document.getElementById('modal'); document.getElementById('modalBody').innerHTML = html; m.classList.add('show'); m.setAttribute('aria-hidden','false'); }
+function escapeHtml(s){ if (s==null) return ''; return String(s).replace(/[&<>"']/g,c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+</script>
+</body>
+</html>

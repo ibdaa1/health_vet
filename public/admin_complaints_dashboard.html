@@ -1,0 +1,2021 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة تحكم المدير - جميع الشكاوى</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --primary: #2E5939;
+            --primary-light: #4A7C59;
+            --primary-dark: #1E472B;
+            --secondary: #B38E5D;
+            --secondary-light: #D4B78C;
+            --accent: #E74C3C;
+            --accent-light: #F1948A;
+            --warning: #F39C12;
+            --success: #27AE60;
+            --info: #3498DB;
+            
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-primary: #2C3E50;
+            --text-secondary: #566573;
+            --border-color: #D5DBDB;
+            --shadow: 0 2px 12px rgba(0,0,0,0.1);
+            
+            --font-xs: 0.75rem;
+            --font-sm: 0.875rem;
+            --font-base: 1rem;
+            --font-lg: 1.125rem;
+            --font-xl: 1.25rem;
+            --font-2xl: 1.5rem;
+            
+            --space-xs: 0.25rem;
+            --space-sm: 0.5rem;
+            --space-md: 1rem;
+            --space-lg: 1.5rem;
+            --space-xl: 2rem;
+            
+            --border-radius: 8px;
+            --input-height: 2.5rem;
+        }
+
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+        }
+
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-color); 
+            color: var(--text-primary);
+            line-height: 1.6;
+            font-size: var(--font-base);
+            padding: var(--space-md);
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: var(--space-sm);
+                font-size: var(--font-sm);
+            }
+        }
+
+        .container { 
+            max-width: 100%;
+            margin: 0 auto;
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: var(--space-lg);
+        }
+
+        @media (min-width: 1200px) {
+            .container {
+                max-width: 1400px;
+            }
+        }
+
+        h2 { 
+            font-size: var(--font-xl);
+            text-align: center;
+            color: var(--primary);
+            margin-bottom: var(--space-lg);
+            border-bottom: 2px solid var(--secondary);
+            padding-bottom: var(--space-sm);
+        }
+
+        h3 {
+            font-size: var(--font-lg);
+            color: var(--primary);
+            margin: var(--space-lg) 0 var(--space-md) 0;
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .user-info {
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
+            color: white;
+            padding: var(--space-md);
+            border-radius: var(--border-radius);
+            margin-bottom: var(--space-lg);
+            text-align: center;
+        }
+
+        .user-info h3 {
+            color: white;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            gap: var(--space-lg);
+            flex-wrap: wrap;
+        }
+
+        .user-info span {
+            font-weight: normal;
+            opacity: 0.9;
+        }
+
+        .notification {
+            padding: var(--space-md);
+            border-radius: var(--border-radius);
+            margin-bottom: var(--space-md);
+            text-align: center;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-sm);
+        }
+
+        .notification.warning {
+            background: #FFF3CD;
+            border: 1px solid #FFEAA7;
+            color: #856404;
+        }
+
+        .notification.danger {
+            background: #F8D7DA;
+            border: 1px solid #F5C6CB;
+            color: #721C24;
+        }
+
+        .status-badge {
+            padding: var(--space-xs) var(--space-sm);
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: var(--font-xs);
+            display: inline-block;
+            min-width: 80px;
+            text-align: center;
+            text-transform: uppercase;
+        }
+
+        .status-open { background: var(--info); color: white; }
+        .status-inprogress { background: var(--warning); color: white; }
+        .status-closed { background: var(--success); color: white; }
+        .status-onhold { background: var(--text-secondary); color: white; }
+        .status-rejected { background: var(--accent); color: white; }
+
+        .final-status-pendingclose { background: var(--warning); color: white; }
+        .final-status-closed { background: var(--success); color: white; }
+        .final-status-rejected { background: var(--accent); color: white; }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: var(--space-md);
+            margin-bottom: var(--space-lg);
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            padding: var(--space-md);
+            border-radius: var(--border-radius);
+            text-align: center;
+            box-shadow: var(--shadow);
+            border-left: 4px solid var(--primary);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .stat-card h4 {
+            color: var(--text-secondary);
+            font-size: var(--font-sm);
+            margin-bottom: var(--space-sm);
+        }
+
+        .stat-card .number {
+            font-size: var(--font-2xl);
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .charts-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--space-lg);
+            margin-bottom: var(--space-lg);
+        }
+
+        .chart-wrapper {
+            background: var(--card-bg);
+            padding: var(--space-md);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            height: 300px;
+            position: relative;
+        }
+
+        .chart-wrapper.large {
+            grid-column: span 2;
+        }
+
+        @media (max-width: 768px) {
+            .chart-wrapper.large {
+                grid-column: span 1;
+            }
+            .charts-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .btn {
+            padding: var(--space-sm) var(--space-lg);
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: var(--font-sm);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-sm);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .btn-outline:hover {
+            background: var(--bg-color);
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #219955;
+            transform: translateY(-2px);
+        }
+
+        .filter-bar {
+            background: var(--card-bg);
+            padding: var(--space-md);
+            border-radius: var(--border-radius);
+            margin-bottom: var(--space-lg);
+            box-shadow: var(--shadow);
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--space-md);
+            margin-bottom: var(--space-md);
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-xs);
+        }
+
+        .filter-group label {
+            font-weight: bold;
+            color: var(--text-secondary);
+            font-size: var(--font-sm);
+        }
+
+        .filter-controls {
+            display: flex;
+            gap: var(--space-md);
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        input, select {
+            width: 100%;
+            padding: var(--space-sm);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-size: var(--font-sm);
+            height: var(--input-height);
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(46, 89, 57, 0.1);
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin-bottom: var(--space-lg);
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            position: relative;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: var(--font-sm);
+            min-width: 1200px;
+        }
+
+        th, td {
+            padding: var(--space-sm);
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+            white-space: nowrap;
+        }
+
+        th {
+            background: var(--primary);
+            color: white;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        tr:hover {
+            background: #e8f5e8;
+        }
+
+        .action-btn {
+            padding: var(--space-xs) var(--space-sm);
+            font-size: var(--font-xs);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .action-btn.edit {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .action-btn.edit:hover {
+            background: var(--secondary-light);
+            transform: translateY(-1px);
+        }
+
+        .action-btn.map {
+            background: var(--info);
+            color: white;
+        }
+
+        .action-btn.map:hover {
+            background: #2980B9;
+            transform: translateY(-1px);
+        }
+
+        .message {
+            padding: var(--space-md);
+            border-radius: var(--border-radius);
+            margin: var(--space-md) 0;
+            text-align: center;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .message.error {
+            background: var(--accent-light);
+            color: var(--accent);
+            border: 1px solid var(--accent);
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: var(--success);
+            border: 1px solid var(--success);
+        }
+
+        .kpi-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: var(--font-xs);
+            font-weight: bold;
+            margin: 0 2px;
+        }
+
+        .kpi-delay {
+            background: var(--accent-light);
+            color: var(--accent);
+        }
+
+        .kpi-warning {
+            background: #FDEBD0;
+            color: var(--warning);
+        }
+
+        .kpi-normal {
+            background: #D5F5E3;
+            color: var(--success);
+        }
+
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: var(--space-xl);
+            color: var(--text-secondary);
+        }
+
+        .loading-spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: var(--space-sm);
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .user-info h3 {
+                flex-direction: column;
+                gap: var(--space-sm);
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .filter-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .filter-controls {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .chart-wrapper {
+                height: 250px;
+            }
+            
+            h2 {
+                font-size: var(--font-lg);
+            }
+            
+            h3 {
+                font-size: var(--font-base);
+            }
+        }
+
+        .table-container::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .table-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .table-container::-webkit-scrollbar-thumb {
+            background: var(--primary-light);
+            border-radius: 4px;
+        }
+
+        .table-container::-webkit-scrollbar-thumb:hover {
+            background: var(--primary);
+        }
+
+        .lang-switch {
+            text-align: left;
+            margin-bottom: var(--space-md);
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-md);
+        }
+
+        .no-data {
+            text-align: center;
+            padding: var(--space-xl);
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        /* عناصر التحكم في الصفحات */
+        .pagination-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--space-md);
+            background: var(--card-bg);
+            border-top: 1px solid var(--border-color);
+            border-radius: 0 0 var(--border-radius) var(--border-radius);
+        }
+
+        .pagination-info {
+            font-size: var(--font-sm);
+            color: var(--text-secondary);
+        }
+
+        .pagination-nav {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .page-btn {
+            padding: var(--space-xs) var(--space-sm);
+            border: 1px solid var(--border-color);
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .page-btn:hover:not(:disabled) {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .page-input {
+            width: 60px;
+            text-align: center;
+            margin: 0 var(--space-xs);
+        }
+
+        .export-controls {
+            display: flex;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-md);
+            justify-content: flex-end;
+            flex-wrap: wrap;
+        }
+
+        /* Print styles for report */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            .print-report, .print-report * {
+                visibility: visible;
+            }
+            .print-report {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                background: white;
+                padding: 20px;
+            }
+            .print-report table {
+                width: 100%;
+                font-size: 12px;
+                border-collapse: collapse;
+            }
+            .print-report th, .print-report td {
+                border: 1px solid #000;
+                padding: 4px;
+            }
+            .print-report th {
+                background: #f0f0f0 !important;
+                color: #000 !important;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .pagination-controls {
+                display: none !important;
+            }
+        }
+
+        /* تنسيقات خاصة للطباعة */
+        .print-header {
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #000;
+            padding-bottom: 10px;
+        }
+
+        .print-footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 12px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- زر تغيير اللغة -->
+        <div class="lang-switch">
+            <button class="btn btn-outline" id="langBtn">
+                <i class="fas fa-language"></i>
+                <span id="langText">English</span>
+            </button>
+        </div>
+
+        <!-- العنوان الرئيسي -->
+        <h2 id="title">
+            <i class="fas fa-tachometer-alt"></i>
+            <span data-i18n="title">لوحة تحكم المدير - جميع الشكاوى</span>
+        </h2>
+
+        <!-- معلومات المستخدم -->
+        <div class="user-info">
+            <h3>
+                <span><i class="fas fa-user"></i> <span data-i18n="name_label">الاسم:</span></span> 
+                <span id="empName">جاري التحميل...</span>
+                <span><i class="fas fa-id-card"></i> <span data-i18n="id_label">الرقم الإداري:</span></span> 
+                <span id="empId">جاري التحميل...</span>
+                <span><i class="fas fa-briefcase"></i> <span data-i18n="job_title_label">الوظيفة:</span></span> 
+                <span id="empTitle">جاري التحميل...</span>
+            </h3>
+        </div>
+
+        <!-- التنبيهات -->
+        <div id="openNotification" class="notification warning" style="display: none;">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span id="openCountMessage">
+                <span data-i18n="open_notification_prefix">لديك</span>
+                <span id="openCount">0</span>
+                <span data-i18n="open_notification_suffix">شكوى مفتوحة يجب متابعتها</span>
+            </span>
+        </div>
+
+        <div id="pendingCloseNotification" class="notification danger" style="display: none;">
+            <i class="fas fa-clock"></i>
+            <span id="pendingCloseCountMessage">
+                <span data-i18n="pending_close_prefix">لديك</span>
+                <span id="pendingCloseCount">0</span>
+                <span data-i18n="pending_close_suffix">شكوى بانتظار الإغلاق النهائي</span>
+            </span>
+        </div>
+
+        <!-- الإحصائيات السريعة -->
+        <div class="section-title">
+            <i class="fas fa-chart-bar"></i>
+            <h3 data-i18n="stats_title_main">إحصائيات الشكاوى الكلية</h3>
+        </div>
+        <div class="stats-grid" id="statsSection">
+            <!-- سيتم تعبئتها ديناميكياً -->
+        </div>
+
+        <!-- الرسوم البيانية -->
+        <div class="section-title">
+            <i class="fas fa-chart-pie"></i>
+            <h3 data-i18n="charts_title">الرسوم البيانية الإحصائية</h3>
+        </div>
+        <div class="charts-container">
+            <div class="chart-wrapper">
+                <canvas id="typeChart"></canvas>
+            </div>
+            <div class="chart-wrapper">
+                <canvas id="priorityChart"></canvas>
+            </div>
+            <div class="chart-wrapper">
+                <canvas id="sourceChart"></canvas>
+            </div>
+            <div class="chart-wrapper">
+                <canvas id="finalStatusChart"></canvas>
+            </div>
+            <div class="chart-wrapper large">
+                <canvas id="areaChart"></canvas>
+            </div>
+            <div class="chart-wrapper large">
+                <canvas id="employeeChart"></canvas>
+            </div>
+        </div>
+
+        <!-- أداء الموظفين -->
+        <div class="section-title">
+            <i class="fas fa-users"></i>
+            <h3 data-i18n="employee_stats_title">مؤشر أداء الموظفين (KPI)</h3>
+        </div>
+        <div class="table-container">
+            <table id="employeeStatsTable">
+                <thead>
+                    <tr>
+                        <th data-i18n="emp_table_header_id">الرقم الإداري</th>
+                        <th data-i18n="emp_table_header_name">اسم الموظف</th>
+                        <th data-i18n="emp_table_header_total">إجمالي الشكاوى</th>
+                        <th data-i18n="emp_table_header_open">شكاوى مفتوحة</th>
+                        <th data-i18n="emp_table_header_pending">بانتظار الإغلاق</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td colspan="5" class="loading">
+                            <div class="loading-spinner"></div>
+                            <span data-i18n="table_loading">جاري التحميل...</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- البحث والفلترة -->
+        <div class="section-title">
+            <i class="fas fa-search"></i>
+            <h3 data-i18n="search_filter_title">البحث والفلترة</h3>
+        </div>
+        <div class="filter-bar">
+            <div class="filter-grid">
+                <div class="filter-group">
+                    <label for="filterDateFrom" data-i18n="filter_from">من تاريخ:</label>
+                    <input type="date" id="filterDateFrom">
+                </div>
+                <div class="filter-group">
+                    <label for="filterDateTo" data-i18n="filter_to">إلى تاريخ:</label>
+                    <input type="date" id="filterDateTo">
+                </div>
+                <div class="filter-group">
+                    <label for="filterComplaintType" data-i18n="filter_type">نوع الشكوى:</label>
+                    <select id="filterComplaintType">
+                        <option value="" data-i18n="filter_all">الكل</option>
+                        <option value="Cats" data-i18n="type_cats">قطط</option>
+                        <option value="Dogs" data-i18n="type_dogs">كلاب</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="filterResponsePriority" data-i18n="filter_priority">الأولوية:</label>
+                    <select id="filterResponsePriority">
+                        <option value="" data-i18n="filter_all">الكل</option>
+                        <option value="Emergency" data-i18n="priority_emergency">طارئة</option>
+                        <option value="Scheduled" data-i18n="priority_scheduled">مجدولة</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="filterSource" data-i18n="filter_source">المصدر:</label>
+                    <select id="filterSource">
+                        <option value="" data-i18n="filter_all">الكل</option>
+                        <option value="Hotline" data-i18n="source_hotline">هاتف</option>
+                        <option value="In-person" data-i18n="source_in_person">مباشر</option>
+                        <option value="Department" data-i18n="source_department">قسم</option>
+                        <option value="Email" data-i18n="source_email">بريد إلكتروني</option>
+                        <option value="Social Media" data-i18n="source_social_media">وسائل تواصل</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="filterArea" data-i18n="filter_area">المنطقة:</label>
+                    <input type="text" id="filterArea" data-i18n="placeholder_area" placeholder="اسم المنطقة">
+                </div>
+            </div>
+            <div class="filter-controls">
+                <button class="btn btn-primary" onclick="loadDashboard()">
+                    <i class="fas fa-search"></i>
+                    <span data-i18n="btn_search">بحث</span>
+                </button>
+                <button class="btn btn-outline" onclick="resetFilter()">
+                    <i class="fas fa-undo"></i>
+                    <span data-i18n="btn_all_complaints">عرض الكل</span>
+                </button>
+                <button class="btn btn-success" onclick="exportToExcel()" id="excelBtn" style="display: none;">
+                    <i class="fas fa-file-excel"></i>
+                    <span data-i18n="btn_excel">تصدير Excel</span>
+                </button>
+                <button class="btn btn-primary" onclick="printReport()" id="printBtn" style="display: none;">
+                    <i class="fas fa-print"></i>
+                    <span data-i18n="btn_print">طباعة التقرير</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- عناصر التحكم في التصدير -->
+        <div class="export-controls no-print" id="exportControls" style="display: none;">
+            <div class="pagination-info" id="paginationInfo">
+                <span data-i18n="showing">عرض</span> 
+                <span id="startRecord">0</span>-<span id="endRecord">0</span> 
+                <span data-i18n="of">من</span> 
+                <span id="totalRecords">0</span> 
+                <span data-i18n="records">سجل</span>
+                (<span data-i18n="page">صفحة</span> <span id="currentPage">1</span> 
+                <span data-i18n="of">من</span> <span id="totalPages">1</span>)
+            </div>
+        </div>
+
+        <!-- قائمة الشكاوى -->
+        <div class="section-title">
+            <i class="fas fa-list"></i>
+            <h3 data-i18n="complaint_list_title">قائمة جميع الشكاوى</h3>
+        </div>
+        <div class="table-container">
+            <table id="complaintsTable">
+                <thead>
+                    <tr>
+                        <th data-i18n="complaint_no">رقم الشكوى</th>
+                        <th data-i18n="complainant_name">اسم الشاكي</th>
+                        <th data-i18n="complaint_date">تاريخ الشكوى</th>
+                        <th data-i18n="received_date">تاريخ الاستلام</th>
+                        <th data-i18n="registration_delay_days">تأخير التسجيل</th>
+                        <th data-i18n="follow_up_delay_days">تأخير المتابعة</th>
+                        <th data-i18n="responsible_employee">الموظف المسؤول</th>
+                        <th data-i18n="complaint_type">النوع</th>
+                        <th data-i18n="area">المنطقة</th>
+                        <th data-i18n="complaint_status">حالة الشكوى</th>
+                        <th data-i18n="final_status">حالة الإغلاق</th>
+                        <th data-i18n="response_days">أيام المتابعة</th>
+                        <th data-i18n="location">الموقع</th>
+                        <th data-i18n="actions">الإجراءات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td colspan="14" class="loading">
+                            <div class="loading-spinner"></div>
+                            <span data-i18n="table_loading">جاري التحميل...</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <!-- عناصر التحكم في الصفحات -->
+            <div class="pagination-controls no-print" id="paginationControls" style="display: none;">
+                <div class="pagination-info">
+                    <span data-i18n="showing">عرض</span> 
+                    <span id="startRecord">0</span>-<span id="endRecord">0</span> 
+                    <span data-i18n="of">من</span> 
+                    <span id="totalRecords">0</span> 
+                    <span data-i18n="records">سجل</span>
+                </div>
+                <div class="pagination-nav">
+                    <button class="page-btn" onclick="goToFirstPage()" id="firstPageBtn" disabled>
+                        <i class="fas fa-angle-double-right"></i>
+                    </button>
+                    <button class="page-btn" onclick="goToPrevPage()" id="prevPageBtn" disabled>
+                        <i class="fas fa-angle-right"></i>
+                    </button>
+                    <span>
+                        <span data-i18n="page">صفحة</span> 
+                        <input type="number" id="pageInput" class="page-input" min="1" value="1" onchange="goToPage(this.value)">
+                        <span data-i18n="of">من</span> 
+                        <span id="totalPages">1</span>
+                    </span>
+                    <button class="page-btn" onclick="goToNextPage()" id="nextPageBtn" disabled>
+                        <i class="fas fa-angle-left"></i>
+                    </button>
+                    <button class="page-btn" onclick="goToLastPage()" id="lastPageBtn" disabled>
+                        <i class="fas fa-angle-double-left"></i>
+                    </button>
+                </div>
+                <div class="pagination-info">
+                    <span data-i18n="rows_per_page">عدد الصفوف:</span>
+                    <select id="rowsPerPage" onchange="changeRowsPerPage(this.value)">
+                        <option value="10">10</option>
+                        <option value="25" selected>25</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="message" id="message"></div>
+
+        <!-- Print Report Container (hidden) -->
+        <div id="printReport" class="print-report" style="display: none;">
+            <div class="print-header">
+                <h1>تقرير الشكاوى - البلدية</h1>
+                <p id="reportDate"></p>
+                <p id="reportUserInfo"></p>
+            </div>
+            <div id="reportStats"></div>
+            <div id="reportTable"></div>
+            <div id="reportEmployeeStats"></div>
+            <div class="print-footer">
+                <p>تم إنشاء التقرير في: <span id="printTime"></span></p>
+                <p>جميع الحقوق محفوظة © البلدية</p>
+            </div>
+        </div>
+    </div>
+<script src="session_check.js"></script>
+    <script>
+        // =============================================
+        // الإعدادات العامة والمتغيرات
+        // =============================================
+        const API_ENDPOINT = '/health_vet/api/get_all_complaints.php';
+        const FORM_BASE_URL = '/health_vet/public/add_Complaints.html';
+        const LANG_PATH = '/health_vet/languages/';
+        
+        let charts = {};
+        let currentLang = localStorage.getItem('lang') || 'ar';
+        let translations = {};
+        let allComplaints = [];
+        let employeeStats = [];
+        let statsCounts = {};
+        let isLoading = false;
+        
+        // متغيرات الترقيم
+        let currentPage = 1;
+        let rowsPerPage = 25;
+        let totalPages = 1;
+        let totalRecords = 0;
+
+        // =============================================
+        // نظام الترجمة
+        // =============================================
+
+        // دالة تحميل ملفات الترجمة
+        async function loadTranslations(lang = null) {
+            if (lang) {
+                currentLang = lang;
+            }
+
+            try {
+                const langFileName = `${currentLang}_admin_complaints.json`;
+                const response = await fetch(`${LANG_PATH}${langFileName}`);
+                
+                if (!response.ok) {
+                    throw new Error(`Failed to load translation file: ${response.status}`);
+                }
+                
+                translations = await response.json();
+                applyTranslations();
+                updatePageDirection();
+                
+                // حفظ اللغة المختارة
+                localStorage.setItem('lang', currentLang);
+                
+                console.log(`Translations loaded successfully for: ${currentLang}`);
+                return true;
+            } catch (err) {
+                console.error('Error loading translations:', err);
+                loadDefaultTranslations();
+                return false;
+            }
+        }
+
+        // الترجمة الافتراضية في حالة فشل تحميل الملفات
+        function loadDefaultTranslations() {
+            translations = {
+                'title': 'لوحة تحكم المدير - جميع الشكاوى',
+                'user_info_title': 'معلومات المستخدم',
+                'stats_title_main': 'إحصائيات الشكاوى الكلية',
+                'charts_title': 'الرسوم البيانية الإحصائية',
+                'employee_stats_title': 'مؤشر أداء الموظفين (KPI)',
+                'search_filter_title': 'البحث والفلترة',
+                'complaint_list_title': 'قائمة جميع الشكاوى المفلترة',
+                
+                'name_label': 'الاسم',
+                'id_label': 'الرقم الإداري',
+                'job_title_label': 'الوظيفة',
+                'filter_from': 'من',
+                'filter_to': 'إلى',
+                'filter_type': 'النوع',
+                'filter_priority': 'الأولوية',
+                'filter_source': 'المصدر',
+                'filter_area': 'المنطقة',
+                'filter_all': 'الكل',
+                
+                'btn_search': 'بحث',
+                'btn_all_complaints': 'عرض الكل',
+                'btn_print': 'طباعة التقرير',
+                'btn_excel': 'تصدير Excel',
+                
+                'total': 'الإجمالي',
+                'open': 'مفتوحة',
+                'inprogress': 'قيد المعالجة',
+                'closed': 'مغلقة',
+                'onhold': 'معلقة',
+                'rejected': 'مرفوضة',
+                'pendingclose': 'بانتظار الإغلاق',
+                
+                'complaint_no': 'رقم الشكوى',
+                'complainant_name': 'اسم الشاكي',
+                'complaint_date': 'تاريخ الشكوى',
+                'received_date': 'تاريخ الاستلام',
+                'registration_delay_days': 'تأخير التسجيل',
+                'follow_up_delay_days': 'تأخير المتابعة',
+                'responsible_employee': 'الموظف المسؤول',
+                'complaint_type': 'النوع',
+                'area': 'المنطقة',
+                'complaint_status': 'حالة الشكوى',
+                'final_status': 'حالة الإغلاق',
+                'response_days': 'أيام المتابعة',
+                'location': 'الموقع',
+                'actions': 'الإجراءات',
+                
+                'action_edit': 'تعديل',
+                'action_map': 'عرض الخريطة',
+                
+                'emp_table_header_id': 'الرقم الإداري',
+                'emp_table_header_name': 'اسم الموظف',
+                'emp_table_header_total': 'إجمالي الشكاوى',
+                'emp_table_header_open': 'شكاوى مفتوحة',
+                'emp_table_header_pending': 'بانتظار الإغلاق',
+                
+                'chart_title_type': 'توزيع أنواع الشكاوى',
+                'chart_title_priority': 'توزيع الأولويات',
+                'chart_title_source': 'توزيع المصادر',
+                'chart_title_final_status': 'الحالات النهائية',
+                'chart_title_area': 'توزيع المناطق',
+                'chart_title_employee': 'أداء الموظفين',
+                'chart_y_axis_complaints': 'عدد الشكاوى',
+                
+                'loading': 'جاري التحميل...',
+                'processing': 'جاري المعالجة...',
+                'error_fetching': 'خطأ في جلب البيانات',
+                'error_parsing': 'خطأ في معالجة البيانات',
+                'error_connection': 'خطأ في الاتصال بالخادم',
+                'table_loading': 'جاري التحميل...',
+                'table_no_data': 'لا توجد بيانات متاحة',
+                
+                'open_notification_prefix': 'لديك',
+                'open_notification_suffix': 'شكوى مفتوحة يجب متابعتها',
+                'pending_close_prefix': 'لديك',
+                'pending_close_suffix': 'شكوى بانتظار الإغلاق النهائي',
+                
+                'unknown': 'غير معروف',
+                'unknown_emp': 'موظف غير معروف',
+                
+                'type_cats': 'قطط',
+                'type_dogs': 'كلاب',
+                'priority_emergency': 'طارئة',
+                'priority_scheduled': 'مجدولة',
+                'source_hotline': 'هاتف',
+                'source_in_person': 'مباشر',
+                'source_department': 'قسم',
+                'source_email': 'بريد إلكتروني',
+                'source_social_media': 'وسائل تواصل',
+                'final_status_pending_close': 'بانتظار الإغلاق',
+                'final_status_closed': 'مغلق',
+                'final_status_rejected': 'مرفوض',
+                'placeholder_area': 'اسم المنطقة',
+                'success_loading': 'تم تحميل البيانات بنجاح',
+                'report_title': 'تقرير الشكاوى',
+                'report_date': 'تاريخ التقرير: ',
+                'showing': 'عرض',
+                'of': 'من',
+                'records': 'سجل',
+                'page': 'صفحة',
+                'rows_per_page': 'عدد الصفوف:'
+            };
+            applyTranslations();
+        }
+
+        // تطبيق الترجمة على جميع العناصر
+        function applyTranslations() {
+            // ترجمة العناصر ذات data-i18n
+            document.querySelectorAll('[data-i18n]').forEach(element => {
+                const key = element.getAttribute('data-i18n');
+                const translation = translate(key);
+                
+                if (element.tagName === 'INPUT' && element.hasAttribute('placeholder')) {
+                    element.setAttribute('placeholder', translation);
+                } else if (element.tagName === 'TITLE') {
+                    document.title = translation;
+                } else {
+                    element.textContent = translation;
+                }
+            });
+
+            // تحديث نص زر اللغة
+            const langText = document.getElementById('langText');
+            if (langText) {
+                langText.textContent = currentLang === 'ar' ? 'English' : 'العربية';
+            }
+        }
+
+        // دالة الترجمة الأساسية
+        function translate(key) {
+            return translations[key] || key;
+        }
+
+        // تحديث اتجاه الصفحة
+        function updatePageDirection() {
+            const direction = currentLang === 'ar' ? 'rtl' : 'ltr';
+            document.documentElement.dir = direction;
+            document.documentElement.lang = currentLang;
+        }
+
+        // دوال الترجمة للرسوم البيانية
+        function translateType(type) {
+            switch(type) {
+                case 'Cats': return translate('type_cats');
+                case 'Dogs': return translate('type_dogs');
+                default: return type;
+            }
+        }
+
+        function translatePriority(priority) {
+            switch(priority) {
+                case 'Emergency': return translate('priority_emergency');
+                case 'Scheduled': return translate('priority_scheduled');
+                default: return priority;
+            }
+        }
+
+        function translateSource(source) {
+            switch(source) {
+                case 'Hotline': return translate('source_hotline');
+                case 'In-person': return translate('source_in_person');
+                case 'Department': return translate('source_department');
+                case 'Email': return translate('source_email');
+                case 'Social Media': return translate('source_social_media');
+                default: return source;
+            }
+        }
+
+        function translateFinalStatus(status) {
+            switch(status) {
+                case 'Pending Close': return translate('final_status_pending_close');
+                case 'Closed': return translate('final_status_closed');
+                case 'Rejected': return translate('final_status_rejected');
+                default: return status;
+            }
+        }
+
+        // =============================================
+        // دوال جلب البيانات والعرض
+        // =============================================
+
+        // الدالة الرئيسية لجلب البيانات
+        async function loadDashboard() {
+            if (isLoading) return;
+            
+            isLoading = true;
+            showLoadingState();
+            showMessage(translate('loading'), true);
+
+            try {
+                const params = new URLSearchParams();
+                const from = document.getElementById('filterDateFrom').value;
+                const to = document.getElementById('filterDateTo').value;
+                const type = document.getElementById('filterComplaintType').value;
+                const priority = document.getElementById('filterResponsePriority').value;
+                const source = document.getElementById('filterSource').value;
+                const area = document.getElementById('filterArea').value;
+
+                if (from) params.append('from', from);
+                if (to) params.append('to', to);
+                if (type) params.append('type', type);
+                if (priority) params.append('priority', priority);
+                if (source) params.append('source', source);
+                if (area) params.append('area', area);
+
+                const response = await fetch(`${API_ENDPOINT}?${params}`);
+                
+                if (!response.ok) {
+                    throw new Error(`${translate('error_connection')}: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    allComplaints = data.data || [];
+                    employeeStats = data.employeeStats || [];
+                    displayUserInfo(data.userInfo || {});
+                    displayStats(allComplaints);
+                    displayEmployeeStats(employeeStats);
+                    displayCharts(data.chartStats || {}, employeeStats);
+                    loadComplaints(allComplaints);
+                    document.getElementById('printBtn').style.display = 'inline-flex';
+                    document.getElementById('excelBtn').style.display = 'inline-flex';
+                    document.getElementById('exportControls').style.display = 'flex';
+                    showMessage(translate('success_loading'), true);
+                } else {
+                    throw new Error(data.message || translate('error_fetching'));
+                }
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+                showMessage(`${translate('error_fetching')}: ${error.message}`, false);
+                displayEmptyStates();
+            } finally {
+                isLoading = false;
+                hideLoadingState();
+            }
+        }
+
+        // عرض حالة فارغة في حالة الخطأ
+        function displayEmptyStates() {
+            displayUserInfo({});
+            displayStats([]);
+            displayEmployeeStats([]);
+            displayCharts({}, []);
+            loadComplaints([]);
+            document.getElementById('printBtn').style.display = 'none';
+            document.getElementById('excelBtn').style.display = 'none';
+            document.getElementById('exportControls').style.display = 'none';
+            document.getElementById('paginationControls').style.display = 'none';
+        }
+
+        // عرض حالة التحميل
+        function showLoadingState() {
+            const loadingCells = document.querySelectorAll('.loading');
+            loadingCells.forEach(el => el.style.display = 'flex');
+        }
+
+        function hideLoadingState() {
+            const loadingCells = document.querySelectorAll('.loading');
+            loadingCells.forEach(el => el.style.display = 'none');
+        }
+
+        // عرض معلومات المستخدم
+        function displayUserInfo(userInfo) {
+            document.getElementById('empName').textContent = userInfo.EmpName || translate('unknown');
+            document.getElementById('empId').textContent = userInfo.EmpID || translate('unknown');
+            document.getElementById('empTitle').textContent = userInfo.JobTitle || translate('unknown');
+        }
+
+        // عرض الإحصائيات
+        function displayStats(data) {
+            statsCounts = {
+                'total': data.length,
+                'open': data.filter(c => c.ComplaintStatus === 'Open').length,
+                'inprogress': data.filter(c => c.ComplaintStatus === 'In Progress').length,
+                'closed': data.filter(c => c.ComplaintStatus === 'Closed').length,
+                'onhold': data.filter(c => c.ComplaintStatus === 'On Hold').length,
+                'rejected': data.filter(c => c.ComplaintStatus === 'Rejected').length
+            };
+
+            const statsHTML = `
+                <div class="stat-card">
+                    <h4>${translate('total')}</h4>
+                    <div class="number">${statsCounts.total}</div>
+                </div>
+                <div class="stat-card">
+                    <h4>${translate('open')}</h4>
+                    <div class="number">${statsCounts.open}</div>
+                </div>
+                <div class="stat-card">
+                    <h4>${translate('inprogress')}</h4>
+                    <div class="number">${statsCounts.inprogress}</div>
+                </div>
+                <div class="stat-card">
+                    <h4>${translate('closed')}</h4>
+                    <div class="number">${statsCounts.closed}</div>
+                </div>
+                <div class="stat-card">
+                    <h4>${translate('onhold')}</h4>
+                    <div class="number">${statsCounts.onhold}</div>
+                </div>
+                <div class="stat-card">
+                    <h4>${translate('rejected')}</h4>
+                    <div class="number">${statsCounts.rejected}</div>
+                </div>
+            `;
+
+            document.getElementById('statsSection').innerHTML = statsHTML;
+            updateNotifications(statsCounts.open, data.filter(c => c.FinalStatus === 'Pending Close').length);
+        }
+
+        // تحديث التنبيهات
+        function updateNotifications(openCount, pendingCount) {
+            const openNotification = document.getElementById('openNotification');
+            const pendingNotification = document.getElementById('pendingCloseNotification');
+            
+            if (openNotification) {
+                openNotification.style.display = openCount > 0 ? 'flex' : 'none';
+                document.getElementById('openCount').textContent = openCount;
+            }
+            
+            if (pendingNotification) {
+                pendingNotification.style.display = pendingCount > 0 ? 'flex' : 'none';
+                document.getElementById('pendingCloseCount').textContent = pendingCount;
+            }
+        }
+
+        // عرض إحصائيات الموظفين
+        function displayEmployeeStats(employeeStatsData) {
+            const tbody = document.querySelector('#employeeStatsTable tbody');
+            if (!tbody) return;
+
+            hideLoadingState(); // Hide loading for this table
+
+            if (employeeStatsData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="no-data">${translate('table_no_data')}</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = employeeStatsData.map(emp => `
+                <tr>
+                    <td>${emp.EmpID || ''}</td>
+                    <td>${emp.EmpName || translate('unknown')}</td>
+                    <td>${emp.TotalComplaints || 0}</td>
+                    <td>${emp.OpenComplaints || 0}</td>
+                    <td>${emp.PendingCloseCount || 0}</td>
+                </tr>
+            `).join('');
+        }
+
+        // عرض الرسوم البيانية
+        function displayCharts(chartStats, employeeStatsData) {
+            // تدمير الرسوم البيانية القديمة
+            Object.values(charts).forEach(chart => {
+                if (chart && typeof chart.destroy === 'function') {
+                    chart.destroy();
+                }
+            });
+            charts = {};
+
+            // تسجيل plugins
+            if (typeof Chart !== 'undefined' && typeof ChartDataLabels !== 'undefined') {
+                Chart.register(ChartDataLabels);
+            }
+
+            // ألوان للرسوم البيانية
+            const colors = ['#2E5939', '#B38E5D', '#4A7C59', '#D4B78C', '#1E472B', '#9966FF', '#FF6384', '#FFCE56', '#36A2EB', '#FF9F40'];
+
+            // رسم بياني لأنواع الشكاوى
+            const typeCtx = document.getElementById('typeChart')?.getContext('2d');
+            if (typeCtx && chartStats.ComplaintType && chartStats.ComplaintType.length > 0) {
+                const labels = chartStats.ComplaintType.map(item => translateType(item.ComplaintType));
+                charts.typeChart = new Chart(typeCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: chartStats.ComplaintType.map(item => parseInt(item.count || 0)),
+                            backgroundColor: colors.slice(0, labels.length),
+                            borderWidth: 2,
+                            borderColor: '#fff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { 
+                                position: currentLang === 'ar' ? 'bottom' : 'right',
+                            },
+                            title: { 
+                                display: true, 
+                                text: translate('chart_title_type'),
+                                font: { size: 14 }
+                            },
+                            datalabels: {
+                                color: '#fff',
+                                font: { weight: 'bold', size: 11 },
+                                formatter: (value) => value
+                            }
+                        }
+                    }
+                });
+            }
+
+            // رسم بياني للأولويات
+            const priorityCtx = document.getElementById('priorityChart')?.getContext('2d');
+            if (priorityCtx && chartStats.ResponsePriority && chartStats.ResponsePriority.length > 0) {
+                const labels = chartStats.ResponsePriority.map(item => translatePriority(item.ResponsePriority));
+                charts.priorityChart = new Chart(priorityCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: translate('chart_y_axis_complaints'),
+                            data: chartStats.ResponsePriority.map(item => parseInt(item.count || 0)),
+                            backgroundColor: colors[0],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            title: { 
+                                display: true, 
+                                text: translate('chart_title_priority'),
+                                font: { size: 14 }
+                            },
+                            datalabels: {
+                                anchor: 'end',
+                                align: 'top',
+                                color: '#333',
+                                font: { weight: 'bold', size: 11 }
+                            }
+                        },
+                        scales: {
+                            y: { beginAtZero: true }
+                        }
+                    }
+                });
+            }
+
+            // رسم بياني للمصادر
+            const sourceCtx = document.getElementById('sourceChart')?.getContext('2d');
+            if (sourceCtx && chartStats.Source && chartStats.Source.length > 0) {
+                const labels = chartStats.Source.map(item => translateSource(item.Source));
+                charts.sourceChart = new Chart(sourceCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: chartStats.Source.map(item => parseInt(item.count || 0)),
+                            backgroundColor: colors.slice(0, labels.length),
+                            borderWidth: 2,
+                            borderColor: '#fff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { 
+                                position: currentLang === 'ar' ? 'bottom' : 'right',
+                            },
+                            title: { 
+                                display: true, 
+                                text: translate('chart_title_source'),
+                                font: { size: 14 }
+                            },
+                            datalabels: {
+                                color: '#fff',
+                                font: { weight: 'bold', size: 11 },
+                                formatter: (value) => value
+                            }
+                        }
+                    }
+                });
+            }
+
+            // رسم بياني للحالات النهائية
+            const finalStatusCtx = document.getElementById('finalStatusChart')?.getContext('2d');
+            if (finalStatusCtx && chartStats.FinalStatus && chartStats.FinalStatus.length > 0) {
+                const labels = chartStats.FinalStatus.map(item => translateFinalStatus(item.FinalStatus));
+                charts.finalStatusChart = new Chart(finalStatusCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: chartStats.FinalStatus.map(item => parseInt(item.count || 0)),
+                            backgroundColor: colors.slice(0, labels.length),
+                            borderWidth: 2,
+                            borderColor: '#fff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { 
+                                position: currentLang === 'ar' ? 'bottom' : 'right',
+                            },
+                            title: { 
+                                display: true, 
+                                text: translate('chart_title_final_status'),
+                                font: { size: 14 }
+                            },
+                            datalabels: {
+                                color: '#fff',
+                                font: { weight: 'bold', size: 11 },
+                                formatter: (value) => value
+                            }
+                        }
+                    }
+                });
+            }
+
+            // رسم بياني للمناطق (bar كبير)
+            const areaCtx = document.getElementById('areaChart')?.getContext('2d');
+            if (areaCtx && chartStats.Area && chartStats.Area.length > 0) {
+                const labels = chartStats.Area.map(item => item.Area || translate('unknown'));
+                charts.areaChart = new Chart(areaCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: translate('chart_y_axis_complaints'),
+                            data: chartStats.Area.map(item => parseInt(item.count || 0)),
+                            backgroundColor: colors.slice(0, Math.min(labels.length, colors.length)),
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            title: { 
+                                display: true, 
+                                text: translate('chart_title_area'),
+                                font: { size: 14 }
+                            },
+                            datalabels: {
+                                anchor: 'end',
+                                align: 'top',
+                                color: '#333',
+                                font: { weight: 'bold', size: 11 }
+                            }
+                        },
+                        scales: {
+                            y: { beginAtZero: true }
+                        }
+                    }
+                });
+            }
+
+            // رسم بياني لأداء الموظفين (horizontal bar كبير)
+            const employeeCtx = document.getElementById('employeeChart')?.getContext('2d');
+            if (employeeCtx && employeeStatsData.length > 0) {
+                const labels = employeeStatsData.map(emp => emp.EmpName || translate('unknown_emp'));
+                const data = employeeStatsData.map(emp => parseInt(emp.TotalComplaints || 0));
+                charts.employeeChart = new Chart(employeeCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: translate('chart_y_axis_complaints'),
+                            data: data,
+                            backgroundColor: colors.slice(0, Math.min(labels.length, colors.length)),
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            title: { 
+                                display: true, 
+                                text: translate('chart_title_employee'),
+                                font: { size: 14 }
+                            },
+                            datalabels: {
+                                anchor: 'start',
+                                align: 'end',
+                                color: '#333',
+                                font: { weight: 'bold', size: 11 }
+                            }
+                        },
+                        scales: {
+                            x: { beginAtZero: true }
+                        }
+                    }
+                });
+            }
+        }
+
+        // =============================================
+        // نظام الترقيم والصفحات
+        // =============================================
+
+        // حساب إعدادات الترقيم
+        function calculatePagination() {
+            totalRecords = allComplaints.length;
+            totalPages = Math.ceil(totalRecords / rowsPerPage);
+            
+            // تأكد من أن الصفحة الحالية ضمن النطاق الصحيح
+            if (currentPage > totalPages) {
+                currentPage = totalPages || 1;
+            }
+            
+            updatePaginationControls();
+        }
+
+        // تحديث عناصر التحكم في الترقيم
+        function updatePaginationControls() {
+            const startRecord = (currentPage - 1) * rowsPerPage + 1;
+            const endRecord = Math.min(currentPage * rowsPerPage, totalRecords);
+            
+            // تحديث معلومات الصفحة
+            document.getElementById('startRecord').textContent = startRecord;
+            document.getElementById('endRecord').textContent = endRecord;
+            document.getElementById('totalRecords').textContent = totalRecords;
+            document.getElementById('currentPage').textContent = currentPage;
+            document.getElementById('totalPages').textContent = totalPages;
+            document.getElementById('pageInput').value = currentPage;
+            
+            // تحديث حالة الأزرار
+            document.getElementById('firstPageBtn').disabled = currentPage === 1;
+            document.getElementById('prevPageBtn').disabled = currentPage === 1;
+            document.getElementById('nextPageBtn').disabled = currentPage === totalPages;
+            document.getElementById('lastPageBtn').disabled = currentPage === totalPages;
+            
+            // إظهار عناصر التحكم إذا كانت هناك بيانات
+            document.getElementById('paginationControls').style.display = totalRecords > 0 ? 'flex' : 'none';
+        }
+
+        // الانتقال إلى الصفحة الأولى
+        function goToFirstPage() {
+            currentPage = 1;
+            loadComplaints(allComplaints);
+        }
+
+        // الانتقال إلى الصفحة السابقة
+        function goToPrevPage() {
+            if (currentPage > 1) {
+                currentPage--;
+                loadComplaints(allComplaints);
+            }
+        }
+
+        // الانتقال إلى الصفحة التالية
+        function goToNextPage() {
+            if (currentPage < totalPages) {
+                currentPage++;
+                loadComplaints(allComplaints);
+            }
+        }
+
+        // الانتقال إلى الصفحة الأخيرة
+        function goToLastPage() {
+            currentPage = totalPages;
+            loadComplaints(allComplaints);
+        }
+
+        // الانتقال إلى صفحة محددة
+        function goToPage(pageNum) {
+            const page = parseInt(pageNum);
+            if (page >= 1 && page <= totalPages) {
+                currentPage = page;
+                loadComplaints(allComplaints);
+            } else {
+                document.getElementById('pageInput').value = currentPage;
+            }
+        }
+
+        // تغيير عدد الصفوف في الصفحة
+        function changeRowsPerPage(newRowsPerPage) {
+            rowsPerPage = parseInt(newRowsPerPage);
+            currentPage = 1; // العودة إلى الصفحة الأولى
+            loadComplaints(allComplaints);
+        }
+
+        // تحميل الشكاوى في الجدول مع الترقيم
+        function loadComplaints(complaints) {
+            const tbody = document.querySelector('#complaintsTable tbody');
+            if (!tbody) return;
+
+            hideLoadingState(); // Hide loading for complaints table
+
+            // حساب الترقيم
+            calculatePagination();
+            
+            // استخراج البيانات للصفحة الحالية
+            const startIndex = (currentPage - 1) * rowsPerPage;
+            const endIndex = Math.min(startIndex + rowsPerPage, complaints.length);
+            const currentPageData = complaints.slice(startIndex, endIndex);
+
+            if (currentPageData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="14" class="no-data">${translate('table_no_data')}</td></tr>`;
+                document.getElementById('paginationControls').style.display = 'none';
+                return;
+            }
+
+            tbody.innerHTML = currentPageData.map(complaint => {
+                const statusClass = `status-${(complaint.ComplaintStatus || '').toLowerCase().replace(/ /g, '')}`;
+                const finalStatusClass = `final-status-${(complaint.FinalStatus || '').toLowerCase().replace(/ /g, '')}`;
+                
+                // تنسيق تأخير التسجيل
+                const regDelayDays = parseInt(complaint.RegistrationDelayDays || 0) > 0 ? 
+                    `<span class="kpi-badge kpi-delay">${complaint.RegistrationDelayDays}</span>` : 
+                    '<span class="kpi-badge kpi-normal">-</span>';
+                
+                // تنسيق تأخير المتابعة
+                const fupDelayDays = parseInt(complaint.FollowUpDelayDays || 0) > 0 ? 
+                    `<span class="kpi-badge kpi-warning">${complaint.FollowUpDelayDays}</span>` : 
+                    '<span class="kpi-badge kpi-normal">-</span>';
+
+                // رابط الخريطة
+                const mapLink = complaint.Coordinates ? 
+                    `<a href="https://maps.google.com/?q=${encodeURIComponent(complaint.Coordinates)}" target="_blank" class="action-btn map">
+                        <i class="fas fa-map-marker-alt"></i> ${translate('action_map')}
+                    </a>` : '-';
+
+                // تنسيق أنواع الشكاوى
+                const complaintType = translateType(complaint.ComplaintType);
+
+                // ترجمة الحالة إذا لزم
+                const statusText = complaint.ComplaintStatus || '';
+                const finalStatusText = translateFinalStatus(complaint.FinalStatus || '');
+
+                return `
+                    <tr>
+                        <td>${complaint.ComplaintNo || ''}</td>
+                        <td>${complaint.ComplainantName || ''}</td>
+                        <td>${formatDate(complaint.ComplaintDate)}</td>
+                        <td>${formatDate(complaint.ReceivedDate)}</td>
+                        <td>${regDelayDays}</td>
+                        <td>${fupDelayDays}</td>
+                        <td>${complaint.ReceivedByEmpName || ''} (${complaint.ReceivedByEmpID || ''})</td>
+                        <td>${complaintType}</td>
+                        <td>${complaint.Area || ''}</td>
+                        <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                        <td><span class="status-badge ${finalStatusClass}">${finalStatusText}</span></td>
+                        <td>${complaint.ResponseDays || '-'}</td>
+                        <td>${mapLink}</td>
+                        <td>
+                            <button class="action-btn edit" onclick="editComplaint(${complaint.ComplaintID})" title="${translate('action_edit')}">
+                                <i class="fas fa-edit"></i> ${translate('action_edit')}
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // =============================================
+        // التصدير والطباعة
+        // =============================================
+
+        // تصدير إلى Excel
+        function exportToExcel() {
+            if (allComplaints.length === 0) {
+                showMessage('لا توجد بيانات للتصدير', false);
+                return;
+            }
+
+            try {
+                // إعداد البيانات للتصدير
+                const excelData = allComplaints.map(complaint => ({
+                    'رقم الشكوى': complaint.ComplaintNo || '',
+                    'اسم الشاكي': complaint.ComplainantName || '',
+                    'تاريخ الشكوى': formatDate(complaint.ComplaintDate),
+                    'تاريخ الاستلام': formatDate(complaint.ReceivedDate),
+                    'تأخير التسجيل': complaint.RegistrationDelayDays || 0,
+                    'تأخير المتابعة': complaint.FollowUpDelayDays || 0,
+                    'الموظف المسؤول': `${complaint.ReceivedByEmpName || ''} (${complaint.ReceivedByEmpID || ''})`,
+                    'نوع الشكوى': translateType(complaint.ComplaintType),
+                    'المنطقة': complaint.Area || '',
+                    'حالة الشكوى': complaint.ComplaintStatus || '',
+                    'حالة الإغلاق': translateFinalStatus(complaint.FinalStatus || ''),
+                    'أيام المتابعة': complaint.ResponseDays || 0
+                }));
+
+                // إنشاء ورقة عمل
+                const ws = XLSX.utils.json_to_sheet(excelData);
+                
+                // إنشاء مصنف وإضافة الورقة
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, 'الشكاوى');
+                
+                // إنشاء اسم الملف
+                const date = new Date().toISOString().split('T')[0];
+                const fileName = `شكاوى_البلدية_${date}.xlsx`;
+                
+                // تحميل الملف
+                XLSX.writeFile(wb, fileName);
+                
+                showMessage('تم تصدير البيانات بنجاح إلى Excel', true);
+            } catch (error) {
+                console.error('Error exporting to Excel:', error);
+                showMessage('حدث خطأ أثناء تصدير البيانات إلى Excel', false);
+            }
+        }
+
+        // دالة طباعة التقرير
+        function printReport() {
+            if (allComplaints.length === 0) {
+                showMessage('لا توجد بيانات للطباعة', false);
+                return;
+            }
+
+            const reportDate = new Date().toLocaleDateString('ar-SA', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+
+            const printTime = new Date().toLocaleTimeString('ar-SA');
+
+            // معلومات المستخدم للطباعة
+            const empName = document.getElementById('empName').textContent;
+            const empId = document.getElementById('empId').textContent;
+            const empTitle = document.getElementById('empTitle').textContent;
+
+            const reportStatsHTML = `
+                <h2>${translate('stats_title_main')}</h2>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                    <div style="text-align: center; padding: 1rem; border: 1px solid #ddd;">
+                        <h4>${translate('total')}</h4>
+                        <div style="font-size: 1.5rem; font-weight: bold;">${statsCounts.total}</div>
+                    </div>
+                    <div style="text-align: center; padding: 1rem; border: 1px solid #ddd;">
+                        <h4>${translate('open')}</h4>
+                        <div style="font-size: 1.5rem; font-weight: bold;">${statsCounts.open}</div>
+                    </div>
+                    <div style="text-align: center; padding: 1rem; border: 1px solid #ddd;">
+                        <h4>${translate('inprogress')}</h4>
+                        <div style="font-size: 1.5rem; font-weight: bold;">${statsCounts.inprogress}</div>
+                    </div>
+                    <div style="text-align: center; padding: 1rem; border: 1px solid #ddd;">
+                        <h4>${translate('closed')}</h4>
+                        <div style="font-size: 1.5rem; font-weight: bold;">${statsCounts.closed}</div>
+                    </div>
+                </div>
+            `;
+
+            const reportTableHTML = `
+                <h2>${translate('complaint_list_title')}</h2>
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 2rem; font-size: 12px;">
+                    <thead>
+                        <tr style="background: #2E5939; color: white;">
+                            <th style="padding: 8px; border: 1px solid #000;">${translate('complaint_no')}</th>
+                            <th style="padding: 8px; border: 1px solid #000;">${translate('complainant_name')}</th>
+                            <th style="padding: 8px; border: 1px solid #000;">${translate('complaint_date')}</th>
+                            <th style="padding: 8px; border: 1px solid #000;">${translate('received_date')}</th>
+                            <th style="padding: 8px; border: 1px solid #000;">${translate('complaint_type')}</th>
+                            <th style="padding: 8px; border: 1px solid #000;">${translate('area')}</th>
+                            <th style="padding: 8px; border: 1px solid #000;">${translate('complaint_status')}</th>
+                            <th style="padding: 8px; border: 1px solid #000;">${translate('final_status')}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${allComplaints.map(complaint => `
+                            <tr>
+                                <td style="padding: 6px; border: 1px solid #000;">${complaint.ComplaintNo || ''}</td>
+                                <td style="padding: 6px; border: 1px solid #000;">${complaint.ComplainantName || ''}</td>
+                                <td style="padding: 6px; border: 1px solid #000;">${formatDate(complaint.ComplaintDate)}</td>
+                                <td style="padding: 6px; border: 1px solid #000;">${formatDate(complaint.ReceivedDate)}</td>
+                                <td style="padding: 6px; border: 1px solid #000;">${translateType(complaint.ComplaintType)}</td>
+                                <td style="padding: 6px; border: 1px solid #000;">${complaint.Area || ''}</td>
+                                <td style="padding: 6px; border: 1px solid #000;">${complaint.ComplaintStatus || ''}</td>
+                                <td style="padding: 6px; border: 1px solid #000;">${translateFinalStatus(complaint.FinalStatus || '')}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+
+            const reportEmployeeStatsHTML = employeeStats.length > 0 ? `
+                <h2>${translate('employee_stats_title')}</h2>
+                <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+                    <thead>
+                        <tr style="background: #2E5939; color: white;">
+                            <th style="padding: 8px; border: 1px solid #000;">${translate('emp_table_header_id')}</th>
+                            <th style="padding: 8px; border: 1px solid #000;">${translate('emp_table_header_name')}</th>
+                            <th style="padding: 8px; border: 1px solid #000;">${translate('emp_table_header_total')}</th>
+                            <th style="padding: 8px; border: 1px solid #000;">${translate('emp_table_header_open')}</th>
+                            <th style="padding: 8px; border: 1px solid #000;">${translate('emp_table_header_pending')}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${employeeStats.map(emp => `
+                            <tr>
+                                <td style="padding: 6px; border: 1px solid #000;">${emp.EmpID || ''}</td>
+                                <td style="padding: 6px; border: 1px solid #000;">${emp.EmpName || translate('unknown')}</td>
+                                <td style="padding: 6px; border: 1px solid #000;">${emp.TotalComplaints || 0}</td>
+                                <td style="padding: 6px; border: 1px solid #000;">${emp.OpenComplaints || 0}</td>
+                                <td style="padding: 6px; border: 1px solid #000;">${emp.PendingCloseCount || 0}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            ` : '';
+
+            document.getElementById('reportDate').innerHTML = `<strong>${translate('report_date')} ${reportDate}</strong>`;
+            document.getElementById('reportUserInfo').innerHTML = `المستخدم: ${empName} - الرقم الإداري: ${empId} - الوظيفة: ${empTitle}`;
+            document.getElementById('reportStats').innerHTML = reportStatsHTML;
+            document.getElementById('reportTable').innerHTML = reportTableHTML;
+            document.getElementById('reportEmployeeStats').innerHTML = reportEmployeeStatsHTML;
+            document.getElementById('printTime').textContent = printTime;
+
+            // إظهار نافذة الطباعة
+            const printContent = document.getElementById('printReport');
+            printContent.style.display = 'block';
+            
+            window.print();
+            
+            // إخفاء محتوى الطباعة بعد الانتهاء
+            setTimeout(() => {
+                printContent.style.display = 'none';
+            }, 500);
+        }
+
+        // =============================================
+        // دوال مساعدة
+        // =============================================
+
+        // تنسيق التاريخ (ميلادي)
+        function formatDate(dateStr) {
+            if (!dateStr) return '';
+            try {
+                const date = new Date(dateStr);
+                return date.toLocaleDateString('en-GB', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit'
+                });
+            } catch {
+                return dateStr;
+            }
+        }
+
+        // إعادة تعيين الفلترة
+        function resetFilter() {
+            document.getElementById('filterDateFrom').value = '';
+            document.getElementById('filterDateTo').value = '';
+            document.getElementById('filterComplaintType').value = '';
+            document.getElementById('filterResponsePriority').value = '';
+            document.getElementById('filterSource').value = '';
+            document.getElementById('filterArea').value = '';
+            currentPage = 1;
+            loadDashboard();
+        }
+
+        // تعديل الشكوى
+        function editComplaint(complaintID) {
+            window.open(`${FORM_BASE_URL}?ComplaintID=${complaintID}`, '_blank');
+        }
+
+        // عرض الرسائل
+        function showMessage(text, isSuccess) {
+            const messageEl = document.getElementById('message');
+            if (messageEl) {
+                messageEl.textContent = text;
+                messageEl.className = `message ${isSuccess ? 'success' : 'error'}`;
+                messageEl.style.display = 'block';
+                
+                setTimeout(() => {
+                    messageEl.textContent = '';
+                    messageEl.className = 'message';
+                    messageEl.style.display = 'none';
+                }, 5000);
+            }
+        }
+
+        // =============================================
+        // تهيئة الصفحة
+        // =============================================
+        document.addEventListener('DOMContentLoaded', function() {
+            // تحميل الترجمة أولاً
+            loadTranslations().then(() => {
+                // ثم تحميل البيانات
+                loadDashboard();
+            });
+            
+            // إعداد زر تغيير اللغة
+            document.getElementById('langBtn').addEventListener('click', function() {
+                currentLang = currentLang === 'ar' ? 'en' : 'ar';
+                loadTranslations().then(() => {
+                    loadDashboard();
+                });
+            });
+
+            // إضافة event listeners للحقول لتمكين البحث بالزر Enter
+            const filterInputs = document.querySelectorAll('#filterDateFrom, #filterDateTo, #filterComplaintType, #filterResponsePriority, #filterSource, #filterArea');
+            filterInputs.forEach(input => {
+                input.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        loadDashboard();
+                    }
+                });
+            });
+        });
+
+        // جعل الدوال متاحة globally للاستخدام في الأحداث
+        window.loadDashboard = loadDashboard;
+        window.resetFilter = resetFilter;
+        window.editComplaint = editComplaint;
+        window.printReport = printReport;
+        window.exportToExcel = exportToExcel;
+        window.goToFirstPage = goToFirstPage;
+        window.goToPrevPage = goToPrevPage;
+        window.goToNextPage = goToNextPage;
+        window.goToLastPage = goToLastPage;
+        window.goToPage = goToPage;
+        window.changeRowsPerPage = changeRowsPerPage;
+    </script>
+</body>
+</html>

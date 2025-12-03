@@ -1,0 +1,1186 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title data-i18n="title">Mayo Clinic Sharjah for Cats and Dogs Management — HealthVet</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --brand:#1a4721;
+  --brand-light:#2b5d34;
+  --accent:#b8860b;
+  --muted:#5c5c5c;
+  --muted-light:#8a8a8a;
+  --green:#0d6e1d;
+  --orange:#b36200;
+  --red:#a51c1c;
+  --border:#e0e0e0;
+  --bg-light:#f8faf8;
+  font-family:"Tajawal",sans-serif;
+}
+*{box-sizing:border-box; margin:0; padding:0}
+body{background:#f1f4f1;color:#222;padding:8px;font-size:0.9rem;line-height:1.5}
+.container{max-width:1200px;margin:0 auto}
+.header{display:flex;gap:10px;align-items:center;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.logo{width:42px;height:42px;border-radius:6px;background:linear-gradient(135deg,var(--brand),#153a1d);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.9rem}
+.card{background:#fff;padding:10px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.08);margin-bottom:10px;border:1px solid var(--border)}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.col{flex:1 1 180px;min-width:140px}
+label{display:block;font-weight:600;margin-bottom:4px;font-size:0.85rem;color:var(--muted)}
+.input,select,textarea,button{font-family:inherit;font-size:0.85rem}
+.input,select,textarea{width:100%;padding:7px 9px;border-radius:6px;border:1px solid var(--border);background:#fff;transition:border-color 0.2s}
+.input:focus,select:focus,textarea:focus{outline:none;border-color:var(--brand-light)}
+.button{padding:7px 10px;border-radius:6px;border:none;cursor:pointer;background:var(--brand);color:#fff;font-weight:600;font-size:0.85rem;transition:all 0.2s;display:inline-flex;align-items:center;gap:4px;justify-content:center}
+.button:hover{background:var(--brand-light)}
+.button.ghost{background:transparent;border:1px solid var(--border);color:var(--muted)}
+.button.ghost:hover{background:#f5f5f5}
+.button:disabled{opacity:0.6;cursor:not-allowed;background:var(--muted)}
+.button.delete-icon{background:var(--red);color:#fff;border-color:var(--red)}
+.button.delete-icon:hover{background:#8b1717}
+.button.icon-only{padding:6px;border-radius:4px;width:32px;height:32px;justify-content:center}
+.small{font-size:0.8rem;color:var(--muted-light)}
+/* search results */
+.visitsList{max-height:200px;overflow:auto;border:1px solid var(--border);border-radius:6px;padding:6px;background:#fff}
+.visitItem{padding:6px 8px;border-bottom:1px solid #f5f5f5;display:flex;justify-content:space-between;align-items:center}
+.visitItem .meta{font-size:0.85rem}
+.visitItem .meta div:first-child{font-weight:600}
+/* products cards - constrained images */
+.productsGrid{display:grid;grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));gap:10px;max-height:400px;overflow:auto;padding:4px}
+.productCard{display:flex;gap:10px;align-items:flex-start;border-radius:8px;padding:8px;background:#fff;border:1px solid var(--border);box-shadow:0 2px 6px rgba(0,0,0,0.04);transition:transform 0.2s, box-shadow 0.2s}
+.productCard:hover{transform:translateY(-2px);box-shadow:0 4px 10px rgba(0,0,0,0.08)}
+.productThumb{flex:0 0 auto;display:flex;align-items:center;justify-content:center;border-radius:6px;overflow:hidden;background:#fafafa;width:60px;height:60px;max-width:300px;max-height:300px}
+.productThumb img{display:block;max-width:100%;max-height:100%;object-fit:contain}
+.productMeta{flex:1;display:flex;flex-direction:column;gap:4px}
+.productTitle{font-weight:700;color:var(--brand);font-size:0.9rem}
+.productSpecs{font-size:0.8rem;color:var(--muted);max-height:60px;overflow:auto;padding-right:4px}
+/* modal - minimized and beautified */
+.modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.45);z-index:999;visibility:hidden;opacity:0;transition:0.12s}
+.modal.show{visibility:visible;opacity:1}
+.modalCard{width:100%;max-width:750px;background:#fff;border-radius:12px;padding:12px;display:grid;grid-template-columns:1fr 1fr;gap:8px;max-height:80vh;overflow:auto;box-shadow:0 8px 24px rgba(0,0,0,0.15)}
+@media(max-width:900px){ .modalCard{grid-template-columns:1fr;padding:8px;gap:6px;max-height:90vh} }
+.media{height:80px;border-radius:6px;overflow:hidden;background:#fafafa;display:flex;align-items:center;justify-content:center;max-width:280px;max-height:280px}
+.media img{max-width:100%;max-height:100%;object-fit:contain}
+#modalMainImage{max-width:280px;max-height:280px;width:auto;height:auto;object-fit:contain;border-radius:6px;display:block}
+/* attributes & variants UI */
+.attributesList{max-height:180px;overflow:auto;padding:6px;border:1px solid var(--border);border-radius:6px;background:#fff;display:flex;flex-direction:column;gap:6px}
+.attributeGroup{display:flex;gap:6px;align-items:flex-start;flex-wrap:wrap;justify-content:space-between}
+.attributeLabel{font-size:0.82rem;color:var(--muted);min-width:80px;font-weight:600;text-align:left}
+.attrChip{display:inline-block;padding:4px 8px;border-radius:999px;background:#f5f8f5;color:var(--brand);font-size:0.8rem;border:1px solid #e6efe6;cursor:pointer}
+.attrChip.selected{background:var(--brand);color:#fff;border-color:var(--brand)}
+.modalDetails{max-height:120px;overflow:auto;font-size:0.85rem;color:var(--muted);padding:6px;border-radius:5px;border:1px solid var(--border);background:#fff}
+/* variants list - enhanced for details */
+.modalVariants{max-height:180px;overflow:auto;padding:4px;border-radius:5px;border:1px solid var(--border);background:#fff;display:flex;flex-direction:column;gap:6px}
+.variantRow{display:flex;justify-content:space-between;align-items:center;padding:6px;border-radius:5px;background:#fafafa;border:1px solid #f6f6f6}
+.variantMeta{display:flex;flex-direction:column;align-items:flex-start;gap:3px;font-size:0.8rem}
+.stockBadge{display:inline-block;padding:4px 6px;border-radius:4px;color:#fff;font-weight:600;font-size:0.75rem}
+.stock-high{background:var(--green)}
+.stock-low{background:var(--orange)}
+.stock-zero{background:var(--red)}
+.expiryBadge{background:var(--orange);color:#fff;padding:2px 4px;border-radius:3px;font-size:0.7rem}
+/* dispensed table */
+.table-wrap{background:#fff;border-radius:6px;padding:6px;border:1px solid var(--border);margin-top:6px;overflow:auto}
+.table{width:100%;border-collapse:collapse;font-size:0.85rem}
+.table th,.table td{padding:6px 8px;border-bottom:1px solid #f3f3f3;text-align:left}
+.table th{font-weight:600;color:var(--muted);background:#f9f9f9}
+.thumb{width:50px;height:50px;object-fit:contain;border-radius:4px;border:1px solid var(--border);max-width:80px;max-height:80px}
+/* scanner */
+.videoWrap{width:100%;height:300px;background:#000;border-radius:6px;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.langSwitch{padding:5px;border-radius:4px;border:1px solid var(--border);background:#fff;font-size:0.85rem}
+/* form improvements */
+.formRow{display:flex;gap:8px;margin-bottom:8px}
+.formCol{flex:1;min-width:120px}
+.formTitle{margin-bottom:8px;font-weight:700;color:var(--brand);font-size:1rem}
+.camera-chooser {display: flex; gap: 8px; margin-bottom: 8px; justify-content: center;}
+/* Print styles - focused on animal and treatment data only */
+@media print {
+  body { padding: 0; font-size: 11pt; background: white; }
+  .container { max-width: none; width: 100%; margin: 0; }
+  .no-print { display: none !important; }
+  /* Hide everything except animal data, visit details, and dispensed table */
+  .header, #visitsResults, #visitCard .row:has(label[data-i18n="visit_type"]), #visitCard .row:has(label[data-i18n="symptoms"]), #visitCard .row:has(label[data-i18n="notes"]), #visitCard .row:has(label[data-i18n="case_status"]), #visitCard .row:has(label[data-i18n="animal_status"]), .productsGrid { display: none !important; }
+  /* Show only animal ID, date/time, doctor, and dispensed table */
+  #visitCard { border: none; box-shadow: none; margin: 0; padding: 0; }
+  #visitCard .row:has(label[data-i18n="animal_code"]), #visitCard .row:has(label[data-i18n="visit_date"]), #visitCard .row:has(label[data-i18n="doctor"]) { display: flex !important; }
+  #visitCard .col { flex: 1; min-width: auto; }
+  .header { border-bottom: 2px solid var(--brand); padding-bottom: 12px; margin-bottom: 20px; }
+  .formTitle { font-size: 14pt; color: var(--brand); border-bottom: 1px solid var(--border); padding-bottom: 4px; }
+  .table { width: 100%; font-size: 10pt; border-collapse: collapse; margin-top: 10px; }
+  .table th, .table td { padding: 8px; border: 1px solid #ddd; text-align: center; }
+  .table th { background: #f9f9f9; font-weight: bold; }
+  .thumb { width: 40px; height: 40px; }
+  .dispensed_title { font-size: 16pt; text-align: center; margin: 20px 0 10px 0; color: var(--brand); }
+  @page { margin: 0.5in; size: A4; }
+}
+/* responsive improvements */
+@media (max-width: 768px) {
+  .productsGrid{grid-template-columns:1fr}
+  .row{flex-direction:column}
+  .col{flex:1 1 auto}
+  .modalCard{padding:8px;gap:6px}
+  .table-wrap{overflow-x:auto}
+  .table{font-size:0.8rem}
+  .table th,.table td{padding:4px 6px}
+  .modalVariants .variantRow{flex-direction:column;align-items:flex-start;text-align:left}
+  .variantMeta{align-items:flex-start !important}
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="logo">HV</div>
+    <div>
+      <div id="pageTitle" style="font-weight:700;font-size:1.1rem" data-i18n="title">Mayo Clinic Sharjah for Cats and Dogs Management — HealthVet</div>
+      <div class="small" data-i18n="official_form">Official Form - Government Veterinary Clinic</div>
+    </div>
+    <div style="margin-left:auto;display:flex;gap:6px;align-items:center">
+      <select id="langSelect" class="langSwitch" aria-label="language">
+        <option value="ar">العربية</option>
+        <option value="en">English</option>
+      </select>
+      <button id="btnDeleteVisit" class="button ghost delete-icon no-print" data-i18n="delete_visit_full" title="Delete entire visit and related records">🗑️ Delete Visit</button>
+    </div>
+  </div>
+  <!-- TOP SEARCH -->
+  <div class="card no-print" aria-label="Search Visits">
+    <div class="formTitle" data-i18n="search_visits">Search Visits</div>
+    <div class="row">
+      <div class="col">
+        <label data-i18n="search_animal_label">Search by Animal ID (Scan/Enter)</label>
+        <div style="display:flex;gap:6px">
+          <input id="search_animal_code" data-i18n-placeholder="search_animal_ph" class="input" placeholder="Scan QR or enter animal ID" list="animals_datalist" />
+          <datalist id="animals_datalist"></datalist>
+          <button id="openScannerBack" class="button icon-only" title="Scan with Back Camera">🔍</button>
+          <button id="openScannerFront" class="button icon-only" title="Scan with Front Camera">📷</button>
+        </div>
+        <div class="small notice" id="scanHint" data-i18n="scan_hint">If animal not found, you can register it</div>
+      </div>
+      <div class="col">
+        <label data-i18n="date_from">Date From</label>
+        <input id="search_date_from" type="date" class="input" />
+      </div>
+      <div class="col">
+        <label data-i18n="date_to">Date To</label>
+        <input id="search_date_to" type="date" class="input" />
+      </div>
+      <div class="col">
+        <label data-i18n="doctor">Doctor</label>
+        <select id="search_doctor" class="input"><option value="">All Doctors</option></select>
+      </div>
+      <div class="col">
+        <label data-i18n="visit_type">Visit Type</label>
+        <select id="search_visit_type" class="input">
+          <option value="">All Types</option>
+          <option value="Checkup">General Checkup</option>
+          <option value="Follow-up">Follow-up</option>
+          <option value="Surgery">Surgery</option>
+          <option value="VACCINE">Vaccine</option>
+          <option value="ANTIPARASITE">Antiparasite</option>
+          <option value="MICROCHIP">Microchip</option>
+          <option value="PASSPORT">Passport</option>
+          <option value="BLOOD TEST">Blood Test</option>
+          <option value="PTS">PTS</option>
+        </select>
+      </div>
+      <div class="col">
+        <label data-i18n="case_status">Case Status</label>
+        <select id="search_case_status" class="input">
+          <option value="">All Statuses</option>
+          <option value="In Progress">In Progress</option>
+          <option value="Semi Progress">Partial Progress</option>
+          <option value="Completed">Completed</option>
+        </select>
+      </div>
+      <div class="col">
+        <label data-i18n="animal_status">Animal Status</label>
+        <select id="search_animal_status" class="input">
+          <option value="">All Statuses</option>
+          <option value="Adoption">Adoption</option>
+          <option value="Return">Return</option>
+        </select>
+      </div>
+      <div style="min-width:120px;align-self:end">
+        <button id="btnSearchVisits" class="button icon-only" style="width:100%" data-i18n="search" title="Search">🔍</button>
+      </div>
+    </div>
+    <div style="margin-top:8px">
+      <div id="visitsResults" class="visitsList">
+        <div class="small" data-i18n="press_search">Press "Search" to display visits or leave fields empty to show all</div>
+      </div>
+    </div>
+  </div>
+  <!-- Visit form -->
+  <div class="card" id="visitCard">
+    <div class="formTitle" data-i18n="visit_details">Visit Details</div>
+    <form id="visitForm" autocomplete="off">
+      <input type="hidden" id="visit_id" name="id" value="">
+      <div class="row">
+        <div class="col">
+          <label data-i18n="animal_code">Animal ID</label>
+          <div style="display:flex;gap:6px">
+            <button id="clearAnimalCode" class="button icon-only" title="Clear QR">❌</button>
+            <input id="animal_code" class="input" list="animals_datalist" name="animal_code" required />
+          </div>
+        </div>
+        <div class="col">
+          <label data-i18n="visit_date">Date & Time</label>
+          <input id="visit_date" name="visit_date" type="datetime-local" class="input" required />
+        </div>
+        <div class="col">
+          <label data-i18n="doctor">Doctor</label>
+          <select id="doctor_empid" name="doctor_empid" class="input" required></select>
+        </div>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <div class="col">
+          <label data-i18n="visit_type">Visit Type</label>
+          <select id="visit_type" name="visit_type" class="input">
+            <option value="">-- Select --</option>
+            <option value="Checkup">General Checkup</option>
+            <option value="Follow-up">Follow-up</option>
+            <option value="Surgery">Surgery</option>
+            <option value="VACCINE">Vaccine</option>
+            <option value="ANTIPARASITE">Antiparasite</option>
+            <option value="MICROCHIP">Microchip</option>
+            <option value="PASSPORT">Passport</option>
+            <option value="BLOOD TEST">Blood Test</option>
+            <option value="PTS">PTS</option>
+          </select>
+        </div>
+        <div class="col">
+          <label data-i18n="symptoms">Symptoms</label>
+          <textarea id="symptoms" name="symptoms" class="input" rows="2"></textarea>
+        </div>
+        <div class="col">
+          <label data-i18n="notes">Notes</label>
+          <textarea id="notes" name="notes" class="input" rows="2"></textarea>
+        </div>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <div class="col">
+          <label data-i18n="case_status">Case Status</label>
+          <select id="case_status" name="case_status" class="input">
+             <option value="">-- Select --</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Semi Progress">Partial Progress</option>
+            <option value="Completed">Completed</option>
+          </select>
+        </div>
+        <div class="col">
+          <label data-i18n="animal_status">Animal Status</label>
+          <select id="animal_status" name="animal_status" class="input">
+             <option value="">-- Select --</option>
+            <option value="Return">Return</option>
+            <option value="Adoption">Adoption</option>
+          </select>
+        </div>
+      </div>
+      <div style="margin-top:8px;display:flex;gap:6px;align-items:center">
+        <button id="saveVisit" class="button icon-only" type="submit" data-i18n="save_visit" title="Save / Update Visit">💾</button>
+        <div id="visitMsg" class="small" style="color:green"></div>
+        <div id="visitErr" class="small" style="color:crimson"></div>
+      </div>
+    </form>
+  </div>
+  <!-- dispensed items -->
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <h3 style="margin:0;font-size:1rem" data-i18n="dispensed_title" class="dispensed_title">Medications Dispensed for the Visit</h3>
+      <div>
+        <button id="btnRefresh" class="button icon-only no-print" data-i18n="refresh" title="Refresh">🔄</button>
+        <button id="btnPrintArea" class="button no-print icon-only" style="background:#444;margin-left:6px" data-i18n="print_area" title="Print Prescription">🖨️</button>
+      </div>
+    </div>
+    <div class="table-wrap" style="margin-top:8px">
+      <table class="table" id="dispensedTable">
+        <thead>
+          <tr>
+            <th data-i18n="image">Image</th>
+            <th data-i18n="product_name">Product Name</th>
+            <th data-i18n="sku">Version/SKU</th>
+            <th data-i18n="quantity">Quantity (Base)</th>
+            <th data-i18n="unit">Unit</th>
+            <th data-i18n="action">Action</th>
+            <th data-i18n="recorded_by">Recorded By</th>
+            <th data-i18n="time">Time</th>
+            <th class="no-print" data-i18n="actions">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="dispensedTbody">
+          <tr><td colspan="9" class="small" data-i18n="no_dispensed">No dispensed items</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <!-- products panel -->
+  <div class="card">
+    <div class="formTitle" data-i18n="products_search">Search Products</div>
+    <div style="display:flex;gap:6px;align-items:center;margin-bottom:8px">
+      <input id="productSearch" class="input" placeholder="Search by product name, code, or supplier">
+      <select id="filterCategory" class="input" style="width:160px"><option value="">All Categories</option></select>
+      <button id="btnSearchProducts" class="button icon-only" data-i18n="search_products" title="Search Products">🔍</button>
+    </div>
+    <div id="productsGrid" class="productsGrid" aria-live="polite"></div>
+  </div>
+</div>
+<!-- product modal - enhanced, minimized -->
+<div id="productModal" class="modal" aria-hidden="true">
+  <div class="modalCard" role="dialog" aria-modal="true">
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <div class="media"><img id="modalMainImage" src="/health_vet/uploads/ProductImage/default.png" alt=""></div>
+      <div id="modalThumbs" style="display:flex;gap:6px;overflow:auto"></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:5px">
+      <h3 id="modalTitle" style="font-size:1rem">Product Name</h3>
+      <div class="small" id="modalCode">Code: -</div>
+      <div style="margin-top:4px">
+        <div class="small" style="margin-bottom:3px;font-weight:600;color:var(--muted)" data-i18n="product_details">Product Details</div>
+        <div id="modalDetails" class="modalDetails"></div>
+      </div>
+      <div style="margin-top:6px">
+        <div class="small" style="margin-bottom:4px;font-weight:600;color:var(--muted)" data-i18n="variants">Versions / Variants (with full details)</div>
+        <div id="modalVariants" class="modalVariants"></div>
+      </div>
+      <div style="margin-top:6px" class="row">
+        <div class="col">
+          <label data-i18n="action">Action</label>
+          <select id="modalAction" class="input">
+            <option value="Dispensed" data-i18n="dispensed">Dispensed</option>
+            <option value="Administered" data-i18n="administered">Administered In-Clinic</option>
+            <option value="Prescribed" data-i18n="prescribed">Prescribed</option>
+            <option value="Reserved" data-i18n="reserved">Reserved</option>
+          </select>
+        </div>
+      </div>
+      <!-- Single quantity field for input -->
+      <div style="margin-top:8px">
+        <label><strong data-i18n="amount">Amount (Base Unit)</strong></label>
+        <input id="modalAmount" type="number" step="0.0001" min="0.0001" value="1" class="input" />
+        <div id="amountHelper" class="small" style="margin-top:3px;color:var(--muted)">Enter amount in base unit only (unit auto-selected from database).</div>
+      </div>
+      <div style="margin-top:6px">
+        <label><strong data-i18n="base_unit">Base Unit (from Database)</strong></label>
+        <div id="modalUnitDisplay" class="small" style="padding:6px;border:1px solid var(--border);border-radius:6px;background:#fafafa">-</div>
+      </div>
+      <input type="hidden" id="modalUnit" value="">
+      <input type="hidden" id="modalUnitsPerPack" value="1">
+      <div style="margin-top:8px;display:flex;gap:6px;justify-content:flex-end">
+        <button id="modalClose" class="button ghost icon-only" data-i18n="close" title="Close">❌</button>
+        <button id="modalDispense" class="button icon-only" data-i18n="dispense_to_visit" title="Dispense to Visit">💊</button>
+      </div>
+      <div id="modalMsg" class="small" style="margin-top:6px;color:crimson"></div>
+    </div>
+  </div>
+</div>
+<!-- scanner modal -->
+<div id="scannerModal" class="modal" aria-hidden="true">
+  <div class="modalCard" style="max-width:680px;grid-template-columns:1fr" role="dialog">
+    <h3 style="margin:0 0 6px 0;font-size:1rem" id="scannerTitle" data-i18n="scan_animal">Scan Animal ID</h3>
+    <div class="videoWrap"><video id="videoElement" autoplay playsinline></video></div>
+    <div style="display:flex;justify-content:flex-end;gap:6px;margin-top:6px">
+      <button id="closeScanner" class="button ghost icon-only" data-i18n="close" title="Close">❌</button>
+    </div>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+<script>
+const apiBase = '/health_vet/api/';
+const variantsBase = '/health_vet/api/variants/';
+const languagesPath = '/health_vet/languages/';
+let LANG = localStorage.getItem('hv_lang') || 'en';
+const $ = id => document.getElementById(id);
+let currentProduct = null;
+let currentVariants = [];
+let selectedVariantID = null;
+const optionLabelsCache = {}; // id -> {ar,en}
+let unitsCache = {};
+let doctorsCache = {};
+let currentFacingMode = 'environment'; // default back
+/* I18n loader */
+let TRANSLATIONS = {};
+async function loadTranslations(lang){
+  try {
+    const res = await fetch(`${languagesPath}${lang}_add_visit.json`, { cache:'no-cache' });
+    if (!res.ok) { TRANSLATIONS = {}; return; }
+    TRANSLATIONS = await res.json();
+  } catch(e){ TRANSLATIONS = {}; }
+}
+function t(key, fallback){
+  if (TRANSLATIONS && TRANSLATIONS[key]) return TRANSLATIONS[key];
+  return fallback || key;
+}
+async function applyTranslations(){
+  await loadTranslations(LANG);
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const key = el.getAttribute('data-i18n');
+    const fallback = el.textContent;
+    el.textContent = t(key, fallback);
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el=>{
+    const key = el.getAttribute('data-i18n-placeholder');
+    const fallback = el.getAttribute('placeholder') || '';
+    el.setAttribute('placeholder', t(key, fallback));
+  });
+  document.documentElement.lang = LANG;
+  document.documentElement.dir = LANG==='ar' ? 'rtl' : 'ltr';
+  await loadUnits();
+}
+/* Unit and Doctor helpers */
+function getUnitName(id) {
+  id = String(id).trim();
+  if (!id) return '';
+  return unitsCache[id] || id;
+}
+async function loadUnits() {
+  try {
+    const res = await fetch(`${apiBase}get_units.php?lang=${LANG}`, { credentials:'same-origin' });
+    const j = await res.json();
+    if (j.success && Array.isArray(j.data)) {
+      j.data.forEach(u => {
+        const unitId = String(u.UnitID);
+        unitsCache[unitId] = LANG === 'ar' ? (u.UnitName_AR || u.Name || '') : (u.UnitName_EN || u.Name || '');
+      });
+    }
+  } catch(e) { console.error('loadUnits', e); }
+}
+async function fetchProductDetails(productId) {
+  try {
+    const res = await fetch(`${apiBase}get_product.php?ProductID=${productId}`, { credentials:'same-origin' });
+    const j = await res.json();
+    if (j.success && j.product) {
+      const p = j.product;
+      return {
+        name: (LANG==='ar' ? p.Name_AR : p.Name_EN) || p.Name || p.Product_Code || '',
+        image: p.ProductImage || null
+      };
+    }
+  } catch(e) { console.error('fetchProductDetails', e); }
+  return {name: '', image: null};
+}
+async function fetchVariantDetails(variantId) {
+  try {
+    const res = await fetch(`${variantsBase}get_variant.php?VariantID=${variantId}`, { credentials:'same-origin' });
+    const j = await res.json();
+    if (j.success && j.variant) {
+      const v = j.variant;
+      return {
+        image: v.ProductImage || null
+      };
+    }
+  } catch(e) { console.error('fetchVariantDetails', e); }
+  return {image: null};
+}
+/* Option label helpers */
+function parseOptionIDs(s){
+  if (!s) return [];
+  if (Array.isArray(s)) return s.map(String);
+  return String(s).split(/[,\|;]/).map(x=>x.trim()).filter(Boolean);
+}
+function optionIDsToReadable(ids){
+  if (!ids || !ids.length) return '';
+  const names = ids.map(id => {
+    const e = optionLabelsCache[String(id)];
+    if (!e) return null;
+    return LANG === 'en' ? (e.en || e.ar) : (e.ar || e.en);
+  }).filter(Boolean);
+  return names.join(', ');
+}
+async function fetchOptionLabelsBulk(ids){
+  const missing = ids.filter(id => !(String(id) in optionLabelsCache)).map(String);
+  if (!missing.length) return;
+  try {
+    const res = await fetch(`${variantsBase}option_labels.php?ids=${encodeURIComponent(missing.join(','))}`, { credentials:'same-origin' });
+    const j = await res.json();
+    if (!j || !j.success) return;
+    if (typeof j.data === 'object') {
+      for (const k of Object.keys(j.data)) {
+        const v = j.data[k];
+        if (typeof v === 'string') optionLabelsCache[String(k)] = optionLabelsCache[String(k)] || { ar: v, en: v };
+        else if (v && typeof v === 'object') optionLabelsCache[String(k)] = optionLabelsCache[String(k)] || { ar: v.ar || v.Name_AR || v.Name || String(k), en: v.en || v.Name_EN || v.Name || String(k) };
+      }
+    }
+  } catch(e){ console.error('fetchOptionLabelsBulk', e); }
+}
+async function fetchOptionLabelsFromVariantsProduct(productId){
+  if (!productId) return;
+  try {
+    const res = await fetch(variantsBase + `get_variants.php?product_id=${encodeURIComponent(productId)}`, { credentials:'same-origin' });
+    if (!res.ok) return;
+    const j = await res.json();
+    if (!j || !j.success || !Array.isArray(j.data)) return;
+    j.data.forEach(variant=>{
+      if (Array.isArray(variant.Options)) {
+        variant.Options.forEach(opt=>{
+          const id = opt.OptionID || opt.id || opt.ID;
+          if (!id) return;
+          const ar = opt.Name_AR || opt.Name || opt.Label || '';
+          const en = opt.Name_EN || opt.Name || opt.Label || '';
+          optionLabelsCache[String(id)] = optionLabelsCache[String(id)] || { ar: ar || String(id), en: en || String(id) };
+        });
+      } else {
+        const ids = parseOptionIDs(variant.OptionIDs || variant.OptionID || '');
+        const texts = (variant.OptionTexts || variant.OptionValues || variant.OptionLabels || '').split(',').map(s=>s.trim()).filter(Boolean);
+        if (ids.length && texts.length && ids.length === texts.length) {
+          ids.forEach((id, idx) => optionLabelsCache[String(id)] = optionLabelsCache[String(id)] || { ar: texts[idx], en: texts[idx] });
+        }
+      }
+    });
+  } catch(e){ console.error('fetchOptionLabelsFromVariantsProduct', e); }
+}
+async function ensureOptionLabels(ids, productId=null){
+  const uniq = Array.from(new Set((ids||[]).map(String).filter(Boolean)));
+  if (!uniq.length) return;
+  await fetchOptionLabelsBulk(uniq);
+  const missing = uniq.filter(id => !(String(id) in optionLabelsCache));
+  if (missing.length && productId) await fetchOptionLabelsFromVariantsProduct(productId);
+}
+/* Initialization */
+document.getElementById('langSelect').value = LANG;
+document.getElementById('langSelect').addEventListener('change', async (e)=>{
+  LANG = e.target.value;
+  localStorage.setItem('hv_lang', LANG);
+  await applyTranslations();
+  await loadProducts();
+  const vid = document.getElementById('visit_id').value;
+  if (vid) loadDispensed(vid);
+});
+async function init(){
+  await applyTranslations();
+  await loadAnimalsDatalist();
+  await loadDoctors();
+  await loadCategories();
+  bindUI();
+  const qp = new URLSearchParams(location.search);
+  const id = qp.get('id');
+  if (id) {
+    document.getElementById('visit_id').value = id;
+    await loadVisit(id);
+    loadDispensed(id);
+  }
+  await loadProducts();
+}
+init();
+/* Utilities */
+function escapeHtml(s){ return s==null?'':String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function stockBadgeHtml(q, minQ = 0){
+  const qty = Number(q || 0);
+  if (qty <= 0) return `<span class="stockBadge stock-zero">${t('stock_out','Out of Stock')}</span>`;
+  if (qty <= minQ) return `<span class="stockBadge stock-low">${t('stock_low','Low Stock')}</span>`;
+  return `<span class="stockBadge stock-high">${t('stock_ok','Available')}</span>`;
+}
+/* Load lists */
+async function loadAnimalsDatalist(){
+  try {
+    const res = await fetch(apiBase + 'get_animals.php', { credentials:'same-origin' });
+    const j = await res.json();
+    if (!j.success) return;
+    const dl = $('animals_datalist'); dl.innerHTML = '';
+    (j.data || []).forEach(a => {
+      const opt = document.createElement('option'); opt.value = a.animal_code; opt.text = a.animal_code + (a.animal_name ? ' — ' + a.animal_name : '');
+      dl.appendChild(opt);
+    });
+  } catch(e){ console.error('loadAnimalsDatalist', e); }
+}
+async function loadDoctors(){
+  try {
+    const res = await fetch(apiBase + 'get_doctors.php', { credentials:'same-origin' });
+    const j = await res.json();
+    const sel = $('doctor_empid'); const searchSel = $('search_doctor');
+    sel.innerHTML = `<option value="">${t('choose_doctor','Choose Doctor')}</option>`;
+    searchSel.innerHTML = `<option value="">${t('all_doctors','All Doctors')}</option>`;
+    doctorsCache = {};
+    if (!j.success) return;
+    (j.data||[]).forEach(d => {
+      doctorsCache[d.EmpID] = d.EmpName;
+      sel.innerHTML += `<option value="${d.EmpID}">${escapeHtml(d.EmpName)}</option>`;
+      searchSel.innerHTML += `<option value="${d.EmpID}">${escapeHtml(d.EmpName)}</option>`;
+    });
+  } catch(e){ console.error('loadDoctors', e); }
+}
+async function loadCategories(){
+  try {
+    const res = await fetch(apiBase + 'get_inventory_list.php?lang=ar', { credentials:'same-origin' });
+    const j = await res.json();
+    const sel = $('filterCategory'); if (!j.success) return;
+    sel.innerHTML = `<option value="">${t('all_categories','All Categories')}</option>`;
+    (j.data||[]).filter(x=>x.Type==='Category').forEach(c => sel.innerHTML += `<option value="${c.ItemID}">${escapeHtml(c.Name)}</option>`);
+  } catch(e){ console.error('loadCategories', e); }
+}
+/* Visits search */
+document.getElementById('btnSearchVisits').addEventListener('click', async ()=>{
+  const wrap = $('visitsResults');
+  wrap.innerHTML = `<div class="small">${t('loading','Searching...')}</div>`;
+  try {
+    const res = await fetch(apiBase + 'add_visit.php?action=get_all', { credentials:'same-origin' });
+    const j = await res.json();
+    if (!j.success) { wrap.innerHTML = `<div class="small">${j.message||t('error','Error')}</div>`; return; }
+    let visits = j.visits || [];
+    const ac = $('search_animal_code').value.trim();
+    const df = $('search_date_from')?.value;
+    const dt = $('search_date_to')?.value;
+    const doc = $('search_doctor').value;
+    const vtype = $('search_visit_type').value;
+    const cs = $('search_case_status').value;
+    const as = $('search_animal_status').value;
+    if (ac) visits = visits.filter(v => (v.animal_code||'').toString().includes(ac));
+    if (df) visits = visits.filter(v => (v.visit_date||'').slice(0,10) >= df);
+    if (dt) visits = visits.filter(v => (v.visit_date||'').slice(0,10) <= dt);
+    if (doc) visits = visits.filter(v => String(v.doctor_empid) === String(doc));
+    if (vtype) visits = visits.filter(v => (v.visit_type||'') === vtype);
+    if (cs) visits = visits.filter(v => (v.case_status||'') === cs);
+    if (as) visits = visits.filter(v => (v.animal_status||'') === as);
+    renderVisitsList(visits);
+    if (ac && visits.length === 0) {
+      const ares = await fetch(apiBase + `get_animals.php?code=${encodeURIComponent(ac)}`, { credentials:'same-origin' });
+      const aj = await ares.json();
+      if (aj && aj.success && aj.data && aj.data.length) {
+        wrap.innerHTML = `<div class="small">${t('animal_has_no_visits','Animal exists but no visits')}. <button class="button icon-only" onclick="createVisitForAnimal('${escapeJs(ac)}')" title="Create New Visit">➕</button></div>`;
+      } else {
+        const url = `/health_vet/public/add_animals.html?animal_code=${encodeURIComponent(ac)}`;
+        window.open(url, '_blank');
+        wrap.innerHTML = `<div class="small">${t('animal_not_found','Animal not found. Opening add animal form...')}</div>`;
+      }
+    }
+  } catch(e){ console.error('searchVisits', e); wrap.innerHTML = `<div class="small">${t('failed_fetch_visits','Failed to fetch visits')}</div>`; }
+});
+function renderVisitsList(items){
+  const wrap = $('visitsResults'); wrap.innerHTML = '';
+  if (!items.length) { wrap.innerHTML = `<div class="small">${t('no_visits','No matching visits')}</div>`; return; }
+  items.forEach(v=>{
+    const div = document.createElement('div'); div.className='visitItem';
+    const left = document.createElement('div'); left.className='meta';
+    left.innerHTML = `<div style="font-weight:600">#${v.id} — ${escapeHtml(v.animal_code||'')}</div><div class="small">${escapeHtml(v.visit_date||'')} · ${escapeHtml(v.visit_type||'')} · ${escapeHtml(v.case_status||'')} · ${escapeHtml(v.animal_status||'')}</div>`;
+    const right = document.createElement('div');
+    const btnOpen = document.createElement('button'); btnOpen.className='button ghost icon-only'; btnOpen.innerHTML = '📂'; btnOpen.title = 'Open';
+    btnOpen.addEventListener('click', ()=> { $('visit_id').value = v.id; loadVisit(v.id); loadDispensed(v.id); history.replaceState(null,'','?id=' + v.id); });
+    right.appendChild(btnOpen); div.appendChild(left); div.appendChild(right); wrap.appendChild(div);
+  });
+}
+function escapeJs(s){ return (s||'').replace(/'/g,"\\'").replace(/\n/g,'\\n'); }
+/* Load single visit */
+async function loadVisit(id){
+  $('visitMsg').textContent=''; $('visitErr').textContent='';
+  try {
+    const res = await fetch(apiBase + 'add_visit.php?action=get_all', { credentials:'same-origin' });
+    const j = await res.json();
+    if (!j.success) { $('visitErr').textContent = j.message || t('failed_fetch_visit','Failed to fetch visit'); return; }
+    const visit = (j.visits||[]).find(x=>String(x.id)===String(id));
+    if (!visit) { $('visitErr').textContent = t('visit_not_found','Visit not found'); return; }
+    $('animal_code').value = visit.animal_code || '';
+    $('visit_date').value = (visit.visit_date||'').replace(' ','T').slice(0,16);
+    $('doctor_empid').value = visit.doctor_empid || '';
+    $('visit_type').value = visit.visit_type || 'Checkup';
+    $('symptoms').value = visit.symptoms || '';
+    $('notes').value = visit.notes || '';
+    $('case_status').value = visit.case_status || 'In Progress';
+    $('animal_status').value = visit.animal_status || 'Return';
+  } catch(e){ console.error('loadVisit', e); $('visitErr').textContent = t('error','Error'); }
+}
+/* Create quick visit */
+async function createVisitForAnimal(code){
+  try {
+    const now = new Date(); const iso = now.toISOString().slice(0,16);
+    const fd = new FormData(); fd.set('action','add'); fd.set('animal_code', code); fd.set('visit_date', iso); fd.set('doctor_empid',''); fd.set('visit_type','Checkup'); fd.set('case_status','In Progress'); fd.set('animal_status','Return');
+    const res = await fetch(apiBase + 'add_visit.php', { method:'POST', body: fd, credentials:'same-origin' });
+    const j = await res.json();
+    if (!j.success) return alert(t('create_visit_failed','Failed to create visit') + ': ' + (j.message||''));
+    const vid = j.id || j.insertId || (j.data && (j.data.id||j.data.VisitID));
+    if (vid) { $('visit_id').value = vid; history.replaceState(null,'','?id=' + vid); loadVisit(vid); loadDispensed(vid); alert(t('visit_created','New visit created ID ') + vid); }
+    else alert(t('no_id_returned','Created but server did not return ID'));
+  } catch(e){ console.error('createVisitForAnimal', e); alert(t('create_visit_failed','Failed to create visit')); }
+}
+/* Save visit */
+document.getElementById('visitForm').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  $('visitMsg').textContent=''; $('visitErr').textContent='';
+  const id = $('visit_id').value;
+  const fd = new FormData();
+  fd.set('animal_code', $('animal_code').value.trim());
+  fd.set('visit_date', $('visit_date').value);
+  fd.set('doctor_empid', $('doctor_empid').value);
+  fd.set('visit_type', $('visit_type').value);
+  fd.set('symptoms', $('symptoms').value || '');
+  fd.set('notes', $('notes').value || '');
+  fd.set('case_status', $('case_status').value || 'In Progress');
+  fd.set('animal_status', $('animal_status').value || 'Return');
+  if (id) { fd.set('action','update'); fd.set('id', id); } else fd.set('action','add');
+  const btn = document.getElementById('saveVisit'); btn.disabled = true; btn.innerHTML = '⏳';
+  try {
+    const res = await fetch(apiBase + 'add_visit.php', { method:'POST', body: fd, credentials:'same-origin' });
+    const j = await res.json();
+    if (!j.success) { $('visitErr').textContent = j.message || t('save_failed','Save failed'); return; }
+    const keys = ['id','visit_id','insertId','insert_id','ID','VisitID'];
+    let vid = null;
+    for (const k of keys) if (j[k]) { vid = j[k]; break; }
+    if (!vid && j.data && (j.data.id || j.data.VisitID)) vid = j.data.id || j.data.VisitID;
+    if (vid) { $('visit_id').value = vid; history.replaceState(null,'','?id=' + vid); $('visitMsg').textContent = t('saved_id','Saved · ID: ') + vid; setTimeout(()=> $('visitMsg').textContent='',3000); loadDispensed(vid); }
+    else $('visitErr').textContent = t('no_id_returned','Saved but server did not return visit ID');
+  } catch(err){ console.error('saveVisit', err); $('visitErr').textContent = t('save_failed','Save failed'); }
+  finally{ btn.disabled = false; btn.innerHTML = '💾'; }
+});
+/* Products: load & render */
+document.getElementById('btnSearchProducts').addEventListener('click', loadProducts);
+document.getElementById('productSearch').addEventListener('keydown', (e)=>{ if (e.key === 'Enter') loadProducts(); });
+async function loadProducts(){
+  const q = encodeURIComponent(document.getElementById('productSearch').value.trim());
+  const cat = encodeURIComponent(document.getElementById('filterCategory').value || '');
+  document.getElementById('productsGrid').innerHTML = `<div class="small">${t('loading_products','Loading...')}</div>`;
+  try {
+    const res = await fetch(`${apiBase}get_products.php?lang=ar&per_page=50&q=${q}&category=${cat}`, { credentials:'same-origin' });
+    const j = await res.json();
+    if (!j.success) { document.getElementById('productsGrid').innerHTML = `<div class="small">${j.message||t('failed_products','Error')}</div>`; return; }
+    await renderProducts(j.data || []);
+  } catch(e){ console.error('loadProducts', e); document.getElementById('productsGrid').innerHTML = `<div class="small">${t('failed_products','Load failed')}</div>`; }
+}
+async function renderProducts(items){
+  const grid = document.getElementById('productsGrid'); grid.innerHTML = '';
+  if (!items.length) { grid.innerHTML = `<div class="small">${t('no_products','No results')}</div>`; return; }
+  const preloadIds = new Set();
+  items.forEach(p=>{
+    if (p.OptionIDs) parseOptionIDs(p.OptionIDs).forEach(id => preloadIds.add(id));
+    if (Array.isArray(p.Attributes)) {
+      p.Attributes.forEach(a => {
+        if (Array.isArray(a.Options)) a.Options.forEach(o=>{
+          const id = o.OptionID || o.id || o.ID;
+          if (id && !(String(id) in optionLabelsCache)) optionLabelsCache[String(id)] = { ar: o.Name_AR || o.Label || o.Name || String(id), en: o.Name_EN || o.Label || o.Name || String(id) };
+        });
+      });
+    }
+  });
+  if (preloadIds.size) await ensureOptionLabels(Array.from(preloadIds));
+  for (const p of items){
+    const card = document.createElement('div'); card.className='productCard';
+    const thumb = document.createElement('div'); thumb.className='productThumb';
+    if (p.ProductImage) { const img = document.createElement('img'); img.src = `/health_vet/uploads/ProductImage/${p.ProductImage}`; img.alt = p.Product_Code || ''; thumb.appendChild(img); } else thumb.textContent='-';
+    card.appendChild(thumb);
+    const meta = document.createElement('div'); meta.className='productMeta';
+    const title = document.createElement('div'); title.className='productTitle';
+    title.textContent = (LANG==='en') ? (p.Name_EN || p.Name_AR || p.Product_Code) : (p.Name_AR || p.Name_EN || p.Product_Code);
+    meta.appendChild(title);
+    const specs = document.createElement('div'); specs.className='productSpecs';
+    const lines = [];
+    if (p.Quantity !== undefined) lines.push(`${t('available','Available')}: ${p.Quantity || 0}`);
+    if (p.MinQuantity) lines.push(`${t('min_quantity','Min Quantity')}: ${p.MinQuantity}`);
+    const baseUnitId = p.BaseUnitRaw || p.BaseUnitID || p.Default_BaseUnit;
+    if (baseUnitId) {
+      const bu = getUnitName(baseUnitId);
+      if (bu) lines.push(`${t('base_unit','Base Unit')}: ${bu}`);
+    }
+    if (p.Supplier) lines.push(p.Supplier);
+    specs.textContent = lines.join(' · ');
+    meta.appendChild(specs);
+    card.appendChild(meta);
+    const actions = document.createElement('div'); actions.style.alignSelf='end';
+    const btn = document.createElement('button'); btn.className='button icon-only'; btn.innerHTML = '📋'; btn.title = 'Details / Dispense';
+    btn.addEventListener('click', ()=> openProductModal(p.Product_ID, true));
+    actions.appendChild(btn); card.appendChild(actions);
+    grid.appendChild(card);
+    fetchOptionLabelsFromVariantsProduct(p.Product_ID).catch(()=>{});
+  }
+}
+/* Product modal - modified for auto-selection and full details with new API */
+document.getElementById('modalClose').addEventListener('click', ()=> { hideModal(); clearModalEditState(); });
+function showModal(){ document.getElementById('productModal').classList.add('show'); document.getElementById('productModal').setAttribute('aria-hidden','false'); }
+function hideModal(){ document.getElementById('productModal').classList.remove('show'); document.getElementById('productModal').setAttribute('aria-hidden','true'); }
+async function openProductModal(productID, quickOpen=false){
+  document.getElementById('modalMsg').textContent=''; document.getElementById('modalTitle').textContent = t('loading','Loading...');
+  document.getElementById('modalVariants').innerHTML=''; document.getElementById('modalThumbs').innerHTML='';
+  document.getElementById('modalMainImage').src = '/health_vet/uploads/ProductImage/default.png';
+  selectedVariantID = null; currentProduct = null; currentVariants = [];
+  document.getElementById('modalUnitDisplay').textContent = '-';
+  try {
+    // Fetch product details
+    const productRes = await fetch(apiBase + `get_product.php?ProductID=${encodeURIComponent(productID)}`, { credentials:'same-origin' });
+    const pj = await productRes.json();
+    if (!pj.success) { document.getElementById('modalMsg').textContent = pj.message || t('failed_product','Failed to load product'); showModal(); return; }
+    currentProduct = pj.product || {};
+    // Fetch variants with resolved units from new API
+    const variantsRes = await fetch(`${apiBase}get_variants_with_unit_names.php?product_id=${encodeURIComponent(productID)}&lang=${LANG}`, { credentials:'same-origin' });
+    const vj = await variantsRes.json();
+    if (vj.success) {
+      currentVariants = vj.variants || [];
+    } else {
+      console.warn('Variants fetch failed, falling back to product variants if any:', vj.message);
+      currentVariants = pj.variants || [];
+    }
+    document.getElementById('modalTitle').textContent = (LANG==='en') ? (currentProduct.Name_EN || currentProduct.Name_AR || currentProduct.Product_Code) : (currentProduct.Name_AR || currentProduct.Name_EN || currentProduct.Product_Code);
+    document.getElementById('modalCode').textContent = `${t('code','Code')}: ${currentProduct.Product_Code || '-'}`;
+    if (currentProduct.ProductImage) {
+      document.getElementById('modalMainImage').src = `/health_vet/uploads/ProductImage/${currentProduct.ProductImage}`;
+      const thumb = document.createElement('img'); thumb.className='thumb'; thumb.src = `/health_vet/uploads/ProductImage/${currentProduct.ProductImage}`; thumb.style.width='50px'; thumb.style.height='50px';
+      thumb.addEventListener('click', ()=> document.getElementById('modalMainImage').src = thumb.src);
+      document.getElementById('modalThumbs').appendChild(thumb);
+    }
+    let detailsText = (LANG==='en') ? (currentProduct.Description_EN || currentProduct.Description || '') : (currentProduct.Description || currentProduct.ShortDescription || '');
+    detailsText += `\n${t('min_quantity','Min Quantity')}: ${currentProduct.MinQuantity || 0}`;
+    document.getElementById('modalDetails').textContent = detailsText;
+    const allIds = [];
+    currentVariants.forEach(v => parseOptionIDs(v.OptionIDs || v.OptionID || '').forEach(id => allIds.push(id)));
+    if (allIds.length) await ensureOptionLabels(Array.from(new Set(allIds)), productID);
+    const variantsWrap = document.getElementById('modalVariants'); variantsWrap.innerHTML = '';
+    if (currentVariants && currentVariants.length) {
+      currentVariants.forEach(v=>{
+        const row = document.createElement('div'); row.className='variantRow';
+        const left = document.createElement('div');
+        const variantName = v.SKU || v.VariantName || ('Variant ' + (v.VariantID||''));
+        const ids = parseOptionIDs(v.OptionIDs || v.OptionID || '');
+        const readable = optionIDsToReadable(ids);
+        left.innerHTML = `<div style="font-weight:600">${escapeHtml(variantName)}</div><div class="small">${escapeHtml(readable)}</div>`;
+        const meta = document.createElement('div'); meta.className='variantMeta';
+        const qty = Number(v.Quantity || currentProduct.Quantity || 0);
+        const minQty = Number(v.MinQuantity || 0);
+        meta.innerHTML = `${stockBadgeHtml(qty, minQty)}<div class="small">${t('remaining','Remaining')}: ${qty}</div><div class="small">${t('min_quantity','Min Quantity')}: ${minQty}</div>`;
+        if (v.ExpiryDate) meta.innerHTML += `<div class="small expiryBadge">${t('expiry','Expiry')}: ${v.ExpiryDate}</div>`;
+        meta.innerHTML += `<div class="small">${t('base_unit','Base Unit')}: ${v.unit_label || v.BaseUnitRaw || ''}</div><div class="small">${t('units_per_pack','Units per Pack')}: ${v.UnitsPerPack || 1}</div>`;
+        const right = document.createElement('div');
+        if (v.ProductImage) {
+          const btnView = document.createElement('button'); btnView.className='button ghost icon-only'; btnView.innerHTML = '🖼️'; btnView.title = 'View Image';
+          btnView.addEventListener('click', ()=> document.getElementById('modalMainImage').src = `/health_vet/uploads/ProductImage/${v.ProductImage}`);
+          right.appendChild(btnView);
+          // Add variant thumb
+          const vthumb = document.createElement('img'); vthumb.className='thumb'; vthumb.src = `/health_vet/uploads/ProductImage/${v.ProductImage}`; vthumb.style.width='50px'; vthumb.style.height='50px'; vthumb.style.marginTop='4px';
+          vthumb.addEventListener('click', ()=> document.getElementById('modalMainImage').src = vthumb.src);
+          document.getElementById('modalThumbs').appendChild(vthumb);
+        } else {
+          const disabledView = document.createElement('button'); disabledView.className='button ghost icon-only'; disabledView.disabled=true; disabledView.innerHTML = '📷'; disabledView.title = 'No Image';
+          right.appendChild(disabledView);
+        }
+        const btnChoose = document.createElement('button'); btnChoose.className='button ghost icon-only'; btnChoose.innerHTML = '✅'; btnChoose.title = 'Choose';
+        btnChoose.addEventListener('click', ()=> {
+          selectedVariantID = v.VariantID || v.Id || v.VariantID;
+          variantsWrap.querySelectorAll('.variantRow').forEach(r=> r.style.borderColor='#f6f6f6');
+          row.style.borderColor = 'var(--brand)';
+          const baseUnit = v.unit_label || v.BaseUnitRaw || '';
+          const unitsPerPack = Number(v.UnitsPerPack || 1);
+          document.getElementById('modalUnit').value = baseUnit;
+          document.getElementById('modalUnitsPerPack').value = unitsPerPack;
+          document.getElementById('modalUnitDisplay').textContent = `${baseUnit} (1 pack = ${unitsPerPack})`;
+          document.getElementById('amountHelper').textContent = `Enter amount in base unit (${baseUnit}) only.`;
+          document.getElementById('modalMsg').textContent = t('variant_selected','Variant auto-selected with full details');
+        });
+        right.appendChild(btnChoose);
+        row.appendChild(left); row.appendChild(meta); row.appendChild(right);
+        variantsWrap.appendChild(row);
+      });
+      // Auto-select first available variant (no manual required if possible)
+      if (!selectedVariantID) {
+        const firstAvail = currentVariants.find(x=> Number(x.Quantity||0) > 0) || currentVariants[0];
+        if (firstAvail) {
+          selectedVariantID = firstAvail.VariantID || firstAvail.Id || firstAvail.VariantID;
+          const firstRow = variantsWrap.querySelector('.variantRow');
+          if (firstRow) firstRow.style.borderColor = 'var(--brand)';
+          // Set fields automatically
+          const baseUnit = firstAvail.unit_label || firstAvail.BaseUnitRaw || '';
+          const unitsPerPack = Number(firstAvail.UnitsPerPack || 1);
+          document.getElementById('modalUnit').value = baseUnit;
+          document.getElementById('modalUnitsPerPack').value = unitsPerPack;
+          document.getElementById('modalUnitDisplay').textContent = `${baseUnit} (1 pack = ${unitsPerPack})`;
+          document.getElementById('amountHelper').textContent = `Enter amount in base unit (${baseUnit}) only.`;
+          document.getElementById('modalMsg').textContent = t('auto_selected','Available variant auto-selected');
+        }
+      }
+      // Load doctor defaults if doctor selected
+      const doctor = $('doctor_empid').value;
+      if (doctor && currentProduct.Product_ID) {
+        try {
+          const dres = await fetch(`${apiBase}get_doctor_product.php?EmpID=${encodeURIComponent(doctor)}&ProductID=${encodeURIComponent(currentProduct.Product_ID)}`, {credentials:'same-origin'});
+          const dj = await dres.json();
+          if (dj.success && dj.data) {
+            document.getElementById('modalAmount').value = dj.data.DefaultQty || 1;
+            document.getElementById('modalAction').value = dj.data.DefaultAction || 'Dispensed';
+            document.getElementById('modalMsg').textContent += ` | ${t('defaults_loaded','Doctor defaults loaded')}`;
+          }
+        } catch(e){ console.error('Doctor defaults load failed', e); }
+      }
+    } else {
+      const baseUnitId = currentProduct.BaseUnitRaw || currentProduct.Default_BaseUnitID || currentProduct.Default_BaseUnit;
+      const baseUnit = getUnitName(baseUnitId) || currentProduct.Default_BaseUnit || '';
+      variantsWrap.innerHTML = `<div class="small">${t('no_variants','No variants available')}. ${t('general_qty','General Quantity')}: ${currentProduct.Quantity ?? 0} | ${t('min_quantity','Min Quantity')}: ${currentProduct.MinQuantity || 0} | ${t('base_unit','Base Unit')}: ${baseUnit}</div>`;
+      document.getElementById('modalUnit').value = baseUnit;
+      document.getElementById('modalUnitsPerPack').value = 1;
+      document.getElementById('modalUnitDisplay').textContent = `${baseUnit}`;
+    }
+    showModal();
+  } catch(e){ console.error('openProductModal', e); document.getElementById('modalMsg').textContent = t('failed_product','Failed to load product'); showModal(); }
+}
+/* Delete Visit Full */
+document.getElementById('btnDeleteVisit').addEventListener('click', async function(){
+  const vid = document.getElementById('visit_id').value;
+  if (!vid) return alert(t('select_visit_first','Select or save visit first'));
+  if (!confirm(t('confirm_delete_full','Warning: This will delete the visit and all related records (dispensed products, transactions...). Proceed?'))) return;
+  try {
+    const fd = new FormData();
+    fd.set('VisitID', vid);
+    const res = await fetch('/health_vet/api/delete_visit_full.php', { method: 'POST', body: fd, credentials: 'same-origin' });
+    const j = await res.json().catch(()=>null);
+    if (!res.ok || !j || !j.success) {
+      const text = j && j.message ? j.message : 'Failed to delete visit or invalid server response';
+      alert(text);
+      return;
+    }
+    alert(j.message || t('deleted','Deleted successfully'));
+    window.location.href = '/health_vet/public/add_visit.html';
+  } catch (err) {
+    console.error('delete visit error', err);
+    alert(t('delete_failed','Delete error, check server logs'));
+  }
+});
+/* Dispense action - simplified, no pack conversion needed as base only */
+document.getElementById('modalDispense').addEventListener('click', async ()=>{
+  document.getElementById('modalMsg').textContent='';
+  const visitId = document.getElementById('visit_id').value;
+  if (!visitId) { document.getElementById('modalMsg').textContent = t('save_visit_first','Save visit first or select one'); return; }
+  const amountBase = parseFloat(document.getElementById('modalAmount').value) || 0;
+  if (amountBase <= 0) { document.getElementById('modalMsg').textContent = t('enter_valid_amount','Enter valid amount'); return; }
+  if (!currentProduct || !currentProduct.Product_ID) { document.getElementById('modalMsg').textContent = t('select_product_first','Select product first'); return; }
+  if (!selectedVariantID && currentVariants.length > 0) { document.getElementById('modalMsg').textContent = t('select_variant','Variant auto-selected, check'); return; }
+  const baseUnitLabel = document.getElementById('modalUnit').value || '';
+  if (!baseUnitLabel) { document.getElementById('modalMsg').textContent = t('select_unit','Unit auto-selected'); return; }
+  let selectedVariant = null;
+  if (selectedVariantID) {
+    selectedVariant = currentVariants.find(v => String(v.VariantID || v.Id) === String(selectedVariantID));
+  }
+  const variantBaseUnit = (selectedVariant && (selectedVariant.unit_label || selectedVariant.BaseUnitRaw)) ? (selectedVariant.unit_label || selectedVariant.BaseUnitRaw) : (currentProduct && currentProduct.Default_BaseUnit ? currentProduct.Default_BaseUnit : '');
+  if (variantBaseUnit && variantBaseUnit !== baseUnitLabel) {
+    if (!confirm(`${t('unit_mismatch_warning','Product base unit is')}: "${variantBaseUnit}". ${t('continue_with','You are dispensing in unit')}: "${baseUnitLabel}". ${t('confirm_continue','Continue?')}`)) return;
+  }
+  const fd = new FormData();
+  fd.set('VisitID', visitId);
+  fd.set('ProductID', currentProduct.Product_ID);
+  if (selectedVariantID) fd.set('VariantID', selectedVariantID);
+  fd.set('Amount', String(amountBase));
+  fd.set('Unit', baseUnitLabel);
+  fd.set('Action', document.getElementById('modalAction').value || 'Dispensed');
+  const editId = document.getElementById('modalDispense').dataset.editId;
+  if (editId) fd.set('VisitProductID', String(editId));
+  const btn = document.getElementById('modalDispense');
+  if (btn.dataset.processing === '1') return;
+  btn.dataset.processing = '1';
+  btn.disabled = true; btn.innerHTML = '⏳';
+  try {
+    const res = await fetch(apiBase + 'visit_dispense_with_units.php', { method:'POST', body: fd, credentials:'same-origin' });
+    const j = await res.json();
+    if (!j.success) { document.getElementById('modalMsg').textContent = j.message || t('dispense_failed','Dispense failed'); return; }
+    await loadDispensed(visitId);
+    await loadProducts();
+    hideModal();
+    window.dispatchEvent(new Event('visitDispensed'));
+    if (selectedVariantID && currentProduct.Product_ID) {
+      console.log('Stock updated for variant:', selectedVariantID);
+    }
+  } catch(e){ console.error('modalDispense', e); document.getElementById('modalMsg').textContent = t('server_error','Server error'); }
+  finally{
+    btn.dataset.processing = '0';
+    btn.disabled = false; btn.innerHTML = '💊';
+  }
+});
+/* Load dispensed items - enhanced with unit and expiry */
+document.getElementById('btnRefresh').addEventListener('click', ()=> { const vid = document.getElementById('visit_id').value; if (!vid) return alert(t('select_visit','Select or save visit')); loadDispensed(vid); });
+async function loadDispensed(visitId){
+  if (!visitId) return;
+  const tbody = document.getElementById('dispensedTbody');
+  tbody.innerHTML = `<tr><td colspan="9" class="small">${t('loading','Loading...')}</td></tr>`;
+  try {
+    const res = await fetch(apiBase + `visit_dispense_with_units.php?VisitID=${encodeURIComponent(visitId)}`, { credentials:'same-origin' });
+    const j = await res.json();
+    if (!j.success) { tbody.innerHTML = `<tr><td colspan="9" class="small">${j.message||t('error','Error')}</td></tr>`; return; }
+    let rows = j.data || [];
+    const allIds = [];
+    rows.forEach(r => parseOptionIDs(r.OptionIDs || r.SKUOptionIDs || r.SKU || '').forEach(id => allIds.push(id)));
+    if (allIds.length) await ensureOptionLabels(Array.from(new Set(allIds)));
+    // Resolve units and doctors
+    rows.forEach(r => {
+      const unitId = r.UnitID || r.ResolvedUnitID || r.Unit || '';
+      r.resolvedUnit = getUnitName(unitId);
+      r.doctorName = doctorsCache[r.EmpID] || r.EmpName || r.EmpID || '';
+    });
+    // Fetch missing product details
+    const missingProducts = rows.filter(r => !r.ProductName).map(r => r.ProductID).filter(Boolean);
+    const uniqueProducts = [...new Set(missingProducts)];
+    const detailsMap = {};
+    for (const pid of uniqueProducts) {
+      const details = await fetchProductDetails(pid);
+      detailsMap[pid] = details;
+    }
+    // Fetch missing variant details for images
+    const missingVariants = rows.filter(r => r.VariantID && !r.ProductImage).map(r => r.VariantID).filter(Boolean);
+    const uniqueVariants = [...new Set(missingVariants)];
+    const variantDetailsMap = {};
+    for (const vid of uniqueVariants) {
+      const vdetails = await fetchVariantDetails(vid);
+      variantDetailsMap[vid] = vdetails;
+    }
+    rows.forEach(r => {
+      if (!r.ProductName) {
+        const details = detailsMap[r.ProductID];
+        if (details) {
+          r.ProductName = details.name;
+          if (!r.ProductImage) r.ProductImage = details.image;
+        }
+      }
+      if (r.VariantID) {
+        const vdetails = variantDetailsMap[r.VariantID];
+        if (vdetails) {
+          if (!r.ProductImage && vdetails.image) r.ProductImage = vdetails.image;
+        }
+      }
+      if (!r.ProductImage) r.ProductImage = 'default.png';
+    });
+    if (!rows.length) { tbody.innerHTML = `<tr><td colspan="9" class="small">${t('no_dispensed','No dispensed items')}</td></tr>`; return; }
+    tbody.innerHTML = '';
+    rows.forEach(r=>{
+      const tr = document.createElement('tr');
+      const img = r.ProductImage ? `<img src="/health_vet/uploads/ProductImage/${r.ProductImage}" class="thumb" alt="">` : '<div class="thumb" style="background:#f5f5f5">—</div>';
+      const sku = r.SKU || r.OptionIDs || 'General';
+      const ids = parseOptionIDs(r.OptionIDs || r.SKUOptionIDs || r.SKU || '');
+      const composition = ids.length ? optionIDsToReadable(ids) : '';
+      const baseQty = Number(r.BaseQuantity ?? r.Quantity ?? r.Amount ?? 0).toFixed(4);
+      const unit = r.resolvedUnit || r.Unit || '';
+      tr.innerHTML = `<td>${img}</td>
+                      <td>${escapeHtml(r.ProductName)}</td>
+                      <td>${escapeHtml(composition || sku)}</td>
+                      <td>${baseQty}</td>
+                      <td>${unit}</td>
+                      <td>${escapeHtml(r.Action||'')}</td>
+                      <td>${escapeHtml(r.doctorName)}</td>
+                      <td>${r.CreatedAt || ''}</td>
+                      <td class="no-print">
+                        <button class="button ghost icon-only" data-id="${r.VisitProductID}" onclick="editDispensed(event)" title="Edit">✏️</button>
+                        <button class="button ghost delete-icon icon-only" data-id="${r.VisitProductID}" onclick="deleteDispensed(event)" title="Delete">🗑️</button>
+                      </td>`;
+      tbody.appendChild(tr);
+    });
+  } catch(e){ console.error('loadDispensed', e); tbody.innerHTML = `<tr><td colspan="9" class="small">${t('failed_load_items','Failed to load items')}</td></tr>`; }
+}
+/* Edit/Delete dispensed */
+window.editDispensed = async function(e){
+  const id = e.currentTarget.dataset.id; if (!id) return;
+  const vid = document.getElementById('visit_id').value; if (!vid) return alert(t('save_visit_first','Save visit first'));
+  try {
+    const res = await fetch(`${apiBase}visit_dispense_with_units.php?VisitProductID=${encodeURIComponent(id)}`, { credentials:'same-origin' });
+    const j = await res.json();
+    if (!j.success) return alert(t('fetch_failed','Failed to fetch data') + ': ' + j.message);
+    const data = j.data;
+    if (!data) return alert(t('item_not_found','Item not found'));
+    const unitId = data.UnitID || data.ResolvedUnitID || data.Unit || '';
+    const editUnit = getUnitName(unitId);
+    await openProductModal(data.ProductID, false);
+    selectedVariantID = data.VariantID || null;
+    document.getElementById('modalAmount').value = Number(data.BaseQuantity ?? data.Quantity ?? data.Amount ?? 1);
+    document.getElementById('modalUnit').value = editUnit;
+    document.getElementById('modalUnitsPerPack').value = Number(data.UnitsPerPack || 1);
+    document.getElementById('modalUnitDisplay').textContent = `${editUnit} (1 pack = ${data.UnitsPerPack || 1})`;
+    document.getElementById('amountHelper').textContent = `Enter amount in base unit (${editUnit}) only.`;
+    document.getElementById('modalAction').value = data.Action || 'Dispensed';
+    document.getElementById('modalDispense').dataset.editId = id;
+    document.getElementById('modalDispense').innerHTML = '💾';
+    // Auto-highlight selected variant row
+    const variantsWrap = document.getElementById('modalVariants');
+    setTimeout(() => {
+      const selectedRow = Array.from(variantsWrap.querySelectorAll('.variantRow')).find(row => {
+        const v = currentVariants.find(cv => String(cv.VariantID || cv.Id) === String(selectedVariantID));
+        return v && row.textContent.includes(v.SKU || v.VariantID);
+      });
+      if (selectedRow) selectedRow.style.borderColor = 'var(--brand)';
+    }, 100);
+    showModal();
+  } catch(e){ console.error('editDispensed', e); alert(t('error','Error')); }
+};
+window.deleteDispensed = async function(e){
+  const id = e.currentTarget.dataset.id; if (!id) return;
+  if (!confirm(t('confirm_delete','Delete this dispense and restore stock?'))) return;
+  const visitId = document.getElementById('visit_id').value;
+  try {
+    const fd = new FormData();
+    fd.set('VisitProductID', String(id));
+    fd.set('Action', 'Delete');
+    const res = await fetch(apiBase + 'visit_dispense_with_units.php', { method:'POST', body: fd, credentials:'same-origin' });
+    const j = await res.json();
+    if (!j.success) return alert(j.message || t('delete_failed','Delete failed'));
+    alert(j.message || t('deleted','Deleted'));
+    if (visitId) loadDispensed(visitId);
+  } catch(e){ console.error('deleteDispensed', e); alert(t('delete_failed','Delete error')); }
+};
+/* Scanner */
+document.getElementById('openScannerBack').addEventListener('click', () => openScanner('search', 'environment'));
+document.getElementById('openScannerFront').addEventListener('click', () => openScanner('search', 'user'));
+document.getElementById('closeScanner').addEventListener('click', closeScanner);
+let videoStream = null, scanInterval = null;
+let currentScanMode = 'search'; // 'search' or 'register'
+async function openScanner(mode = 'search', facing = 'environment'){
+  currentScanMode = mode;
+  currentFacingMode = facing;
+  document.getElementById('scannerTitle').textContent = mode === 'register' ? t('scan_for_register','Scan animal ID for registration') : t('scan_animal','Scan Animal ID');
+  document.getElementById('scannerModal').classList.add('show'); document.getElementById('scannerModal').setAttribute('aria-hidden','false');
+  try {
+    videoStream = await navigator.mediaDevices.getUserMedia({ video:{ facingMode: facing }});
+    const v = document.getElementById('videoElement'); v.srcObject = videoStream; v.play();
+    scanInterval = setInterval(scanFrame, 250);
+  } catch(e){ console.error('openScanner', e); alert(t('camera_error','Failed to access camera, check browser permissions')); closeScanner(); }
+}
+function closeScanner(){
+  if (scanInterval) clearInterval(scanInterval);
+  if (videoStream) { videoStream.getTracks().forEach(t=>t.stop()); videoStream=null; }
+  const v = document.getElementById('videoElement'); if (v) { v.pause(); v.srcObject = null; }
+  document.getElementById('scannerModal').classList.remove('show'); document.getElementById('scannerModal').setAttribute('aria-hidden','true');
+}
+async function scanFrame(){
+  const v = document.getElementById('videoElement'); if (!v || v.readyState !== v.HAVE_ENOUGH_DATA) return;
+  const c = document.createElement('canvas'); c.width = v.videoWidth; c.height = v.videoHeight;
+  const ctx = c.getContext('2d'); ctx.drawImage(v,0,0,c.width,c.height);
+  const img = ctx.getImageData(0,0,c.width,c.height);
+  const code = jsQR(img.data, img.width, img.height);
+  if (code && code.data) {
+    closeScanner();
+    const scanned = code.data.trim();
+    if (currentScanMode === 'register') {
+      document.getElementById('reg_animal_code').value = scanned;
+    } else {
+      document.getElementById('search_animal_code').value = scanned;
+      document.getElementById('animal_code').value = scanned;
+      const found = await tryFindAnimalOrRegister(scanned);
+      if (found) {
+        document.getElementById('btnSearchVisits').click();
+      }
+    }
+  }
+}
+/* Find animal or register */
+async function tryFindAnimalOrRegister(code){
+  try {
+    const res = await fetch(apiBase + `get_animals.php?code=${encodeURIComponent(code)}`, { credentials:'same-origin' });
+    const j = await res.json();
+    if (j && j.success && j.data && j.data.length) { document.getElementById('animal_code').value = code; await loadAnimalsDatalist(); return true; }
+    const url = `/health_vet/public/add_animals.html?animal_code=${encodeURIComponent(code)}`;
+    window.open(url, '_blank');
+    return false;
+  } catch(e){ console.error('tryFindAnimalOrRegister', e); 
+    const url = `/health_vet/public/add_animals.html?animal_code=${encodeURIComponent(code)}`;
+    window.open(url, '_blank');
+    return false; 
+  }
+}
+/* Bind UI and helpers */
+function bindUI(){
+  document.getElementById('btnSearchProducts').addEventListener('click', loadProducts);
+  document.getElementById('productSearch').addEventListener('keydown', (e)=> { if (e.key === 'Enter') loadProducts(); });
+  window.addEventListener('visitDispensed', ()=> { const vid = document.getElementById('visit_id').value; if (vid) loadDispensed(vid); });
+  document.getElementById('btnPrintArea').addEventListener('click', ()=> window.print());
+  document.getElementById('clearAnimalCode').addEventListener('click', () => { document.getElementById('animal_code').value = ''; });
+}
+/* Clear modal edit state */
+function clearModalEditState(){
+  delete $('modalDispense').dataset.editId;
+  $('modalDispense').dataset.processing = '0';
+  $('modalDispense').innerHTML = '💊';
+  $('modalMsg').textContent='';
+  $('modalAmount').value = 1;
+  $('modalUnit').value = '';
+  $('modalUnitsPerPack').value = 1;
+  $('modalUnitDisplay').textContent = '-';
+  $('amountHelper').textContent = 'Enter amount in base unit only (unit auto-selected from database).';
+}
+</script>
+</body>
+</html>

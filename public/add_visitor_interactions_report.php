@@ -1,0 +1,833 @@
+<?php
+// ضع هذا في أعلى add_reserved_report.php (أو أي تقرير .php)
+require_once __DIR__ . '/../api/verify_report_token.php';
+// دعم $payload من verify (بعض النسخ تضعه في $GLOBALS)
+if (!isset($payload) && isset($GLOBALS['payload'])) $payload = $GLOBALS['payload'] ?? null;
+if (empty($payload) || !is_array($payload)) {
+    http_response_code(403);
+    echo "<h2>عذراً، الرابط غير صالح أو انتهت صلاحيته.</h2>";
+    exit;
+}
+$record_id = (int)($payload['record_id'] ?? 0);
+$token = $_GET['token'] ?? $_POST['token'] ?? '';
+// سجّل الاستخدام
+if ($token) {
+    if ($stmt = $conn->prepare("UPDATE report_tokens SET used_at = NOW() WHERE token = ?")) {
+        $stmt->bind_param('s', $token);
+        $stmt->execute();
+        $stmt->close();
+    }
+}
+?>
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>تقرير تفاعل الزائر مع الحيوانات - Visitor Interaction Report</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        /* تنسيقات للطباعة في صفحة واحدة A4 بخط صغير، ثنائي اللغة */
+        :root {
+            --primary-color: #384F30;
+            --secondary-color: #AA9556;
+            --light-tone: #f8ffef;
+            --border-color: #dee2e6;
+            --text-color: #343a40;
+        }
+        @page { size: A4 portrait; margin: 0.5cm; }
+        body {
+            font-family: 'Arial', sans-serif;
+            font-size: 8px; /* خط صغير للتناسب في صفحة واحدة */
+            line-height: 1.2;
+            color: var(--text-color);
+            margin: 0; padding: 0;
+            background-color: white;
+        }
+        .report-container {
+            width: 19.5cm;
+            margin: 0 auto;
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 4px;
+            margin-bottom: 8px;
+        }
+        .logo { height: 35px; width: auto; object-fit: contain; }
+        .header-title {
+            flex-grow: 1;
+            text-align: center;
+            color: var(--primary-color);
+        }
+        .header-title h1 {
+            font-size: 12px;
+            margin-bottom: 1px;
+            font-weight: 700;
+            text-align: center;
+        }
+        .header-title p {
+            color: var(--secondary-color);
+            font-size: 7px;
+            margin: 0;
+            text-align: center;
+        }
+        .header-title .h6 {
+            font-size: 8px;
+            margin-top: 2px !important;
+            text-align: center;
+        }
+        .section-title {
+            background-color: var(--primary-color);
+            color: white;
+            font-size: 9px;
+            font-weight: bold;
+            padding: 2px 6px;
+            margin-top: 6px;
+            border-radius: 2px 2px 0 0;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+        .section-title:before,
+        .section-title:after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: white;
+            margin: 0 5px;
+        }
+        .content-row {
+            padding: 0;
+            border-bottom: 1px dashed #eee;
+            margin-bottom: 2px;
+            display: flex;
+            align-items: stretch;
+            min-height: 20px;
+        }
+        .col-ar {
+            flex: 1;
+            border: 1px solid var(--border-color);
+            border-left: none;
+            padding: 2px 4px;
+            text-align: center;
+            direction: rtl;
+            unicode-bidi: plaintext;
+            font-weight: bold;
+            font-size: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .col-value {
+            flex: 1;
+            border: 1px solid var(--border-color);
+            border-left: none;
+            padding: 2px 4px;
+            text-align: center;
+            direction: ltr;
+            font-size: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--light-tone);
+        }
+        .col-en {
+            flex: 1;
+            border: 1px solid var(--border-color);
+            padding: 2px 4px;
+            text-align: center;
+            direction: ltr;
+            unicode-bidi: plaintext;
+            font-weight: bold;
+            font-size: 7px;
+            color: var(--secondary-color);
+            font-style: italic;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .checkbox-options {
+            display: flex;
+            gap: 10px;
+            font-size: 7px;
+            direction: ltr;
+        }
+        .checkbox-options span {
+            min-width: 35px;
+            text-align: center;
+            padding: 1px 3px;
+            border-radius: 2px;
+            background: white;
+            border: 1px solid var(--border-color);
+        }
+        .radio-options {
+            display: flex;
+            gap: 10px;
+            font-size: 7px;
+            direction: ltr;
+        }
+        .radio-options span {
+            min-width: 35px;
+            text-align: center;
+            padding: 1px 3px;
+            border-radius: 2px;
+            background: white;
+            border: 1px solid var(--border-color);
+        }
+        .textarea-field {
+            min-height: 20px;
+            border: 1px dotted #ccc;
+            padding: 2px;
+            font-size: 8px;
+            background: var(--light-tone);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            width: 100%;
+        }
+        .textarea-field .value-ar {
+            text-align: center;
+            direction: rtl;
+            unicode-bidi: plaintext;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        .textarea-field .value-en {
+            text-align: center;
+            direction: ltr;
+            unicode-bidi: plaintext;
+            color: var(--secondary-color);
+            font-style: italic;
+        }
+        .declaration-ar, .declaration-en {
+            border: 1px solid var(--secondary-color);
+            padding: 6px;
+            margin-top: 8px;
+            background-color: #fffaf0;
+            font-size: 7px;
+            line-height: 1.3;
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+        }
+        .declaration-ar ul {
+            list-style-type: disc;
+            padding-right: 12px;
+            margin-top: 3px;
+            direction: rtl;
+            flex-grow: 1;
+        }
+        .declaration-ar li {
+            margin-bottom: 2px;
+            direction: rtl;
+        }
+        .declaration-en ul {
+            list-style-type: disc;
+            padding-left: 12px;
+            margin-top: 3px;
+            direction: ltr;
+            flex-grow: 1;
+        }
+        .declaration-en li {
+            margin-bottom: 2px;
+            direction: ltr;
+        }
+        .signature-block {
+            padding: 4px;
+            margin-top: 8px;
+            border: 1px solid var(--border-color);
+            min-height: 70px;
+            border-radius: 2px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .signature-block p {
+            margin-bottom: 1px;
+            font-size: 8px;
+        }
+        .signature-line {
+            height: 35px;
+            margin: 2px 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-bottom: 1px dashed #ccc;
+            font-size: 7px;
+        }
+        .signature-line img {
+            max-height: 100%;
+            max-width: 120px;
+            object-fit: contain;
+        }
+        .footer-info {
+            font-size: 7px;
+            margin-top: 6px;
+            padding-top: 3px;
+            text-align: center;
+            border-top: 1px dashed #eee;
+        }
+        .employee-block {
+            margin-top: 8px;
+            padding: 4px;
+            border: 1px solid var(--border-color);
+            border-radius: 2px;
+            text-align: center;
+        }
+        .employee-block p {
+            margin: 0;
+            font-size: 7px;
+        }
+        .contact-footer {
+            font-size: 6px;
+            text-align: center;
+            margin-top: 4px;
+            padding-top: 2px;
+            border-top: 1px dashed #eee;
+            direction: rtl;
+        }
+        .contact-footer p {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .contact-footer .line {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 40px;
+        }
+        @media print {
+            .report-container { border: none; padding: 0; }
+            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .header, .declaration-ar, .declaration-en, .signature-block { page-break-inside: avoid; }
+            button { display: none !important; visibility: hidden; }
+        }
+    </style>
+</head>
+<body>
+    <div class="report-container">
+        <button class="btn btn-secondary mb-2 btn-sm btn-print" onclick="window.print()" style="font-size: 8px;">🖨️ طباعة / Print</button>
+        <div class="header">
+            <img src="/health_vet/public/dclogo.png" alt="DC Logo" class="logo">
+           
+            <div class="header-title">
+                <h1>تقرير تفاعل الزائر مع الحيوانات / Visitor Interaction Report</h1>
+                <p>رقم التفاعل: <span id="report-id" class="text-danger"></span> / Interaction ID</p>
+                <p class="h6">التاريخ: <span id="report-date"></span> / Date</p>
+            </div>
+           
+            <img src="/health_vet/public/shjmunlogo.png" alt="SHJMUN Logo" class="logo">
+        </div>
+        <div id="report-content">
+            <!-- بيانات الزيارة / Visit Information -->
+            <div class="section-title">
+                <span>بيانات الزيارة</span>
+                <span>/</span>
+                <span>Visit Information</span>
+            </div>
+           
+            <!-- تاريخ الزيارة -->
+            <div class="content-row">
+                <div class="col-ar">تاريخ الزيارة:</div>
+                <div class="col-value">
+                    <span id="visit_date_val_ar"></span>
+                </div>
+                <div class="col-en">Visit Date:</div>
+            </div>
+           
+            <!-- نوع الزيارة -->
+            <div class="content-row">
+                <div class="col-ar">نوع الزيارة:</div>
+                <div class="col-value">
+                    <div class="checkbox-options">
+                        <span id="visit_type_personal">شخصية / Personal</span>
+                        <span id="visit_type_official">رسمية / Official</span>
+                        <span id="visit_type_volunteer">تطوعية / Volunteer</span>
+                    </div>
+                </div>
+                <div class="col-en">Visit Type:</div>
+            </div>
+           
+            <!-- الجهة -->
+            <div class="content-row">
+                <div class="col-ar">الجهة:</div>
+                <div class="col-value">
+                    <span id="entity_val_ar"></span>
+                </div>
+                <div class="col-en">Entity:</div>
+            </div>
+            <!-- بيانات الزائر / Visitor Information -->
+            <div class="section-title">
+                <span>بيانات الزائر</span>
+                <span>/</span>
+                <span>Visitor Information</span>
+            </div>
+           
+            <!-- الاسم الكامل -->
+            <div class="content-row">
+                <div class="col-ar">الاسم الكامل:</div>
+                <div class="col-value">
+                    <span id="visitor_full_name_val_ar"></span>
+                </div>
+                <div class="col-en">Full Name:</div>
+            </div>
+           
+            <!-- العمر -->
+            <div class="content-row">
+                <div class="col-ar">العمر:</div>
+                <div class="col-value">
+                    <span id="visitor_age_val_ar"></span>
+                </div>
+                <div class="col-en">Age:</div>
+            </div>
+           
+            <!-- الجنس -->
+            <div class="content-row">
+                <div class="col-ar">الجنس:</div>
+                <div class="col-value">
+                    <div class="radio-options">
+                        <span id="visitor_gender_male">ذكر / Male</span>
+                        <span id="visitor_gender_female">أنثى / Female</span>
+                    </div>
+                </div>
+                <div class="col-en">Gender:</div>
+            </div>
+           
+            <!-- الجنسية -->
+            <div class="content-row">
+                <div class="col-ar">الجنسية:</div>
+                <div class="col-value">
+                    <span id="visitor_nationality_val_ar"></span>
+                </div>
+                <div class="col-en">Nationality:</div>
+            </div>
+           
+            <!-- رقم الاتصال -->
+            <div class="content-row">
+                <div class="col-ar">رقم الاتصال:</div>
+                <div class="col-value">
+                    <span id="visitor_contact_number_val_ar"></span>
+                </div>
+                <div class="col-en">Contact Number:</div>
+            </div>
+            <!-- إقرار الصحة والسلامة / Health and Safety Declaration -->
+            <div class="section-title">
+                <span>إقرار الصحة والسلامة</span>
+                <span>/</span>
+                <span>Health and Safety Declaration</span>
+            </div>
+           
+            <!-- الحساسية -->
+            <div class="content-row">
+                <div class="col-ar">هل لديك أي حساسية تجاه الحيوانات؟</div>
+                <div class="col-value">
+                    <div class="checkbox-options">
+                        <span id="allergies_to_animals_yes">نعم / Yes</span>
+                        <span id="allergies_to_animals_no">لا / No</span>
+                    </div>
+                </div>
+                <div class="col-en">Do you have any allergies toward animals?</div>
+            </div>
+           
+            <!-- الأدوية -->
+            <div class="content-row">
+                <div class="col-ar">هل تتناول أي أدوية؟</div>
+                <div class="col-value">
+                    <div class="checkbox-options">
+                        <span id="on_medication_yes">نعم / Yes</span>
+                        <span id="on_medication_no">لا / No</span>
+                    </div>
+                </div>
+                <div class="col-en">Are you currently on any medication?</div>
+            </div>
+           
+            <!-- تأثير الأدوية -->
+            <div class="content-row">
+                <div class="col-ar">هل تؤثر هذه الأدوية على التفاعل؟</div>
+                <div class="col-value">
+                    <div class="checkbox-options">
+                        <span id="medication_affects_interaction_yes">نعم / Yes</span>
+                        <span id="medication_affects_interaction_no">لا / No</span>
+                    </div>
+                </div>
+                <div class="col-en">If yes, will your interaction affect that?</div>
+            </div>
+           
+            <!-- الموافقة على التفاعل -->
+            <div class="content-row">
+                <div class="col-ar">هل توافق على التفاعل مع الحيوانات؟</div>
+                <div class="col-value">
+                    <div class="checkbox-options">
+                        <span id="agree_to_interact_yes">نعم / Yes</span>
+                        <span id="agree_to_interact_no">لا / No</span>
+                    </div>
+                </div>
+                <div class="col-en">Do you agree to interact with animals?</div>
+            </div>
+            <!-- بيانات الولي (إذا كان قاصراً) / Parent/Guardian Information -->
+            <div id="parent-section" class="section-title" style="display: none;">
+                <span>بيانات الولي/الوصي</span>
+                <span>/</span>
+                <span>Parent/Guardian Information</span>
+            </div>
+           
+            <!-- اسم الولي -->
+            <div id="parent-guardian-name-row" class="content-row" style="display: none;">
+                <div class="col-ar">اسم الولي/الوصي:</div>
+                <div class="col-value">
+                    <span id="parent_guardian_name_val_ar"></span>
+                </div>
+                <div class="col-en">Parent/Guardian Name:</div>
+            </div>
+           
+            <!-- العلاقة -->
+            <div id="relationship-row" class="content-row" style="display: none;">
+                <div class="col-ar">العلاقة بالزائر:</div>
+                <div class="col-value">
+                    <span id="relationship_to_visitor_val_ar"></span>
+                </div>
+                <div class="col-en">Relationship:</div>
+            </div>
+           
+            <!-- رقم الاتصال للولي -->
+            <div id="parent-contact-row" class="content-row" style="display: none;">
+                <div class="col-ar">رقم اتصال الولي:</div>
+                <div class="col-value">
+                    <span id="parent_guardian_contact_val_ar"></span>
+                </div>
+                <div class="col-en">Parent/Guardian Contact:</div>
+            </div>
+           
+            <!-- عدد الأطفال -->
+            <div id="number-of-children-row" class="content-row" style="display: none;">
+                <div class="col-ar">عدد الأطفال:</div>
+                <div class="col-value">
+                    <span id="number_of_children_val_ar"></span>
+                </div>
+                <div class="col-en">Number of Children:</div>
+            </div>
+        </div>
+        <!-- الإقرار / Declaration -->
+<div class="row g-2">
+    <div class="col-md-6">
+        <div class="declaration-ar">
+            <h6 class="text-center fw-bold mb-2" style="color:var(--primary-color); font-size: 9px;">
+                اتفاقية إخلاء المسؤولية لمأوى الشارقة للقطط والكلاب (للزائر البالغ)
+            </h6>
+            <ul>
+                <li>أقر بأنني دخلت مأوى الشارقة للقطط والكلاب بمحض إرادتي وبقرار شخصي، وسأتفاعل طوعاً مع القطط و/أو الكلاب التي قد تتصرف بطرق غير متوقعة. ولن أحمل مأوى الشارقة للقطط والكلاب أو بلدية الشارقة أو أي من موظفيها أو طاقمها أو وكلائها أو ممثليها أي مسؤولية، ولن أطالب بأي تعويض نتيجة أي إصابة قد تحدث في الموقع.</li>
+                <li>أعلم بأن لدى مأوى الشارقة للقطط والكلاب سياسات وقواعد وإجراءات يجب الالتزام بها، وأوافق على الامتثال لها.</li>
+                <li>أقر بأنني قرأت وفهمت هذه "اتفاقية إخلاء المسؤولية".</li>
+            </ul>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="declaration-en">
+            <h6 class="text-center fw-bold mb-2" style="color:var(--primary-color); font-size: 9px;">
+                Sharjah Cat and Dog Shelter Liability Waiver Agreement (For Adult Visitor)
+            </h6>
+            <ul>
+                <li>I, the undersigned, hereby acknowledge and agree that I have entered the Sharjah Cat and Dog Shelter voluntarily and of my own free will. I understand that I will be interacting with cats and/or dogs that may behave in unpredictable ways. Accordingly, I release the Sharjah Cat and Dog Shelter, the Sharjah Municipality, and all of their employees, staff, agents, and representatives from any and all responsibility or liability for any injury or damage that may occur on the premises, and I waive any right to claim compensation.</li>
+                <li>I understand that the Sharjah Cat and Dog Shelter has established certain policies, rules, and procedures that must be followed, and I agree to comply fully with them.</li>
+                <li>I confirm that I have read and fully understood this “Liability Waiver Agreement.”</li>
+            </ul>
+        </div>
+    </div>
+</div>
+        <!-- إقرار للقاصرين -->
+<div id="minor-declaration" class="row g-2 mt-3" style="display: none;">
+    <div class="col-md-6">
+        <div class="declaration-ar">
+            <h6 class="text-center fw-bold mb-2" style="color:var(--primary-color); font-size: 9px;">
+                اتفاقية إخلاء المسؤولية لمأوى الشارقة للقطط والكلاب (للزوار والمتطوعين أقل من 18 عاماً)
+            </h6>
+            <ul>
+                <li>يتطلب دخول الزوار أو المتطوعين الذين تقل أعمارهم عن 18 عاماً توقيع أحد الوالدين أو الوصي القانوني قبل دخول مأوى الشارقة للقطط والكلاب.</li>
+                <li>بصفتي والد/والدة أو الوصي القانوني على القاصر المذكور أعلاه، أؤكد أنني قرأت وفهمت تماماً "اتفاقية إخلاء المسؤولية" الخاصة بمأوى الشارقة للقطط والكلاب. وبموجب هذه الاتفاقية، أوافق على السماح لطفلي/القاصر المذكور بالتفاعل مع الحيوانات داخل المأوى، وأُخلي مسؤولية مأوى الشارقة للقطط والكلاب وبلدية الشارقة وجميع موظفيها أو ممثليها من أي مسؤولية أو التزام أو مطالبة قد تنشأ نتيجة هذا التفاعل أو أي إصابة قد تحدث أثناء الزيارة.</li>
+                <li>أقر بأنني قرأت وفهمت هذه "اتفاقية إخلاء المسؤولية" وأوافق على جميع بنودها.</li>
+            </ul>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="declaration-en">
+            <h6 class="text-center fw-bold mb-2" style="color:var(--primary-color); font-size: 9px;">
+                Sharjah Cat and Dog Shelter Liability Waiver Agreement (For Visitors and Volunteers Under 18 Years Old)
+            </h6>
+            <ul>
+                <li>Visitors or volunteers under the age of 18 must have this agreement signed by a parent or legal guardian prior to entering the Sharjah Cat and Dog Shelter.</li>
+                <li>As the parent or legal guardian of the minor named above, I hereby confirm that I have fully read and understood the “Liability Waiver Agreement” of the Sharjah Cat and Dog Shelter. I hereby grant my consent for my child/minor (named above) to interact with the animals at the shelter, and I fully release the Sharjah Cat and Dog Shelter, the Sharjah Municipality, and all of their employees, staff, agents, and representatives from any and all responsibility, liability, or claims that may arise from such interaction or from any injury occurring during the visit.</li>
+                <li>I acknowledge that I have read and fully understood this “Liability Waiver Agreement” and agree to all of its terms and conditions.</li>
+            </ul>
+        </div>
+    </div>
+</div>
+        <!-- التوقيعات / Signatures -->
+        <div class="row g-2 mt-3">
+            <div class="col-md-6">
+                <div class="signature-block">
+                    <p class="h6 fw-bold mb-1" style="color:var(--primary-color); font-size: 8px;">توقيع الزائر / Visitor Signature</p>
+                    <div class="signature-line" id="visitor-signature-area">
+                        <span class="text-muted" style="font-size: 7px;">جاري تحميل التوقيع... / Loading signature...</span>
+                    </div>
+                    <p style="font-size: 7px;">الاسم: <span id="visitor-name-sig" class="fw-bold"></span> / Name:</p>
+                    <p style="font-size: 7px;">التاريخ: <span id="visit-date-sig" class="fw-bold"></span> / Date:</p>
+                </div>
+            </div>
+            <div class="col-md-6" id="parent-signature-section" style="display: none;">
+                <div class="signature-block">
+                    <p class="h6 fw-bold mb-1" style="color:var(--secondary-color); font-size: 8px;">توقيع الولي/الوصي / Parent/Guardian Signature</p>
+                    <div class="signature-line" id="parent-signature-area">
+                        <span class="text-muted" style="font-size: 7px;">جاري تحميل التوقيع... / Loading signature...</span>
+                    </div>
+                    <p style="font-size: 7px;">الاسم: <span id="parent-name-sig" class="fw-bold"></span> / Name:</p>
+                    <p style="font-size: 7px;">التاريخ: <span id="parent-date-sig" class="fw-bold"></span> / Date:</p>
+                </div>
+            </div>
+        </div>
+        <div class="employee-block">
+            <p class="h6 fw-bold mb-1" style="color:var(--secondary-color); font-size: 8px;">Recorded by / مسجل بواسطة الموظف</p>
+            <p style="font-size: 7px;">اسم الموظف: <span id="created-by-name" class="fw-bold"></span> / Employee Name:</p>
+            <p style="font-size: 7px;">رقم الموظف: <span id="created-by-id" class="fw-bold"></span> / Employee ID:</p>
+        </div>
+        <div class="footer-info">
+            <p style="margin: 0; font-size: 7px;">هذا المستند صادر بناءً على تسجيل تفاعل الزائر رقم: <span id="report-id-footer" class="text-danger fw-bold"></span> / This document is based on Visitor Interaction No.</p>
+        </div>
+        <div class="contact-footer">
+            <div class="line">
+                <span>أرضي 06-5453054</span>
+                <span>هاتف 056-3299669</span>
+            </div>
+            <div class="line">
+                <span>مركز الاتصال للشكاوي والاستفسارات /993</span>
+                <span>info@shjmun.gov.ae</span>
+            </div>
+        </div>
+    </div>
+    <script>
+        // --- RECORD ID من PHP ---
+        const RECORD_ID = <?php echo json_encode($record_id); ?>;
+        // --- CONSTANTS AND GLOBAL VARS ---
+        const API_URL = '../api/process_interactions.php';
+        const EMPLOYEES_API_URL = '../api/get_employees.php';
+        const ARABIC_TRANSLATIONS_URL = '../languages/ar_add_visitor_interactions.json';
+        const ENGLISH_TRANSLATIONS_URL = '../languages/en_add_visitor_interactions.json';
+       
+        let employeesMap = {};
+        let fieldTranslations = { ar: {}, en: {} };
+       
+        // --- HARDCODED MAPPINGS للترجمات الثابتة ---
+        const staticTranslations = {
+            'yes': { ar: 'نعم', en: 'Yes' },
+            'no': { ar: 'لا', en: 'No' },
+            'not_provided': { ar: 'غير مُقدم', en: 'N/A' },
+            'personal': { ar: 'شخصية', en: 'Personal' },
+            'official': { ar: 'رسمية', en: 'Official' },
+            'volunteer': { ar: 'تطوعية', en: 'Volunteer' },
+            'male': { ar: 'ذكر', en: 'Male' },
+            'female': { ar: 'أنثى', en: 'Female' },
+        };
+        // --- HELPER FUNCTIONS ---
+        function getTranslation(key, lang) {
+            if (fieldTranslations[lang][key]) return fieldTranslations[lang][key];
+            if (staticTranslations[key] && staticTranslations[key][lang]) return staticTranslations[key][lang];
+            return key;
+        }
+        function getParameterByName(name) {
+            name = name.replace(/[\[\]]/g, '\\$&');
+            const regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)');
+            const results = regex.exec(window.location.href);
+            if (!results) return null;
+            if (!results[2]) return '';
+            return decodeURIComponent(results[2].replace(/\+/g, ' '));
+        }
+        function formatValue(key, value, lang = 'ar') {
+            if (value === null || value === '' || value === undefined) {
+                return getTranslation('not_provided', lang);
+            }
+            // للحقول المنطقية (checkboxes/radios)
+            if (['allergies_to_animals', 'on_medication', 'medication_affects_interaction', 'agree_to_interact'].includes(key)) {
+                const statusKey = value == 1 ? 'yes' : 'no';
+                return getTranslation(statusKey, lang);
+            }
+            // للحقول الاختيارية
+            if (['visit_type', 'visitor_gender'].includes(key)) {
+                const translationKey = value.toLowerCase();
+                return getTranslation(translationKey, lang);
+            }
+            if (key === 'visit_date') {
+                const date = new Date(value);
+                return lang === 'ar' ? date.toLocaleDateString('ar-AE') : date.toLocaleDateString('en-US');
+            }
+            return value;
+        }
+        function updateCheckboxDisplay(key, value) {
+            const options = ['personal', 'official', 'volunteer', 'male', 'female'];
+            options.forEach(opt => {
+                const el = document.getElementById(key + '_' + opt);
+                if (el) {
+                    if (opt === value.toLowerCase()) {
+                        el.style.backgroundColor = '#d4edda';
+                        el.style.fontWeight = 'bold';
+                    } else {
+                        el.style.backgroundColor = '#f8f9fa';
+                        el.style.fontWeight = 'normal';
+                    }
+                }
+            });
+            // For yes/no
+            ['yes', 'no'].forEach(status => {
+                const el = document.getElementById(key + '_' + status);
+                if (el) {
+                    if ((value == 1 && status === 'yes') || (value == 0 && status === 'no')) {
+                        el.style.backgroundColor = '#d4edda';
+                        el.style.fontWeight = 'bold';
+                    } else {
+                        el.style.backgroundColor = '#f8f9fa';
+                        el.style.fontWeight = 'normal';
+                    }
+                }
+            });
+        }
+        // --- CORE FETCH FUNCTIONS ---
+        async function fetchTranslations() {
+            try {
+                const [arResponse, enResponse] = await Promise.all([
+                    axios.get(ARABIC_TRANSLATIONS_URL),
+                    axios.get(ENGLISH_TRANSLATIONS_URL)
+                ]);
+                fieldTranslations.ar = arResponse.data;
+                fieldTranslations.en = enResponse.data;
+            } catch (error) {
+                console.warn("Failed to fetch translation files.", error);
+            }
+        }
+        async function fetchEmployees() {
+            try {
+                const response = await axios.get(EMPLOYEES_API_URL);
+                if (response.data.success && response.data.data) {
+                    response.data.data.forEach(emp => {
+                        employeesMap[emp.EmpID] = emp.EmpName;
+                    });
+                }
+            } catch (error) {
+                console.error("Failed to fetch employee list.", error);
+            }
+        }
+        async function loadReportData(id) {
+            try {
+                const response = await axios.get(API_URL, {
+                    params: { action: 'get_one', id: id }
+                });
+                if (response.data.success && response.data.data) {
+                    const data = response.data.data;
+                    const empName = employeesMap[data.created_by] || data.created_by || 'غير محدد / N/A';
+                    data.created_by_name = empName;
+                    renderReport(data);
+                } else {
+                    document.body.innerHTML = '<p class="text-danger">خطأ في تحميل بيانات التفاعل.</p>';
+                }
+            } catch (error) {
+                document.body.innerHTML = `<p class="text-danger">فشل في الاتصال: ${error.message}</p>`;
+            }
+        }
+        // --- RENDER FUNCTION ---
+        function renderReport(data) {
+            // تحديث العناوين العامة
+            document.getElementById('report-id').textContent = data.id;
+            document.getElementById('report-id-footer').textContent = data.id;
+            const visitDate = formatValue('visit_date', data.visit_date, 'ar') + ' / ' + formatValue('visit_date', data.visit_date, 'en');
+            document.getElementById('report-date').textContent = visitDate;
+            document.getElementById('visit-date-sig').textContent = visitDate;
+            document.getElementById('parent-date-sig').textContent = visitDate;
+            document.getElementById('visitor-name-sig').textContent = data.visitor_full_name || '................................';
+            document.getElementById('parent-name-sig').textContent = data.parent_guardian_name || '................................';
+            document.getElementById('created-by-name').textContent = data.created_by_name;
+            document.getElementById('created-by-id').textContent = data.created_by || 'غير محدد';
+            // عرض التوقيعات - التعديل هنا: استخدام نفس المنطق من النموذج الرئيسي (../../path)
+            const visitorSigPath = data.visitor_signature;
+            const visitorSigArea = document.getElementById('visitor-signature-area');
+            if (visitorSigPath && (visitorSigPath.includes('uploads/') || visitorSigPath.includes('data:'))) {
+                const fullPath = visitorSigPath.includes('data:') ? visitorSigPath : `../../${visitorSigPath}`;
+                visitorSigArea.innerHTML = `<img src="${fullPath}" alt="Visitor Signature" style="max-height: 100%; max-width: 120px; object-fit: contain;" onerror="this.onerror=null;this.outerHTML='<span class=\'text-muted\' style=\'font-size: 7px;\'>التوقيع غير متوفر / Signature not available</span>'; this.style.display=\'none\';" />`;
+            } else {
+                visitorSigArea.innerHTML = '<span class="text-muted" style="font-size: 7px;">لا توجد توقيع / No signature</span>';
+            }
+            const parentSigPath = data.parent_guardian_signature;
+            const parentSigSection = document.getElementById('parent-signature-section');
+            const parentSigArea = document.getElementById('parent-signature-area');
+            if (parentSigPath && (parentSigPath.includes('uploads/') || parentSigPath.includes('data:'))) {
+                const fullPath = parentSigPath.includes('data:') ? parentSigPath : `../../${parentSigPath}`;
+                parentSigArea.innerHTML = `<img src="${fullPath}" alt="Parent Signature" style="max-height: 100%; max-width: 120px; object-fit: contain;" onerror="this.onerror=null;this.outerHTML='<span class=\'text-muted\' style=\'font-size: 7px;\'>التوقيع غير متوفر / Signature not available</span>'; this.style.display=\'none\';" />`;
+                parentSigSection.style.display = 'block';
+            } else {
+                parentSigSection.style.display = 'none';
+                parentSigArea.innerHTML = '<span class="text-muted" style="font-size: 7px;">لا توجد توقيع / No signature</span>';
+            }
+            // عرض البيانات
+            document.getElementById('visit_date_val_ar').textContent = formatValue('visit_date', data.visit_date, 'ar');
+            updateCheckboxDisplay('visit_type', data.visit_type);
+            document.getElementById('entity_val_ar').textContent = formatValue('entity', data.entity, 'ar');
+            document.getElementById('visitor_full_name_val_ar').textContent = formatValue('visitor_full_name', data.visitor_full_name, 'ar');
+            document.getElementById('visitor_age_val_ar').textContent = data.visitor_age || getTranslation('not_provided', 'ar');
+            updateCheckboxDisplay('visitor_gender', data.visitor_gender);
+            document.getElementById('visitor_nationality_val_ar').textContent = formatValue('visitor_nationality', data.visitor_nationality, 'ar');
+            document.getElementById('visitor_contact_number_val_ar').textContent = formatValue('visitor_contact_number', data.visitor_contact_number, 'ar');
+            updateCheckboxDisplay('allergies_to_animals', data.allergies_to_animals);
+            updateCheckboxDisplay('on_medication', data.on_medication);
+            updateCheckboxDisplay('medication_affects_interaction', data.medication_affects_interaction);
+            updateCheckboxDisplay('agree_to_interact', data.agree_to_interact);
+            // قسم الولي إذا كان العمر أقل من 18 أو توقيع موجود
+            const age = parseInt(data.visitor_age || 0);
+            const hasParentSig = !!data.parent_guardian_signature;
+            const showParentSection = age < 18 || hasParentSig;
+            if (showParentSection) {
+                document.getElementById('parent-section').style.display = 'flex';
+                document.getElementById('parent-guardian-name-row').style.display = 'flex';
+                document.getElementById('relationship-row').style.display = 'flex';
+                document.getElementById('parent-contact-row').style.display = 'flex';
+                document.getElementById('number-of-children-row').style.display = 'flex';
+                document.getElementById('minor-declaration').style.display = 'flex';
+                document.getElementById('parent_guardian_name_val_ar').textContent = formatValue('parent_guardian_name', data.parent_guardian_name, 'ar');
+                document.getElementById('relationship_to_visitor_val_ar').textContent = formatValue('relationship_to_visitor', data.relationship_to_visitor, 'ar');
+                document.getElementById('parent_guardian_contact_val_ar').textContent = formatValue('parent_guardian_contact', data.parent_guardian_contact, 'ar');
+                document.getElementById('number_of_children_val_ar').textContent = data.number_of_children || getTranslation('not_provided', 'ar');
+            } else {
+                document.getElementById('parent-section').style.display = 'none';
+                document.getElementById('parent-guardian-name-row').style.display = 'none';
+                document.getElementById('relationship-row').style.display = 'none';
+                document.getElementById('parent-contact-row').style.display = 'none';
+                document.getElementById('number-of-children-row').style.display = 'none';
+                document.getElementById('minor-declaration').style.display = 'none';
+            }
+        }
+        // --- MAIN ENTRY POINT ---
+        document.addEventListener('DOMContentLoaded', async function() {
+            await Promise.all([
+                fetchTranslations(),
+                fetchEmployees()
+            ]);
+           
+            if (RECORD_ID) {
+                loadReportData(RECORD_ID);
+            } else {
+                document.body.innerHTML = '<p class="text-danger">خطأ: رقم التفاعل مفقود / Error: ID missing</p>';
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pet QR Code System</title>
+
+<!-- jsPDF library for PDF printing -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f0f2f5;
+    padding: 20px;
+    min-height: 100vh;
+}
+
+.container {
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    max-width: 500px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+h1 {
+    color: #2c3e50;
+    margin-bottom: 20px;
+    font-size: 24px;
+}
+
+.input-group {
+    margin: 20px 0;
+    text-align: left;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    color: #555;
+    font-weight: bold;
+}
+
+input[type="text"] {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 16px;
+    text-align: left;
+    transition: border-color 0.3s;
+}
+
+input[type="text"]:focus {
+    outline: none;
+    border-color: #3498db;
+}
+
+.btn {
+    background: #3498db;
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s;
+    margin: 5px 0;
+    width: 100%;
+}
+
+.btn:hover {
+    background: #2980b9;
+}
+
+.btn-print {
+    background: #27ae60;
+}
+
+.btn-print:hover {
+    background: #219a52;
+}
+
+.qr-card {
+    background: white;
+    border: 2px solid #34495e;
+    border-radius: 8px;
+    padding: 10px;
+    margin: 20px 0;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.qr-image {
+    max-width: 100%;
+    height: auto;
+    margin: 10px 0;
+    border: 1px solid #bdc3c7;
+    background: white;
+}
+
+.animal-info {
+    margin-top: 10px;
+    padding: 5px;
+    background: #ecf0f1;
+    border-radius: 5px;
+    width: 100%;
+    text-align: center;
+}
+
+.animal-code {
+    font-size: 18px;
+    font-weight: bold;
+    color: #2c3e50;
+    margin: 10px 0;
+    font-family: 'Courier New', monospace;
+}
+
+.print-section {
+    margin-top: 20px;
+    display: none;
+}
+
+.message {
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 5px;
+    display: none;
+    text-align: center;
+}
+
+.error {
+    background: #ffeaa7;
+    color: #d63031;
+    border: 1px solid #fab1a0;
+}
+
+.success {
+    background: #55efc4;
+    color: #00b894;
+    border: 1px solid #00b894;
+}
+
+.instructions {
+    background: #dfe6e9;
+    padding: 15px;
+    border-radius: 8px;
+    margin: 15px 0;
+    text-align: left;
+    font-size: 14px;
+}
+
+.instructions h3 {
+    color: #2d3436;
+    margin-bottom: 8px;
+}
+
+.loading {
+    display: none;
+    color: #3498db;
+    margin: 10px 0;
+}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>🐱🐶 Pet QR Code System</h1>
+
+<div class="instructions">
+<h3>Usage Instructions:</h3>
+<p>• Enter the Animal Code as registered in the system.</p>
+<p>• Small QR Code (20mm) + code in a simple font for collar tag printing.</p>
+<p>• The QR contains the code only, easily readable by any phone.</p>
+</div>
+
+<div class="input-group">
+<label for="animal_code_input">Animal Code:</label>
+<input type="text" id="animal_code_input" placeholder="Example: CAT001 or DOG456" autocomplete="off">
+</div>
+
+<div id="message" class="message"></div>
+<div id="loading" class="loading">Generating QR Code...</div>
+
+<button class="btn no-print" onclick="generateQR()">Generate QR Code</button>
+
+<div id="qr_preview" class="qr-card">
+    <div class="animal-info">
+        <div class="animal-code" id="animal_code_text"></div>
+    </div>
+    <img id="qr_img" class="qr-image" src="" alt="Pet QR Code">
+</div>
+
+<div class="print-section no-print" id="print_section">
+    <button class="btn btn-print" onclick="printQRtoPDF()">Print QR Code</button>
+</div>
+</div>
+
+<script>
+function showMessage(text, type) {
+    const messageDiv = document.getElementById('message');
+    messageDiv.textContent = text;
+    messageDiv.className = 'message ' + type;
+    messageDiv.style.display = 'block';
+    setTimeout(() => { messageDiv.style.display = 'none'; }, 5000);
+}
+
+async function generateQR() {
+    const code = document.getElementById('animal_code_input').value.trim();
+    if(!code) { showMessage('Please enter the Animal Code', 'error'); return; }
+    if(!/^[\u0600-\u06FFa-zA-Z0-9/\-_ ]{3,50}$/.test(code)) {
+        showMessage('The Animal Code must contain letters, numbers, and the symbols (/ - _) only (3-50 characters)', 'error');
+        return;
+    }
+
+    const apiUrl = '../api/generate_barcode_api.php?animal_code=' + encodeURIComponent(code);
+    const img = document.getElementById('qr_img');
+    const preview = document.getElementById('qr_preview');
+    const printSection = document.getElementById('print_section');
+    const animalCodeText = document.getElementById('animal_code_text');
+    const loading = document.getElementById('loading');
+
+    loading.style.display = 'block';
+    animalCodeText.textContent = code;
+    preview.style.display = 'flex';
+    printSection.style.display = 'none';
+
+    try {
+        const response = await fetch(apiUrl);
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw response.status === 404 ? new Error('Animal not found') : new Error(`HTTP ${response.status}: ${errorText.substring(0,100)}`);
+        }
+        const data = await response.json();
+        const qrUrl = data.qr_url;
+
+        img.onerror = function() {
+            loading.style.display = 'none';
+            showMessage('Failed to load QR. Check connection.', 'error');
+            preview.style.display = 'none';
+        };
+
+        img.onload = function() {
+            loading.style.display = 'none';
+            printSection.style.display = 'block';
+            showMessage('QR Code generated successfully', 'success');
+        };
+
+        img.src = qrUrl + '&t=' + new Date().getTime();
+    } catch (error) {
+        loading.style.display = 'none';
+        showMessage(`Error: ${error.message}`, 'error');
+        preview.style.display = 'none';
+    }
+}
+
+function printQRtoPDF() {
+    const { jsPDF } = window.jspdf;
+    const code = document.getElementById('animal_code_text').textContent;
+    const qrImg = document.getElementById('qr_img');
+
+    if (!qrImg.complete || qrImg.naturalHeight === 0) {
+        showMessage('QR Code not loaded yet', 'error');
+        return;
+    }
+
+    // حجم الملصق
+    const widthMM = 25;
+    const heightMM = 25;
+
+    const doc = new jsPDF({
+        unit: 'mm',
+        format: [heightMM, widthMM] // الطول × العرض
+    });
+
+    // QR داخل PDF
+    doc.addImage(qrImg.src, 'PNG', 2, 2, 20, 20); // 2mm Margin
+    doc.setFont('Courier', 'normal');
+    doc.setFontSize(8);
+    doc.text(code, widthMM/2, 24, { align: 'center' });
+
+    doc.autoPrint();
+    window.open(doc.output('bloburl'), '_blank');
+}
+
+document.getElementById('animal_code_input').addEventListener('keypress', function(e) {
+    if(e.key === 'Enter') generateQR();
+});
+
+document.getElementById('animal_code_input').focus();
+
+window.addEventListener('load', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const codeFromUrl = urlParams.get('animal_code_input');
+    if (codeFromUrl) {
+        document.getElementById('animal_code_input').value = codeFromUrl;
+        generateQR();
+    }
+});
+</script>
+</body>
+</html>

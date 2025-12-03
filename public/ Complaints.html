@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>بحث وتعديل الشكاوى</title>
+<style>
+body { font-family: 'Cairo', sans-serif; background: #f5f7fa; margin: 0; padding: 20px; color: #333; }
+.container { max-width: 1000px; margin: auto; background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 0 12px rgba(0,0,0,0.1);}
+h2 { text-align: center; color: #006e3a; }
+input, select, textarea { padding: 5px; margin: 2px 0; border-radius: 6px; border: 1px solid #ccc; }
+.results-table { width:100%; border-collapse:collapse; margin-top:12px; }
+.results-table th, .results-table td { border:1px solid #ccc; padding:7px 4px; text-align:center;}
+.results-table th { background:#e9ecef; }
+.page-btns {margin:10px 0; text-align:center;}
+.page-btns button {padding:5px 10px; margin:0 2px;}
+#editModal {display:none; position:fixed; top:0;left:0;right:0;bottom:0; background:rgba(0,0,0,0.12); z-index:10;}
+#editModal .modal-content {background:#fff; max-width:600px; margin:48px auto; border-radius:10px; padding:20px; position:relative;}
+#editModal .close {position:absolute; left:14px; top:14px; cursor:pointer; font-size:20px;}
+img.preview {width:60px; height:60px; object-fit:cover; border-radius:4px; border:1px solid #ccc;}
+</style>
+</head>
+<body>
+<div class="container">
+    <h2>بحث وتعديل الشكاوى</h2>
+    <form id="searchForm">
+        <input type="text" id="searchInput" placeholder="بحث برقم الشكوى، اسم، منطقة، نوع..." style="width:220px;">
+        <button type="submit">بحث</button>
+    </form>
+    <div id="results"></div>
+</div>
+
+<!-- نافذة تعديل / اعتماد -->
+<div id="editModal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal()">&times;</span>
+    <form id="editForm">
+        <input type="hidden" name="ComplaintID" id="editComplaintID">
+        <label>رقم الشكوى:</label>
+        <input type="text" id="editComplaintNo" disabled style="background:#f5f5f5;">
+        <label>اسم المشتكي:</label>
+        <input type="text" name="ComplainantName" id="editComplainantName">
+        <label>رقم الهاتف:</label>
+        <input type="text" name="ComplainantPhone" id="editComplainantPhone">
+        <label>المنطقة:</label>
+        <input type="text" name="Area" id="editArea">
+        <label>الإحداثيات:</label>
+        <input type="text" name="Coordinates" id="editCoordinates">
+        <label>المدينة:</label>
+        <input type="text" name="City" id="editCity">
+        <label>نوع الشكوى:</label>
+        <select name="ComplaintType" id="editComplaintType">
+            <option value="Cats">قطط</option>
+            <option value="Dogs">كلاب</option>
+        </select>
+        <label>عدد الحيوانات:</label>
+        <input type="number" name="AnimalCount" id="editAnimalCount">
+        <label>أولوية الاستجابة:</label>
+        <select name="ResponsePriority" id="editResponsePriority">
+            <option value="Emergency">طارئة</option>
+            <option value="Scheduled">مجدولة</option>
+        </select>
+        <label>وصف الشكوى:</label>
+        <textarea name="ComplainantStatement" id="editComplainantStatement"></textarea>
+        <label>طريقة التعامل:</label>
+        <select name="KPI_Method" id="editKPI_Method">
+            <option value="Cage">قفص</option>
+            <option value="Net">شبكة</option>
+            <option value="Manual">يدوي</option>
+            <option value="Other">أخرى</option>
+        </select>
+        <label>تاريخ المتابعة:</label>
+        <input type="datetime-local" name="FollowUpDate" id="editFollowUpDate">
+        <label>إجراء المتابعة:</label>
+        <textarea name="FollowUpAction" id="editFollowUpAction"></textarea>
+        <label>تعليق الفريق:</label>
+        <textarea name="TeamFollowUp" id="editTeamFollowUp"></textarea>
+        
+        <!-- هذه الحقول فقط للمدير/ادمن -->
+        <div id="managerFields" style="background:#fcfcf1; border-radius:7px; padding:10px; margin:10px 0;">
+            <label>ملاحظات المدير:</label>
+            <textarea name="ManagerComment" id="editManagerComment"></textarea>
+            <label>الحالة النهائية:</label>
+            <select name="FinalStatus" id="editFinalStatus">
+                <option value="Pending Close">قيد الإغلاق</option>
+                <option value="Closed">مغلقة</option>
+                <option value="Rejected">مرفوضة</option>
+            </select>
+            <label>تاريخ الإغلاق:</label>
+            <input type="datetime-local" name="CloseDate" id="editCloseDate">
+        </div>
+        <div id="photoContainer"></div>
+        <button type="submit">💾 حفظ التعديلات</button>
+        <button type="button" id="btnDelete" style="background:#b70e2b;">🗑 حذف الشكوى</button>
+    </form>
+    <div id="modalMsg" style="text-align:center;margin-top:8px;color:#006e3a;"></div>
+  </div>
+</div>
+
+<script>
+let userIsManager = false, userIsAdmin = false;
+
+// جلب صلاحيات المستخدم الحالي
+async function getUserRights() {
+    const r = await fetch('/health_vet/api/user_data.php?action=get_user_data');
+    const d = await r.json();
+    userIsManager = d.user_data?.IsLicenseManager==1;
+    userIsAdmin = d.user_data?.IsAdmin==1;
+    if(!userIsManager && !userIsAdmin) document.getElementById('managerFields').style.display='none';
+}
+
+// بحث وعرض النتائج
+let lastQ = ''; let lastPage = 1;
+async function searchComplaints(page=1){
+    const q = document.getElementById('searchInput').value.trim();
+    lastQ = q; lastPage = page;
+    const form = new FormData();
+    form.append('action','search');
+    form.append('q',q);
+    form.append('page',page);
+    const res = await fetch('/health_vet/api/complaints_crud.php',{method:'POST',body:form});
+    const data = await res.json();
+    let html = '';
+    if(data.success && data.data.length){
+        html += `<table class="results-table"><tr><th>رقم الشكوى</th><th>اسم المشتكي</th><th>المنطقة</th><th>نوع</th><th>تاريخ</th><th>الحالة</th><th>تعديل</th></tr>`;
+        data.data.forEach(c=>{
+            html += `<tr>
+                <td>${c.ComplaintNo}</td>
+                <td>${c.ComplainantName}</td>
+                <td>${c.Area}</td>
+                <td>${c.ComplaintType}</td>
+                <td>${c.ComplaintDate?.replace('T',' ').slice(0,16)||''}</td>
+                <td>${c.FinalStatus||''}</td>
+                <td><button onclick="editComplaint(${c.ComplaintID})">تعديل</button></td>
+            </tr>`;
+        }); html += '</table>';
+        html += `<div class="page-btns">`;
+        html += `<button ${data.page==1?"disabled":""} onclick="searchComplaints(${data.page-1})">السابق</button>`;
+        html += `<span>صفحة ${data.page}/${data.pages}</span>`;
+        html += `<button ${data.page==data.pages?"disabled":""} onclick="searchComplaints(${data.page+1})">التالي</button>`;
+        html += `</div>`;
+    }else{
+        html = `<div class="error">لا توجد نتائج</div>`;
+    }
+    document.getElementById('results').innerHTML = html;
+}
+document.getElementById('searchForm').onsubmit = e=>{ e.preventDefault(); searchComplaints(1); };
+
+// جلب شكوى وتعبئة النموذج
+window.editComplaint = async function(id){
+    document.getElementById('editModal').style.display='block';
+    document.getElementById('modalMsg').textContent='';
+    // إظهار أو إخفاء حقول المدير حسب الصلاحية
+    document.getElementById('managerFields').style.display = (userIsAdmin||userIsManager)?'block':'none';
+    // جلب البيانات
+    const form = new FormData();
+    form.append('action','get');
+    form.append('ComplaintID',id);
+    const res = await fetch('/health_vet/api/complaints_crud.php',{method:'POST',body:form});
+    const d = await res.json();
+    if(d.success){
+        const c = d.data;
+        document.getElementById('editComplaintID').value = c.ComplaintID;
+        document.getElementById('editComplaintNo').value = c.ComplaintNo;
+        document.getElementById('editComplainantName').value = c.ComplainantName||'';
+        document.getElementById('editComplainantPhone').value = c.ComplainantPhone||'';
+        document.getElementById('editArea').value = c.Area||'';
+        document.getElementById('editCoordinates').value = c.Coordinates||'';
+        document.getElementById('editCity').value = c.City||'';
+        document.getElementById('editComplaintType').value = c.ComplaintType||'Cats';
+        document.getElementById('editAnimalCount').value = c.AnimalCount||1;
+        document.getElementById('editResponsePriority').value = c.ResponsePriority||'Scheduled';
+        document.getElementById('editComplainantStatement').value = c.ComplainantStatement||'';
+        document.getElementById('editKPI_Method').value = c.KPI_Method||'Cage';
+        document.getElementById('editFollowUpDate').value = c.FollowUpDate?.slice(0,16)||'';
+        document.getElementById('editFollowUpAction').value = c.FollowUpAction||'';
+        document.getElementById('editTeamFollowUp').value = c.TeamFollowUp||'';
+        document.getElementById('editManagerComment').value = c.ManagerComment||'';
+        document.getElementById('editFinalStatus').value = c.FinalStatus||'Pending Close';
+        document.getElementById('editCloseDate').value = c.CloseDate?.slice(0,16)||'';
+        // الصور
+        let photoHtml = '';
+        if(c.PhotoURLs){
+            c.PhotoURLs.split('|').forEach(url=>{
+                photoHtml += `<img class="preview" src="/health_vet/${url}?t=${Date.now()}">`;
+            });
+        }
+        document.getElementById('photoContainer').innerHTML = photoHtml;
+    }
+};
+// حفظ التعديلات
+document.getElementById('editForm').onsubmit = async function(e){
+    e.preventDefault();
+    const form = new FormData(this);
+    form.append('action','update');
+    const res = await fetch('/health_vet/api/complaints_crud.php',{method:'POST',body:form});
+    const d = await res.json();
+    document.getElementById('modalMsg').textContent = d.success?'✅ تم التعديل':'❌ '+d.message;
+    if(d.success) setTimeout(()=>{closeModal();searchComplaints(lastPage);},1200);
+};
+// حذف شكوى
+document.getElementById('btnDelete').onclick = async function(){
+    if(confirm('تأكيد الحذف؟')){
+        const id = document.getElementById('editComplaintID').value;
+        const form = new FormData();
+        form.append('action','delete');
+        form.append('ComplaintID',id);
+        const res = await fetch('/health_vet/api/complaints_crud.php',{method:'POST',body:form});
+        const d = await res.json();
+        document.getElementById('modalMsg').textContent = d.success?'✅ تم الحذف':'❌ '+d.message;
+        if(d.success) setTimeout(()=>{closeModal();searchComplaints(lastPage);},1200);
+    }
+};
+function closeModal(){document.getElementById('editModal').style.display='none';}
+
+getUserRights();
+searchComplaints(1);
+</script>
+</body>
+</html>

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Animal Procedures</title>
+<style>
+body { font-family: Arial, sans-serif; margin: 20px; background: #f8f8f8; }
+h1 { color: #333; }
+form { background: #fff; padding: 20px; border-radius: 6px; box-shadow: 0 0 10px rgba(0,0,0,0.1); margin-bottom: 30px; }
+input, select, textarea { width: 100%; padding: 8px; margin: 5px 0 15px 0; border: 1px solid #ccc; border-radius: 4px; }
+button { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; background: #28a745; color: #fff; }
+button.delete { background: #dc3545; }
+table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+table, th, td { border: 1px solid #ccc; }
+th, td { padding: 10px; text-align: left; }
+tr:nth-child(even) { background-color: #f2f2f2; }
+</style>
+</head>
+<body>
+
+<h1>Animal Procedures</h1>
+
+<form id="procedureForm">
+    <input type="hidden" id="procedure_id">
+    <label>Visit ID</label>
+    <input type="number" id="visit_id" required>
+
+    <label>Animal Code</label>
+    <input type="text" id="animal_code" required placeholder="e.g. 1-CA-ST-2025">
+
+    <label>Procedure Name</label>
+    <input type="text" id="procedure_name" required>
+
+    <label>Description</label>
+    <textarea id="description" rows="3"></textarea>
+
+    <label>Performed By (Doctor)</label>
+    <select id="performed_by" required></select>
+
+    <label>Performed At</label>
+    <input type="datetime-local" id="performed_at">
+
+    <label>Notes</label>
+    <textarea id="notes" rows="3"></textarea>
+
+    <button type="submit">Save Procedure</button>
+</form>
+
+<h2>All Procedures</h2>
+<table id="proceduresTable">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Visit ID</th>
+            <th>Animal Code</th>
+            <th>Procedure Name</th>
+            <th>Description</th>
+            <th>Performed By</th>
+            <th>Performed At</th>
+            <th>Notes</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+<script src="session_check.js"></script>
+<script>
+// Load doctors
+async function loadDoctors(){
+    const res = await fetch('/health_vet/api/get_employees.php');
+    const data = await res.json();
+    const select = document.getElementById('performed_by');
+    select.innerHTML = '<option value="">Select Doctor</option>';
+    data.data.forEach(d=>{
+        select.innerHTML += `<option value="${d.EmpID}">${d.EmpName}</option>`;
+    });
+}
+
+// Load all procedures
+async function loadProcedures(){
+    const res = await fetch('/health_vet/api/procedures_api.php?action=get_all');
+    const data = await res.json();
+    const tbody = document.querySelector('#proceduresTable tbody');
+    tbody.innerHTML = '';
+    if(data.success){
+        data.procedures.forEach(p=>{
+            tbody.innerHTML += `
+            <tr>
+                <td>${p.id}</td>
+                <td>${p.visit_id}</td>
+                <td>${p.animal_code}</td>
+                <td>${p.procedure_name}</td>
+                <td>${p.description || ''}</td>
+                <td>${p.performed_by_name}</td>
+                <td>${p.performed_at || ''}</td>
+                <td>${p.notes || ''}</td>
+                <td>
+                    <button onclick="editProcedure(${p.id})">Edit</button>
+                    <button class="delete" onclick="deleteProcedure(${p.id})">Delete</button>
+                </td>
+            </tr>`;
+        });
+    }
+}
+
+// Save procedure (add/update)
+document.getElementById('procedureForm').addEventListener('submit', async e=>{
+    e.preventDefault();
+    const id = document.getElementById('procedure_id').value;
+    const action = id ? 'update' : 'add';
+    const formData = new FormData();
+    formData.append('action', action);
+    if(id) formData.append('id', id);
+    formData.append('visit_id', document.getElementById('visit_id').value);
+    formData.append('animal_code', document.getElementById('animal_code').value);
+    formData.append('procedure_name', document.getElementById('procedure_name').value);
+    formData.append('description', document.getElementById('description').value);
+    formData.append('performed_by', document.getElementById('performed_by').value);
+    formData.append('performed_at', document.getElementById('performed_at').value);
+    formData.append('notes', document.getElementById('notes').value);
+
+    const res = await fetch('/health_vet/api/procedures_api.php',{method:'POST',body:formData});
+    const data = await res.json();
+    alert(data.message);
+    document.getElementById('procedureForm').reset();
+    loadProcedures();
+});
+
+// Edit procedure
+async function editProcedure(id){
+    const res = await fetch('/health_vet/api/procedures_api.php?action=get_all');
+    const data = await res.json();
+    const p = data.procedures.find(x=>x.id==id);
+    if(p){
+        document.getElementById('procedure_id').value = p.id;
+        document.getElementById('visit_id').value = p.visit_id;
+        document.getElementById('animal_code').value = p.animal_code;
+        document.getElementById('procedure_name').value = p.procedure_name;
+        document.getElementById('description').value = p.description || '';
+        document.getElementById('performed_by').value = p.performed_by;
+        document.getElementById('performed_at').value = p.performed_at ? p.performed_at.replace(' ','T') : '';
+        document.getElementById('notes').value = p.notes || '';
+    }
+}
+
+// Delete procedure
+async function deleteProcedure(id){
+    if(!confirm('Are you sure to delete this procedure?')) return;
+    const formData = new FormData();
+    formData.append('action','delete');
+    formData.append('id',id);
+    const res = await fetch('/health_vet/api/procedures_api.php',{method:'POST',body:formData});
+    const data = await res.json();
+    alert(data.message);
+    loadProcedures();
+}
+
+// Initialize
+loadDoctors();
+loadProcedures();
+</script>
+
+</body>
+</html>

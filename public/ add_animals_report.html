@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>إخلاء مسؤولية تنازل عن حيوان</title>
+    <style>
+        :root {
+            --main-green: #198754; /* أخضر غامق */
+            --olive-tone: #495057; /* زيتوني غامق للنصوص والحدود */
+            --light-beige: #f8ffef; 
+            --border-color: var(--olive-tone); 
+            --text-color: #343a40; 
+        }
+        
+        /* إعدادات الطباعة: إزالة البوردر وتعديل الترويسة والتذييل */
+        @page { 
+            size: A4 portrait; 
+            margin: 1cm; 
+            /* ترقيم الصفحات بالعربية على اليمين */
+            @bottom-right {
+                content: "صفحة " counter(page) " من " counter(pages);
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                font-size: 9px;
+                color: var(--olive-tone);
+                padding-bottom: 5px;
+            }
+            /* ترقيم الصفحات بالإنجليزية على اليسار */
+            @bottom-left {
+                content: "Page " counter(page) " of " counter(pages);
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                font-size: 9px;
+                color: var(--olive-tone);
+                padding-bottom: 5px;
+            }
+        }
+        
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: white; 
+            color: var(--text-color);
+            font-size: 11px;
+            line-height: 1.5; 
+            margin: 0; 
+            padding: 0;
+        }
+        
+        .container { 
+            width: 19.5cm; 
+            margin: 0.5cm auto; 
+            background-color: white;
+            padding: 0;
+        }
+        
+        @media print {
+            .container {
+                border: none; 
+                padding: 0;
+            }
+        }
+
+        /* تحديث الـ Header: إزالة قسم التاريخ بالكامل */
+        .header { 
+            text-align: center; 
+            border-bottom: 3px solid var(--main-green); 
+            padding: 0 0 15px 0; 
+            margin-bottom: 25px; 
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: white;
+        }
+        .logo { 
+            height: 70px; 
+            width: auto; 
+            margin: 0 15px; 
+            object-fit: contain;
+        }
+        .header-title { 
+            flex-grow: 1;
+            text-align: center; 
+            margin: 0; 
+            color: var(--main-green); 
+        }
+        .header-title h1 { font-size: 20px; margin-bottom: 5px; font-weight: 700; }
+        .header-title p { color: var(--olive-tone); }
+        /* تم حذف .header-date بالكامل */
+        
+        /* تنسيق أقسام التقرير - تم تعديل grid-template-columns ليعمل بدون الخط الفاصل */
+        .report-body {
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* إزالة العمود الفاصل */
+            gap: 20px; /* زيادة الفراغ قليلاً لتعويض الخط الفاصل */
+            margin-bottom: 30px;
+        }
+        .column {
+            padding: 10px;
+            background-color: white;
+            border: 1px solid var(--border-color); 
+            border-radius: 4px;
+        }
+        .arabic { direction: rtl; text-align: right; }
+        .english { direction: ltr; text-align: left; }
+        /* تم حذف .line بالكامل */
+        
+        .section { margin-bottom: 15px; }
+        .section h2 { 
+            color: var(--main-green); 
+            font-size: 14px; 
+            border-bottom: 1px dashed var(--border-color); 
+            padding-bottom: 5px;
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        .label { font-weight: 600; color: var(--olive-tone); width: 35%; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 5px; background-color: white; }
+        th, td { border: 1px solid var(--border-color); padding: 6px; font-size: 11px; vertical-align: top; }
+        td:nth-child(2) { font-weight: 500; color: var(--text-color); }
+
+        /* قسم الإقرار/الإخلاء */
+        .declaration {
+            background-color: var(--light-beige);
+            border: 2px solid var(--main-green);
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        .declaration h3 { 
+            color: var(--main-green); 
+            text-align: center; 
+            border-bottom: 1px solid var(--main-green);
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        .declaration ul { font-size: 10.5px; line-height: 1.4; list-style-type: square; padding-right: 20px; margin-top: 5px;}
+        
+        /* قسم التوقيعات */
+        .signatures {
+            display: flex;
+            justify-content: space-around; 
+            align-items: stretch; 
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+            min-height: 150px; 
+        }
+        .signature-box, .registrar-info {
+            flex: 0 0 45%; 
+            text-align: center;
+            margin: 0 10px;
+            border: 1px solid var(--border-color);
+            padding: 15px;
+            border-radius: 4px;
+            display: flex; 
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .registrar-info {
+             text-align: right;
+        }
+        .surrenderer-signature-box {
+            flex: 0 0 45%; 
+            text-align: center;
+            margin: 0 10px;
+            border: 1px solid var(--border-color);
+            padding: 15px;
+            border-radius: 4px;
+            display: flex; 
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .signature-img { 
+            border: 1px dashed var(--olive-tone); 
+            max-width: 180px; 
+            max-height: 70px; 
+            width: auto; 
+            height: auto;
+            margin-bottom: 10px;
+            object-fit: contain;
+            align-self: center; 
+        }
+        
+        .official-stamp { 
+            text-align: center; 
+            font-size: 10px; 
+            color: var(--olive-tone); 
+            margin-top: 30px; 
+            border-top: 1px dashed var(--border-color); 
+            padding-top: 10px;
+        }
+        
+        .official-stamp .hidden-record { display: none; }
+        
+        @media print {
+            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .no-print { display: none !important; }
+            .header, .report-body, .declaration, .signatures { page-break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="/health_vet/public/dclogo.png" alt="DC Logo" class="logo">
+            
+            <div class="header-title">
+                <h1>مستند إخلاء مسؤولية تنازل عن حيوان</h1>
+                <p style="font-size: 14px; margin: 0; color: var(--main-green);">MAWI Sharjah for Cats and Dogs</p>
+                </div>
+            
+            <img src="/health_vet/public/shjmunlogo.png" alt="SHJMUN Logo" class="logo">
+        </div>
+
+        <div id="reportContent">
+            </div>
+
+        <div class="declaration" id="declarationSection" style="display: none;">
+            <h3>إقرار إخلاء مسؤولية المتنازل / Surrenderer's Disclaimer Declaration</h3>
+            <div class="report-body" style="grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 0; border: none; padding: 0;">
+                <div class="column arabic" style="border: 1px solid var(--border-color); padding: 10px;">
+                    <p style="font-weight: bold; font-size: 11px; margin-top: 0; color: var(--main-green);">أقر أنا الموقع أدناه (المتنازل) بما يلي:</p>
+                    <ul>
+                        <li>أتنازل عن الحيوان المذكور أدناه طواعية وبإرادتي الكاملة إلى ماوي الشارقة للقطط والكلاب دون أي إكراه أو ضغط.</li>
+                        <li>أعفي مسؤولية ماوي الشارقة للقطط والكلاب وموظفيها ووكلائها وممثليها من أي مسؤولية أو ضرر أو تعويضات متعلقة بالحيوان المتنازل عنه.</li>
+                        <li>أعلم وأوافق بأن ماوي الشارقة للقطط والكلاب غير ملزمة بإعادة الحيوان إليّ في أي ظرف من الأحوال.</li>
+                        <li>أقر بتواجدي في ماوي الشارقة للقطط والكلاب برغبتي الشخصية الكاملة.</li>
+                    </ul>
+                </div>
+                <div class="column english" style="border: 1px solid var(--border-color); padding: 10px;">
+                    <p style="font-weight: bold; font-size: 11px; margin-top: 0; color: var(--main-green);">I, the undersigned Surrenderer, hereby acknowledge and agree to the following:</p>
+                    <ul>
+                        <li>I voluntarily and of my own full free will surrender the animal mentioned below to MAWI Sharjah for Cats and Dogs without any coercion or pressure.</li>
+                        <li>I release MAWI Sharjah for Cats and Dogs, its employees, agents, and representatives from any liability, damage, or compensation related to the surrendered animal.</li>
+                        <li>I am aware and agree that MAWI Sharjah for Cats and Dogs is not obligated to return the animal to me under any circumstances.</li>
+                        <li>I acknowledge that my presence at MAWI Sharjah for Cats and Dogs is of my own full personal volition.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="signatures" id="signaturesSection" style="display: none;">
+            
+             <div class="surrenderer-signature-box">
+                <p class="signature-label" style="font-size: 13px; color: var(--main-green); margin-top: 0;">توقيع المتنازل / Surrenderer's Signature</p>
+                <div style="flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                    <img id="surrendererSignatureImg" class="signature-img" alt="توقيع المتنازل" style="display: none;">
+                    <div id="manualSurrendererSignatureLine" style="height: 50px; border-bottom: 1px dashed var(--olive-tone); width: 80%; margin-bottom: 5px; display: none;"></div>
+                </div>
+                <p class="signature-label" style="margin-bottom: 0;">اسم المتنازل ورقم الهاتف / Surrenderer's Name & Phone</p>
+                <p id="surrendererSignatureDetails" style="font-weight: bold; font-size: 12px; color: var(--text-color); margin-top: 2px;"></p>
+            </div>
+            
+            <div class="registrar-info">
+                 <h3 style="font-weight: 600; color: var(--main-green); margin-bottom: 10px; border-bottom: 1px dashed var(--olive-tone); padding-bottom: 5px; font-size: 13px; text-align: center;">تفاصيل موظف التسجيل / Registrar's Details</h3>
+                 <div>
+                    <p style="margin: 0; font-size: 11px;"><span class="label">اسم الموظف:</span> <span id="createdByName" style="font-weight: bold; color: var(--text-color);"></span></p>
+                 </div>
+                 <p style="margin: 10px 0 0 0; font-size: 10px; color: var(--olive-tone); text-align: center;"> (تم تسجيل الإخلاء من قبل الموظف المذكور - لا يتطلب توقيع)</p>
+            </div>
+        </div>
+
+        <div class="official-stamp">
+            <p>مستند إخلاء مسؤولية تنازل رسمي صادر عن ماوي الشارقة للقطط والكلاب</p>
+            <p style="margin: 0;">للاستفسارات: هاتف XXXXXXXX | بريد إلكتروني XXXXXX@shjmun.ae</p>
+        </div>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const animalId = urlParams.get('animal_id');
+        const apiUrl = '../api/animals_crud.php'; 
+        
+        if (animalId) {
+            
+            const surrendererSignatureDetails = document.getElementById('surrendererSignatureDetails');
+            surrendererSignatureDetails.textContent = '... جاري التحميل ...';
+
+            const formData = new FormData();
+            formData.append('action', 'get');
+            formData.append('id', animalId);
+
+            fetch(apiUrl, { method: 'POST', body: formData })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success && result.animal && result.animal.animal_source === 'Surrended') {
+                        const data = result.animal;
+                        
+                        // بناء محتوى التقرير بالترتيب المطلوب
+                        document.getElementById('reportContent').innerHTML = `
+                            <div class="report-body">
+                                <div class="column arabic">
+                                    <div class="section">
+                                        <h2 style="color: var(--main-green);">بيانات الحيوان</h2>
+                                        <table>
+                                            <tr><td class="label">الرمز:</td><td>${data.animal_code || 'غير محدد'}</td></tr>
+                                            <tr><td class="label">الاسم:</td><td>${data.animal_name || 'غير محدد'}</td></tr>
+                                            <tr><td class="label">النوع:</td><td>${data.animal_type || 'غير محدد'}</td></tr>
+                                            <tr><td class="label">السلالة:</td><td>${data.breed || 'غير محدد'}</td></tr>
+                                            <tr><td class="label">اللون:</td><td>${data.color || 'غير محدد'}</td></tr>
+                                            <tr><td class="label">الجنس:</td><td>${data.gender || 'غير محدد'}</td></tr>
+                                            <tr><td class="label">تاريخ التسجيل:</td><td>${data.registration_date || 'غير محدد'}</td></tr>
+                                        </table>
+                                    </div>
+                                    <div class="section">
+                                        <h2 style="color: var(--main-green);">بيانات المتنازل</h2>
+                                        <table>
+                                            <tr><td class="label">الاسم:</td><td>${data.owner_name || 'غير محدد'}</td></tr>
+                                            <tr><td class="label">رقم الهوية:</td><td>${data.owner_national_id || 'غير محدد'}</td></tr>
+                                            <tr><td class="label">الهاتف:</td><td>${data.owner_phone || 'غير محدد'}</td></tr>
+                                            <tr><td class="label">البريد:</td><td>${data.owner_email || 'غير محدد'}</td></tr>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="column english">
+                                     <div class="section">
+                                        <h2 style="color: var(--main-green);">Animal Details</h2>
+                                        <table>
+                                            <tr><td class="label">Code:</td><td>${data.animal_code || 'N/A'}</td></tr>
+                                            <tr><td class="label">Name:</td><td>${data.animal_name || 'N/A'}</td></tr>
+                                            <tr><td class="label">Type:</td><td>${data.animal_type || 'N/A'}</td></tr>
+                                            <tr><td class="label">Breed:</td><td>${data.breed || 'N/A'}</td></tr>
+                                            <tr><td class="label">Color:</td><td>${data.color || 'N/A'}</td></tr>
+                                            <tr><td class="label">Gender:</td><td>${data.gender || 'N/A'}</td></tr>
+                                            <tr><td class="label">Registration Date:</td><td>${data.registration_date || 'N/A'}</td></tr>
+                                        </table>
+                                    </div>
+                                    <div class="section">
+                                        <h2 style="color: var(--main-green);">Surrenderer Details</h2>
+                                        <table>
+                                            <tr><td class="label">Name:</td><td>${data.owner_name || 'N/A'}</td></tr>
+                                            <tr><td class="label">National ID:</td><td>${data.owner_national_id || 'N/A'}</td></tr>
+                                            <tr><td class="label">Phone:</td><td>${data.owner_phone || 'N/A'}</td></tr>
+                                            <tr><td class="label">Email:</td><td>${data.owner_email || 'N/A'}</td></tr>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        
+                        document.getElementById('declarationSection').style.display = 'block';
+                        document.getElementById('signaturesSection').style.display = 'flex';
+                        
+                        const surrendererSignatureImg = document.getElementById('surrendererSignatureImg');
+                        const manualSurrendererSignatureLine = document.getElementById('manualSurrendererSignatureLine');
+                        const createdByName = document.getElementById('createdByName');
+                        
+                        // تحديث بيانات التوقيعات/الموظف
+                        createdByName.textContent = data.created_by_name || 'غير محدد'; // افتراضيًا، يمكن جلب created_by_name من API إذا أضيف
+                        surrendererSignatureDetails.textContent = `${data.owner_name || 'غير محدد'} - ${data.owner_phone || 'غير محدد'}`;
+                        
+                        if (data.owner_signature) {
+                            surrendererSignatureImg.src = `../${data.owner_signature}`; 
+                            surrendererSignatureImg.style.display = 'inline-block';
+                            manualSurrendererSignatureLine.style.display = 'none';
+                        } else {
+                            surrendererSignatureImg.style.display = 'none';
+                            manualSurrendererSignatureLine.style.display = 'block';
+                        }
+                        
+                        setTimeout(() => {
+                            window.print();
+                        }, 700);
+                    } else {
+                        document.getElementById('reportContent').innerHTML = `<p style="color: var(--main-green); padding: 20px;">خطأ: الحيوان غير موجود أو ليس من نوع 'Surrended': ${result.message || 'غير محدد'}</p>`;
+                    }
+                })
+                .catch(error => {
+                    console.error('خطأ في التقرير:', error);
+                    document.getElementById('reportContent').innerHTML = '<p style="color: var(--main-green); padding: 20px;">خطأ في جلب البيانات من الخادم.</p>';
+                });
+        } else {
+            document.getElementById('reportContent').innerHTML = '<p style="color: var(--main-green); padding: 20px;">معرف الحيوان مفقود.</p>';
+        }
+    </script>
+</body>
+</html>

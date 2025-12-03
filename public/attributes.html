@@ -1,0 +1,896 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <title>إدارة وإدخال خصائص المنتج - Health Vet</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    :root {
+      --primary-color: #2e7d32;
+      --primary-light: #4caf50;
+      --primary-dark: #1b5e20;
+      --secondary-color: #ede4d4;
+      --secondary-dark: #d4c8a8;
+      --light-color: #ffffff;
+      --shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+      --shadow-hover: 0 12px 35px rgba(46, 125, 50, 0.15);
+      --gradient-primary: linear-gradient(135deg, #2e7d32 0%, #4caf50 100%);
+      --radius: 12px;
+      --gap: 16px;
+      font-family: 'Cairo', Tahoma, Arial, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { 
+      margin: 0; 
+      padding: 20px; 
+      background: var(--light-color); 
+      color: var(--primary-dark); 
+      direction: rtl; 
+      line-height: 1.6; 
+      min-height: 100vh; 
+    }
+    .container { 
+      max-width: 1100px; 
+      margin: 0 auto; 
+      background: var(--light-color); 
+      border-radius: var(--radius); 
+      box-shadow: var(--shadow); 
+      padding: 24px; 
+    }
+    h1 { 
+      text-align: center; 
+      color: var(--primary-color); 
+      font-size: 1.8rem; 
+      margin-bottom: var(--gap); 
+      background: var(--gradient-primary); 
+      -webkit-background-clip: text; 
+      -webkit-text-fill-color: transparent; 
+      background-clip: text; 
+    }
+    .panel { 
+      background: var(--light-color); 
+      border: 1px solid rgba(46, 125, 50, 0.1); 
+      padding: 20px; 
+      border-radius: var(--radius); 
+      margin-bottom: var(--gap); 
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05); 
+    }
+    .panel strong { 
+      display: block; 
+      font-size: 1.1rem; 
+      color: var(--primary-color); 
+      margin-bottom: 12px; 
+      padding-bottom: 8px; 
+      border-bottom: 2px solid var(--secondary-dark); 
+    }
+    .row { 
+      display: flex; 
+      gap: var(--gap); 
+      align-items: center; 
+      flex-wrap: wrap; 
+    }
+    .col { 
+      flex: 1; 
+      min-width: 200px; 
+    }
+    label { 
+      display: block; 
+      font-size: 0.95rem; 
+      margin-bottom: 6px; 
+      color: var(--primary-dark); 
+      font-weight: 600; 
+    }
+    input[type="text"], input[type="number"], select, textarea { 
+      width: 100%; 
+      padding: 12px; 
+      border: 1px solid rgba(46, 125, 50, 0.2); 
+      border-radius: 8px; 
+      box-sizing: border-box; 
+      font-size: 0.95rem; 
+      background: var(--light-color); 
+      transition: border-color 0.3s ease; 
+    }
+    input:focus, select:focus, textarea:focus { 
+      outline: none; 
+      border-color: var(--primary-color); 
+      box-shadow: 0 0 0 2px rgba(46, 125, 50, 0.1); 
+    }
+    button { 
+      background: var(--gradient-primary); 
+      color: var(--light-color); 
+      border: none; 
+      padding: 12px 16px; 
+      border-radius: 8px; 
+      cursor: pointer; 
+      font-size: 0.95rem; 
+      font-weight: 600; 
+      transition: all 0.3s ease; 
+      min-width: 140px; 
+    }
+    button:hover { 
+      transform: translateY(-2px); 
+      box-shadow: var(--shadow-hover); 
+    }
+    button.secondary { 
+      background: var(--secondary-dark); 
+    }
+    button.ghost { 
+      background: transparent; 
+      color: var(--primary-color); 
+      border: 1px solid var(--primary-color); 
+    }
+    .muted { 
+      color: var(--muted); 
+      font-size: 0.92rem; 
+    }
+    .small { 
+      width: 120px; 
+    }
+    .attr { 
+      border: 1px solid rgba(46, 125, 50, 0.1); 
+      padding: 16px; 
+      border-radius: 8px; 
+      background: var(--light-color); 
+      margin-top: 12px; 
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05); 
+    }
+    .attr strong { 
+      display: block; 
+      margin-bottom: 12px; 
+      color: var(--primary-color); 
+    }
+    .msg { 
+      margin-top: 12px; 
+      font-weight: 600; 
+      padding: 10px; 
+      border-radius: 6px; 
+    }
+    .error { 
+      color: #d32f2f; 
+      background: rgba(244, 67, 54, 0.1); 
+      border: 1px solid rgba(244, 67, 54, 0.2); 
+    }
+    .success { 
+      color: var(--primary-color); 
+      background: rgba(76, 175, 80, 0.1); 
+      border: 1px solid rgba(76, 175, 80, 0.2); 
+    }
+    .controls { 
+      display: flex; 
+      gap: 8px; 
+      align-items: center; 
+      margin-top: 12px; 
+      flex-wrap: wrap; 
+    }
+    .control-block { 
+      display: flex; 
+      gap: 8px; 
+      align-items: center; 
+      width: 100%; 
+      margin-bottom: 8px; 
+    }
+    .control-block > * { 
+      flex: 1; 
+      min-width: 0; 
+    }
+    .small-inline { 
+      width: 90px; 
+    }
+    .duplicate-btn { 
+      background: var(--secondary-color); 
+      color: var(--primary-dark); 
+      border: 1px solid var(--secondary-dark); 
+      padding: 8px 12px; 
+      border-radius: 6px; 
+      cursor: pointer; 
+      font-size: 0.9rem; 
+    }
+    .duplicate-btn:hover { 
+      background: var(--secondary-dark); 
+      color: var(--light-color); 
+    }
+    hr { 
+      margin: 16px 0; 
+      border: none; 
+      border-top: 1px solid rgba(46, 125, 50, 0.1); 
+    }
+    @media (max-width: 768px) { 
+      body { padding: 12px; } 
+      .container { padding: 16px; } 
+      .row { flex-direction: column; align-items: stretch; } 
+      .col { min-width: auto; } 
+      .small, .small-inline { width: 100%; } 
+      h1 { font-size: 1.5rem; } 
+    }
+    @media (max-width: 480px) { 
+      .control-block { flex-direction: column; align-items: stretch; } 
+      button { min-width: auto; width: 100%; margin-bottom: 8px; } 
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 id="page-title">إدارة وإدخال خصائص المنتج</h1>
+    <div class="panel">
+      <strong id="step1-title">1) اختر فئة العنصر</strong>
+      <p id="step1-desc" class="muted">اختر الفئة لعرض الخصائص المرتبطة.</p>
+      <div class="row" style="margin-top:8px;">
+        <div class="col">
+          <label id="item-label">فئة العنصر</label>
+          <select id="itemSelect"><option value="">-- جاري التحميل --</option></select>
+        </div>
+        <div style="min-width:140px;">
+          <label id="lang-label">اللغة</label>
+          <select id="uiLang">
+            <option value="ar" selected>العربية</option>
+            <option value="en">English</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="panel">
+      <strong id="step2-title">2) إدارة الخصائص</strong>
+      <div style="display:flex;gap:12px;align-items:end;">
+        <div style="flex:1">
+          <label id="attr-ar-label">اسم الخاصية (العربية)</label>
+          <input id="newAttrAr" type="text" placeholder="مثال: اللون">
+        </div>
+        <div style="flex:1">
+          <label id="attr-en-label">اسم الخاصية (الإنجليزية)</label>
+          <input id="newAttrEn" type="text" placeholder="Example: Color">
+        </div>
+        <div style="min-width:140px">
+          <button id="btnCreateAttr" class="button">إنشاء خاصية</button>
+        </div>
+      </div>
+      <hr>
+      <div style="display:flex;gap:12px;align-items:end;">
+        <div style="flex:1">
+          <label id="select-attr-label">اختر خاصية</label>
+          <select id="selectAttribute"><option value="">-- تحميل الخصائص --</option></select>
+        </div>
+        <div style="flex:1">
+          <label id="opt-ar-label">خيار (AR)</label>
+          <input id="newOptAr" type="text" placeholder="أحمر">
+        </div>
+        <div style="flex:1">
+          <label id="opt-en-label">خيار (EN)</label>
+          <input id="newOptEn" type="text" placeholder="Red">
+        </div>
+        <div style="min-width:140px">
+          <button id="btnCreateOpt" class="secondary">إضافة خيار</button>
+        </div>
+      </div>
+    </div>
+    <div class="panel">
+      <strong id="step3-title">3) ربط الخاصية بالفئة</strong>
+      <div style="display:flex;gap:12px;align-items:end;">
+        <div style="flex:1">
+          <label id="link-attr-label">اختر خاصية للربط</label>
+          <select id="selectAttributeToLink"><option value="">-- تحميل الخصائص --</option></select>
+        </div>
+        <div style="min-width:120px">
+          <label id="required-label">مطلوبة؟</label>
+          <select id="linkIsRequired"><option value="0">لا</option><option value="1">نعم</option></select>
+        </div>
+        <div style="min-width:110px">
+          <label id="order-label">ترتيب</label>
+          <input id="linkSortOrder" type="number" value="0">
+        </div>
+        <div style="flex:1">
+          <label id="default-opt-label">خيار افتراضي</label>
+          <select id="linkDefaultOption"><option value="">-- لا شيء --</option></select>
+        </div>
+        <div style="min-width:140px">
+          <button id="btnLinkAttr" class="ghost">ربط</button>
+        </div>
+      </div>
+    </div>
+    <div class="panel">
+      <strong id="step4-title">4) إدخال / تعديل قيم الخصائص لمنتج</strong>
+      <div class="row" style="margin-top:8px;">
+        <div class="col">
+          <label id="product-id-label">رقم المنتج (Product ID)</label>
+          <input id="productId" type="number" placeholder="مثال: 19">
+        </div>
+        <div style="min-width:300px; display:flex; gap:8px; align-items:flex-end;">
+          <button id="btnLoadSaved" class="secondary">تحميل القيم المحفوظة</button>
+          <button id="saveBtn">حفظ الخصائص</button>
+        </div>
+      </div>
+      <div id="attributesContainer" style="margin-top:12px;"></div>
+      <div id="result" class="msg"></div>
+    </div>
+  </div>
+<script src="session_check.js"></script>
+<script>
+const translations = {
+  ar: {
+    page_title: 'إدارة وإدخال خصائص المنتج',
+    step1_title: '1) اختر فئة العنصر',
+    step1_desc: 'اختر الفئة لعرض الخصائص المرتبطة.',
+    item_label: 'فئة العنصر',
+    lang_label: 'اللغة',
+    step2_title: '2) إدارة الخصائص',
+    attr_ar_label: 'اسم الخاصية (العربية)',
+    attr_ar_placeholder: 'مثال: اللون',
+    attr_en_label: 'اسم الخاصية (الإنجليزية)',
+    attr_en_placeholder: 'Example: Color',
+    create_attr_btn: 'إنشاء خاصية',
+    select_attr_label: 'اختر خاصية',
+    opt_ar_label: 'خيار (AR)',
+    opt_ar_placeholder: 'أحمر',
+    opt_en_label: 'خيار (EN)',
+    opt_en_placeholder: 'Red',
+    create_opt_btn: 'إضافة خيار',
+    step3_title: '3) ربط الخاصية بالفئة',
+    link_attr_label: 'اختر خاصية للربط',
+    required_label: 'مطلوبة؟',
+    required_no: 'لا',
+    required_yes: 'نعم',
+    order_label: 'ترتيب',
+    default_opt_label: 'خيار افتراضي',
+    default_none: '-- لا شيء --',
+    link_btn: 'ربط',
+    step4_title: '4) إدخال / تعديل قيم الخصائص لمنتج',
+    product_id_label: 'رقم المنتج (Product ID)',
+    product_id_placeholder: 'مثال: 19',
+    load_saved_btn: 'تحميل القيم المحفوظة',
+    save_btn: 'حفظ الخصائص',
+    loading: 'جاري التحميل...',
+    no_attrs: 'لا توجد خصائص مرتبطة بهذه الفئة.',
+    error_load: 'فشل تحميل الخصائص.',
+    select_placeholder: '-- اختر --',
+    add_value_btn: 'إضافة قيمة أخرى',
+    remove_btn: 'حذف',
+    value_placeholder: 'أدخل قيمة الخاصية',
+    success_create_attr: 'تم إنشاء الخاصية بنجاح',
+    error_create_attr: 'فشل إنشاء الخاصية',
+    success_create_opt: 'تم إنشاء الخيار بنجاح',
+    error_create_opt: 'فشل إنشاء الخيار',
+    success_link: 'تم الربط بنجاح',
+    error_link: 'فشل الربط',
+    success_load: 'تم تحميل القيم وملؤها في النموذج',
+    error_load_values: 'فشل تحميل القيم',
+    success_save: 'تم الحفظ بنجاح',
+    error_save: 'فشل الحفظ',
+    alert_enter_id: 'أدخل Product ID',
+    alert_select_item: 'اختر فئة العنصر أولاً',
+    alert_select_attr: 'اختر الخاصية للربط',
+    alert_enter_attr_name: 'أدخل اسم الخاصية بالعربية أو بالإنجليزية',
+    alert_select_attr_first: 'اختر خاصية أولاً',
+    alert_enter_opt_name: 'أدخل اسم الخيار',
+    alert_no_category: 'لا يمكن تحميل الخصائص لأن فئة العنصر غير معروفة. اختر فئة أو حدّد منتج مرتبط بفئة.',
+    confirm_no_attrs: 'لا توجد خصائص مُدخلة. هل تريد المتابعة؟',
+    loading_values: 'جاري تحميل القيم (إن وُجدت)...',
+    no_saved_values: 'لم يتم العثور على قيم محفوظة'
+  },
+  en: {
+    page_title: 'Product Attributes Management and Entry',
+    step1_title: '1) Select Item Category',
+    step1_desc: 'Select the category to display associated attributes.',
+    item_label: 'Item Category',
+    lang_label: 'Language',
+    step2_title: '2) Manage Attributes',
+    attr_ar_label: 'Attribute Name (Arabic)',
+    attr_ar_placeholder: 'Example: Color',
+    attr_en_label: 'Attribute Name (English)',
+    attr_en_placeholder: 'Example: Color',
+    create_attr_btn: 'Create Attribute',
+    select_attr_label: 'Select Attribute',
+    opt_ar_label: 'Option (AR)',
+    opt_ar_placeholder: 'Red',
+    opt_en_label: 'Option (EN)',
+    opt_en_placeholder: 'Red',
+    create_opt_btn: 'Add Option',
+    step3_title: '3) Link Attribute to Category',
+    link_attr_label: 'Select Attribute to Link',
+    required_label: 'Required?',
+    required_no: 'No',
+    required_yes: 'Yes',
+    order_label: 'Order',
+    default_opt_label: 'Default Option',
+    default_none: '-- None --',
+    link_btn: 'Link',
+    step4_title: '4) Enter / Edit Attribute Values for Product',
+    product_id_label: 'Product ID',
+    product_id_placeholder: 'Example: 19',
+    load_saved_btn: 'Load Saved Values',
+    save_btn: 'Save Attributes',
+    loading: 'Loading...',
+    no_attrs: 'No attributes associated with this category.',
+    error_load: 'Failed to load attributes.',
+    select_placeholder: '-- Select --',
+    add_value_btn: 'Add Another Value',
+    remove_btn: 'Remove',
+    value_placeholder: 'Enter attribute value',
+    success_create_attr: 'Attribute created successfully',
+    error_create_attr: 'Failed to create attribute',
+    success_create_opt: 'Option created successfully',
+    error_create_opt: 'Failed to create option',
+    success_link: 'Linked successfully',
+    error_link: 'Failed to link',
+    success_load: 'Values loaded and filled in the form',
+    error_load_values: 'Failed to load values',
+    success_save: 'Saved successfully',
+    error_save: 'Failed to save',
+    alert_enter_id: 'Enter Product ID',
+    alert_select_item: 'Select item category first',
+    alert_select_attr: 'Select attribute to link',
+    alert_enter_attr_name: 'Enter attribute name in Arabic or English',
+    alert_select_attr_first: 'Select attribute first',
+    alert_enter_opt_name: 'Enter option name',
+    alert_no_category: 'Cannot load attributes as item category is unknown. Select a category or specify a product linked to a category.',
+    confirm_no_attrs: 'No attributes entered. Do you want to proceed?',
+    loading_values: 'Loading values (if any)...',
+    no_saved_values: 'No saved values found'
+  }
+};
+let currentLang = 'ar';
+function setLanguage(lang) {
+  currentLang = lang;
+  document.documentElement.lang = lang;
+  document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+  document.body.style.direction = lang === 'ar' ? 'rtl' : 'ltr';
+  document.body.style.textAlign = lang === 'ar' ? 'right' : 'left';
+  const t = translations[lang];
+  document.getElementById('page-title').textContent = t.page_title;
+  document.getElementById('step1-title').textContent = t.step1_title;
+  document.getElementById('step1-desc').textContent = t.step1_desc;
+  document.getElementById('item-label').textContent = t.item_label;
+  document.getElementById('lang-label').textContent = t.lang_label;
+  document.getElementById('uiLang').value = lang;
+  document.getElementById('step2-title').textContent = t.step2_title;
+  document.getElementById('attr-ar-label').textContent = t.attr_ar_label;
+  document.getElementById('newAttrAr').placeholder = t.attr_ar_placeholder;
+  document.getElementById('attr-en-label').textContent = t.attr_en_label;
+  document.getElementById('newAttrEn').placeholder = t.attr_en_placeholder;
+  document.getElementById('btnCreateAttr').textContent = t.create_attr_btn;
+  document.getElementById('select-attr-label').textContent = t.select_attr_label;
+  document.getElementById('opt-ar-label').textContent = t.opt_ar_label;
+  document.getElementById('newOptAr').placeholder = t.opt_ar_placeholder;
+  document.getElementById('opt-en-label').textContent = t.opt_en_label;
+  document.getElementById('newOptEn').placeholder = t.opt_en_placeholder;
+  document.getElementById('btnCreateOpt').textContent = t.create_opt_btn;
+  document.getElementById('step3-title').textContent = t.step3_title;
+  document.getElementById('link-attr-label').textContent = t.link_attr_label;
+  document.getElementById('required-label').textContent = t.required_label;
+  document.getElementById('linkIsRequired').options[0].text = t.required_no;
+  document.getElementById('linkIsRequired').options[1].text = t.required_yes;
+  document.getElementById('order-label').textContent = t.order_label;
+  document.getElementById('default-opt-label').textContent = t.default_opt_label;
+  document.getElementById('linkDefaultOption').options[0].text = t.default_none;
+  document.getElementById('btnLinkAttr').textContent = t.link_btn;
+  document.getElementById('step4-title').textContent = t.step4_title;
+  document.getElementById('product-id-label').textContent = t.product_id_label;
+  document.getElementById('productId').placeholder = t.product_id_placeholder;
+  document.getElementById('btnLoadSaved').textContent = t.load_saved_btn;
+  document.getElementById('saveBtn').textContent = t.save_btn;
+  // Update dynamic elements if needed
+  updateDynamicTexts();
+}
+function updateDynamicTexts() {
+  const t = translations[currentLang];
+  // Update selects placeholders if possible
+  const selects = ['itemSelect', 'selectAttribute', 'selectAttributeToLink', 'linkDefaultOption'];
+  selects.forEach(id => {
+    const sel = document.getElementById(id);
+    if (sel && sel.options[0]) {
+      if (id === 'itemSelect' || id === 'selectAttribute' || id === 'selectAttributeToLink') {
+        sel.options[0].text = t.select_placeholder;
+      } else if (id === 'linkDefaultOption') {
+        sel.options[0].text = t.default_none;
+      }
+    }
+  });
+  // Update buttons in dynamic content
+  document.querySelectorAll('.duplicate-btn').forEach(btn => {
+    if (btn.textContent.includes('إضافة')) btn.textContent = t.add_value_btn;
+    else if (btn.textContent.includes('حذف')) btn.textContent = t.remove_btn;
+  });
+  document.querySelectorAll('input[type="text"][data-control-type="text"]').forEach(input => {
+    input.placeholder = t.value_placeholder;
+  });
+}
+const baseApi = '/health_vet/api/api.php';
+const inventoryUrlBase = '/health_vet/api/get_inventory_list.php';
+const el = id => document.getElementById(id);
+const itemSelect = el('itemSelect');
+const uiLang = el('uiLang');
+const attributesContainer = el('attributesContainer');
+const productIdInput = el('productId');
+const resultEl = el('result');
+function showMsg(txt, ok=true){
+  resultEl.textContent = txt;
+  resultEl.className = 'msg ' + (ok ? 'success' : 'error');
+}
+function clearMsg(){ resultEl.textContent = ''; resultEl.className = 'msg'; }
+async function fetchJSON(url, opts){
+  const res = await fetch(url, opts);
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error('HTTP '+res.status+' - '+text);
+  }
+  return res.json();
+}
+async function listInventory() {
+  const lang = uiLang.value === 'en' ? 'en' : 'ar';
+  const url = `${inventoryUrlBase}?lang=${lang}`;
+  itemSelect.innerHTML = '<option value="">'+ translations[currentLang].loading +'</option>';
+  try {
+    const json = await fetchJSON(url, { cache: 'no-store' });
+    const items = (json.success && Array.isArray(json.data)) ? json.data : (json.items || []);
+    itemSelect.innerHTML = '<option value="">'+ translations[currentLang].select_placeholder +'</option>';
+    items.forEach(i => {
+      const opt = document.createElement('option');
+      opt.value = i.ItemID;
+      opt.textContent = i.Name || i.Name_AR || i.Name_EN || ('#'+i.ItemID);
+      itemSelect.appendChild(opt);
+    });
+  } catch (e) {
+    console.error('listInventory error', e);
+    itemSelect.innerHTML = '<option value="">'+ translations[currentLang].error_load +'</option>';
+  }
+}
+async function listAttributesPopulate(){
+  try {
+    const json = await fetchJSON(`${baseApi}?action=list_attributes`);
+    const attrs = json.attributes || [];
+    const s1 = el('selectAttribute');
+    const s2 = el('selectAttributeToLink');
+    s1.innerHTML = '<option value="">'+ translations[currentLang].select_placeholder +'</option>';
+    s2.innerHTML = '<option value="">'+ translations[currentLang].select_placeholder +'</option>';
+    attrs.forEach(a => {
+      const opt = document.createElement('option');
+      opt.value = a.AttributeID;
+      opt.textContent = a.Name_AR || a.Name_EN || ('#'+a.AttributeID);
+      s1.appendChild(opt);
+      s2.appendChild(opt.cloneNode(true));
+    });
+  } catch (e) {
+    console.warn('listAttributesPopulate failed', e);
+  }
+}
+el('selectAttributeToLink').addEventListener('change', async (ev) => {
+  const aid = parseInt(ev.target.value||'0',10);
+  const defSel = el('linkDefaultOption');
+  defSel.innerHTML = '<option value="">'+ translations[currentLang].default_none +'</option>';
+  if (!aid) return;
+  try {
+    const json = await fetchJSON(`${baseApi}?action=get_options&attribute_id=${aid}`);
+    (json.options || []).forEach(o => {
+      const opt = document.createElement('option');
+      opt.value = o.OptionID;
+      opt.textContent = o.Name_AR || o.Name_EN || ('#'+o.OptionID);
+      defSel.appendChild(opt);
+    });
+  } catch (e) { console.warn(e); }
+});
+el('btnCreateAttr').addEventListener('click', async () => {
+  clearMsg();
+  const name_ar = el('newAttrAr').value.trim();
+  const name_en = el('newAttrEn').value.trim();
+  if (!name_ar && !name_en) { 
+    alert(translations[currentLang].alert_enter_attr_name); 
+    return; 
+  }
+  try {
+    const res = await fetchJSON(`${baseApi}?action=create_attribute`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ name_ar, name_en })
+    });
+    if (res.status === 'ok') {
+      el('newAttrAr').value = ''; el('newAttrEn').value = '';
+      await listAttributesPopulate();
+      showMsg(translations[currentLang].success_create_attr, true);
+    } else showMsg(res.message || translations[currentLang].error_create_attr, false);
+  } catch (e) {
+    console.error(e); showMsg(translations[currentLang].error_create_attr + ': ' + e.message, false);
+  }
+});
+el('btnCreateOpt').addEventListener('click', async () => {
+  clearMsg();
+  const attribute_id = parseInt(el('selectAttribute').value||'0',10);
+  const name_ar = el('newOptAr').value.trim();
+  const name_en = el('newOptEn').value.trim();
+  if (!attribute_id) { 
+    alert(translations[currentLang].alert_select_attr_first); 
+    return; 
+  }
+  if (!name_ar && !name_en) { 
+    alert(translations[currentLang].alert_enter_opt_name); 
+    return; 
+  }
+  try {
+    const res = await fetchJSON(`${baseApi}?action=create_option`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ attribute_id, name_ar, name_en })
+    });
+    if (res.status === 'ok') {
+      el('newOptAr').value = ''; el('newOptEn').value = '';
+      showMsg(translations[currentLang].success_create_opt, true);
+      if (parseInt(el('selectAttributeToLink').value||'0',10) === attribute_id) el('selectAttributeToLink').dispatchEvent(new Event('change'));
+    } else showMsg(res.message || translations[currentLang].error_create_opt, false);
+  } catch (e) {
+    console.error(e); showMsg(translations[currentLang].error_create_opt + ': ' + e.message, false);
+  }
+});
+el('btnLinkAttr').addEventListener('click', async () => {
+  clearMsg();
+  const item_id = parseInt(itemSelect.value||'0',10);
+  const attribute_id = parseInt(el('selectAttributeToLink').value||'0',10);
+  const is_required = parseInt(el('linkIsRequired').value||'0',10);
+  const sort_order = parseInt(el('linkSortOrder').value||'0',10);
+  const default_option_id = el('linkDefaultOption').value || null;
+  if (!item_id) { 
+    alert(translations[currentLang].alert_select_item); 
+    return; 
+  }
+  if (!attribute_id) { 
+    alert(translations[currentLang].alert_select_attr); 
+    return; 
+  }
+  try {
+    const res = await fetchJSON(`${baseApi}?action=link_attribute`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ item_id, attribute_id, is_required, sort_order, default_option_id })
+    });
+    if (res.status === 'ok') {
+      showMsg(translations[currentLang].success_link, true);
+      await loadAttributes(item_id);
+    } else showMsg(res.message || translations[currentLang].error_link, false);
+  } catch (e) {
+    console.error(e); showMsg(translations[currentLang].error_link + ': ' + e.message, false);
+  }
+});
+async function loadAttributes(itemId) {
+  clearMsg();
+  attributesContainer.innerHTML = '<div class="muted">'+ translations[currentLang].loading +'</div>';
+  if (!itemId) { attributesContainer.innerHTML = ''; return; }
+  try {
+    const json = await fetchJSON(`${baseApi}?action=get_attributes&item_id=${encodeURIComponent(itemId)}`);
+    const attrs = json.attributes || [];
+    attributesContainer.innerHTML = '';
+    if (!attrs.length) {
+      attributesContainer.innerHTML = '<div class="muted">'+ translations[currentLang].no_attrs +'</div>';
+      return attrs;
+    }
+    attrs.forEach(attr => {
+      const div = document.createElement('div');
+      div.className = 'attr';
+      div.dataset.attributeId = attr.attribute_id || attr.AttributeID;
+      const title = document.createElement('strong');
+      title.textContent = attr.name_ar || attr.name_en || attr.Name_AR || attr.Name_EN || ('#'+(attr.attribute_id||attr.AttributeID));
+      div.appendChild(title);
+      const list = document.createElement('div');
+      list.className = 'value-list';
+      const block = createValueBlock(attr, null);
+      list.appendChild(block);
+      const actions = document.createElement('div');
+      actions.className = 'actions';
+      const dupBtn = document.createElement('button');
+      dupBtn.type = 'button';
+      dupBtn.className = 'duplicate-btn';
+      dupBtn.textContent = translations[currentLang].add_value_btn;
+      dupBtn.addEventListener('click', () => {
+        const newBlock = createValueBlock(attr, null);
+        list.appendChild(newBlock);
+      });
+      actions.appendChild(dupBtn);
+      div.appendChild(list);
+      div.appendChild(actions);
+      attributesContainer.appendChild(div);
+    });
+    return attrs;
+  } catch (e) {
+    console.error('loadAttributes failed', e);
+    attributesContainer.innerHTML = '<div class="muted">'+ translations[currentLang].error_load +'</div>';
+    throw e;
+  }
+}
+function createValueBlock(attr, existingValue) {
+  const attributeId = attr.attribute_id || attr.AttributeID;
+  const block = document.createElement('div');
+  block.className = 'control-block';
+  if (Array.isArray(attr.options) && attr.options.length) {
+    const sel = document.createElement('select');
+    sel.dataset.attributeId = attributeId;
+    sel.dataset.controlType = 'select';
+    const emptyOpt = document.createElement('option'); emptyOpt.value = ''; emptyOpt.textContent = translations[currentLang].select_placeholder;
+    sel.appendChild(emptyOpt);
+    attr.options.forEach(o => {
+      const opt = document.createElement('option');
+      opt.value = o.OptionID || o.option_id;
+      opt.textContent = o.opt_ar || o.Name_AR || o.opt_en || o.Name_EN || (o.label || ('#'+opt.value));
+      sel.appendChild(opt);
+    });
+    if (existingValue && existingValue.option_id !== null) sel.value = existingValue.option_id;
+    block.appendChild(sel);
+  } else {
+    const txt = document.createElement('input');
+    txt.type = 'text';
+    txt.dataset.attributeId = attributeId;
+    txt.dataset.controlType = 'text';
+    txt.placeholder = translations[currentLang].value_placeholder;
+    if (existingValue && existingValue.value !== null) txt.value = existingValue.value;
+    block.appendChild(txt);
+  }
+  const qty = document.createElement('input');
+  qty.type = 'number';
+  qty.className = 'small-inline';
+  qty.dataset.attributeId = attributeId;
+  qty.dataset.controlType = 'number';
+  qty.min = '0';
+  qty.value = existingValue && (existingValue.quantity !== undefined) ? existingValue.quantity : 0;
+  block.appendChild(qty);
+  const rem = document.createElement('button');
+  rem.type = 'button';
+  rem.className = 'duplicate-btn';
+  rem.textContent = translations[currentLang].remove_btn;
+  rem.addEventListener('click', () => block.remove());
+  block.appendChild(rem);
+  return block;
+}
+async function loadAndPrefillProduct(productId) {
+  clearMsg();
+  if (!productId) { 
+    alert(translations[currentLang].alert_enter_id); 
+    return; 
+  }
+  showMsg(translations[currentLang].loading_values, true);
+  try {
+    const json = await fetchJSON(`${baseApi}?action=get_product_values&product_id=${productId}`);
+    if (json.status !== 'ok') {
+      showMsg(translations[currentLang].no_saved_values, false);
+      return;
+    }
+    const product = json.product || null;
+    const values = json.values || [];
+    const inventoryItemId = product && product.inventory_item_id ? product.inventory_item_id : parseInt(itemSelect.value||'0',10);
+    if (!inventoryItemId) {
+      if (!itemSelect.value) {
+        showMsg(translations[currentLang].alert_no_category, false);
+        return;
+      }
+    } else {
+      itemSelect.value = inventoryItemId;
+    }
+    await loadAttributes(inventoryItemId || parseInt(itemSelect.value||'0',10));
+    const grouped = {};
+    (values || []).forEach(v => {
+      const aid = v.attribute_id;
+      if (!grouped[aid]) grouped[aid] = [];
+      grouped[aid].push(v);
+    });
+    for (const aidStr of Object.keys(grouped)) {
+      const aid = parseInt(aidStr, 10);
+      const attrWrapper = attributesContainer.querySelector(`.attr[data-attribute-id="${aid}"]`);
+      if (!attrWrapper) continue;
+      const list = attrWrapper.querySelector('.value-list');
+      const blocks = Array.from(list.querySelectorAll('.control-block'));
+      const entries = grouped[aid];
+      for (let i = 0; i < entries.length; i++) {
+        const entry = entries[i];
+        let block = blocks[i];
+        if (!block) {
+          const sampleBlock = list.querySelector('.control-block');
+          let fakeAttr = { options: [] };
+          if (sampleBlock) {
+            const sel = sampleBlock.querySelector('select[data-attribute-id]');
+            if (sel) {
+              fakeAttr.options = Array.from(sel.querySelectorAll('option')).filter(o => o.value !== '').map(o => ({
+                OptionID: o.value,
+                Name_AR: o.textContent,
+                Name_EN: o.textContent
+              }));
+            }
+          }
+          block = createValueBlock(fakeAttr, null);
+          list.appendChild(block);
+        }
+        const sel = block.querySelector('select[data-attribute-id]');
+        const txt = block.querySelector('input[type="text"][data-attribute-id]');
+        const qty = block.querySelector('input[type="number"][data-attribute-id]');
+        if (sel) {
+          if (entry.option_id !== null) {
+            const optVal = String(entry.option_id);
+            const exists = Array.from(sel.options).some(o => String(o.value) === optVal);
+            if (!exists) {
+              const added = document.createElement('option');
+              added.value = optVal;
+              added.textContent = (entry.option_name_ar || entry.option_name_en || ('#'+optVal));
+              sel.appendChild(added);
+            }
+            sel.value = optVal;
+          } else {
+            sel.value = '';
+          }
+        }
+        if (txt) {
+          txt.value = entry.value !== null ? entry.value : '';
+        }
+        if (qty) {
+          qty.value = (entry.quantity !== undefined && entry.quantity !== null) ? entry.quantity : 0;
+        }
+      }
+    }
+    showMsg(translations[currentLang].success_load, true);
+  } catch (e) {
+    console.error(e);
+    showMsg(translations[currentLang].error_load_values + ': ' + e.message, false);
+  }
+}
+el('saveBtn').addEventListener('click', async () => {
+  clearMsg();
+  const productId = parseInt(productIdInput.value||'0',10);
+  if (!productId) { 
+    alert(translations[currentLang].alert_enter_id); 
+    return; 
+  }
+  const payloadAttrs = [];
+  const attrWrappers = attributesContainer.querySelectorAll('.attr');
+  attrWrappers.forEach(wrapper => {
+    const attributeId = parseInt(wrapper.dataset.attributeId||'0',10);
+    if (!attributeId) return;
+    const blocks = wrapper.querySelectorAll('.control-block');
+    blocks.forEach(b => {
+      const sel = b.querySelector('select[data-attribute-id]');
+      const txt = b.querySelector('input[type="text"][data-attribute-id]');
+      const num = b.querySelector('input[type="number"][data-attribute-id]');
+      const option_id = sel ? (sel.value ? parseInt(sel.value,10) : null) : null;
+      const value = txt ? (txt.value ? txt.value.trim() : null) : null;
+      const quantity = num ? (parseFloat(num.value||'0') || 0) : 0;
+      if (option_id === null && (value === null || value === '')) return;
+      payloadAttrs.push({ attribute_id: attributeId, option_id, value, quantity });
+    });
+  });
+  if (!payloadAttrs.length && !confirm(translations[currentLang].confirm_no_attrs)) return;
+  try {
+    const res = await fetchJSON(`${baseApi}?action=save_product_attributes`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ product_id: productId, attributes: payloadAttrs })
+    });
+    if (res.status === 'ok') {
+      showMsg(translations[currentLang].success_save, true);
+    } else {
+      showMsg(res.message || translations[currentLang].error_save, false);
+    }
+  } catch (e) {
+    console.error(e);
+    showMsg(translations[currentLang].error_save + ': ' + e.message, false);
+  }
+});
+el('btnLoadSaved').addEventListener('click', async () => {
+  const productId = parseInt(productIdInput.value||'0',10);
+  if (!productId) { 
+    alert(translations[currentLang].alert_enter_id + ' لتحميل القيم'); 
+    return; 
+  }
+  await loadAndPrefillProduct(productId);
+});
+itemSelect.addEventListener('change', async (e) => {
+  const itemId = parseInt(e.target.value||'0',10);
+  await loadAttributes(itemId);
+});
+uiLang.addEventListener('change', async () => {
+  const newLang = uiLang.value;
+  setLanguage(newLang);
+  await listInventory();
+});
+(async function init(){
+  try {
+    setLanguage('ar');
+    await listInventory();
+    await listAttributesPopulate();
+    clearMsg();
+  } catch (e) {
+    console.error('Init error', e);
+  }
+})();
+</script>
+</body>
+</html>

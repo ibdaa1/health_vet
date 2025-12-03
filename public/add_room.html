@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title id="pageTitle">إدارة الغرف</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<style>
+/* تعيين متغيرات الألوان المؤسسية */
+:root {
+    --primary-color: #3B4D3A; /* أخضر داكن / زيتوني غامق */
+    --accent-color: #C2A76D; /* ذهبي / بيج داكن */
+    --light-accent: #e8d9b5; /* بيج فاتح */
+    --white-color: #ffffff;
+    --light-bg: #f8f7f3; /* لون خلفية فاتح */
+    --border-color: #dcd6c9;
+    --shadow-color: rgba(59, 77, 58, 0.08);
+    --text-color: #2c3a2b;
+}
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 15px;
+    background-color: var(--light-bg);
+    color: var(--text-color);
+    font-size: 0.9rem;
+}
+.container {
+    max-width: 1200px;
+    margin: auto;
+    background: var(--white-color);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 3px 15px var(--shadow-color);
+    border: 1px solid var(--border-color);
+}
+/* تنسيق العنوان الرئيسي */
+#pageHeader {
+    color: var(--primary-color);
+    border-bottom: 2px solid var(--accent-color);
+    padding-bottom: 12px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}
+.header-actions {
+    display: flex;
+    gap: 8px;
+}
+/* تنسيق الحقول والنماذج */
+.form-section {
+    margin-bottom: 25px;
+    padding: 15px;
+    background-color: #fcfbf7;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+.form-section h3 {
+    margin-top: 0;
+    color: var(--primary-color);
+    font-size: 1.1rem;
+    padding-bottom: 8px;
+    border-bottom: 1px dashed var(--accent-color);
+}
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 15px;
+}
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+label {
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: var(--primary-color);
+    font-size: 0.85rem;
+}
+input[type="text"], input[type="number"], select, textarea {
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    box-sizing: border-box;
+    transition: border-color 0.3s;
+    font-size: 0.85rem;
+    background-color: var(--white-color);
+}
+input[type="text"]:focus, input[type="number"]:focus, select:focus, textarea:focus {
+    border-color: var(--accent-color);
+    outline: none;
+    box-shadow: 0 0 5px rgba(194, 167, 109, 0.3);
+}
+/* تنسيق الأزرار العامة */
+button {
+    padding: 7px 12px;
+    font-weight: 500;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+    font-size: 0.85rem;
+}
+button i {
+    margin-left: 5px;
+    font-size: 0.9em;
+}
+/* أزرار الإجراءات العلوية */
+#langBtn, #newRoomBtn {
+    background-color: var(--primary-color);
+    color: var(--white-color);
+    box-shadow: 0 1px 3px rgba(59, 77, 58, 0.2);
+}
+#langBtn:hover, #newRoomBtn:hover {
+    background-color: #4a5f49;
+    transform: translateY(-1px);
+}
+/* زر الحفظ (الأساسي) */
+#saveBtn {
+    background-color: var(--accent-color);
+    color: var(--primary-color);
+    font-weight: bold;
+    margin-top: 15px;
+    box-shadow: 0 1px 3px rgba(194, 167, 109, 0.3);
+    padding: 8px 16px;
+}
+#saveBtn:hover {
+    background-color: var(--light-accent);
+}
+button:disabled {
+    background-color: #aaa !important;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+/* تنسيق قسم الفلترة - تصميم مضغوط */
+#filterSection {
+    margin: 20px 0;
+    padding: 12px 15px;
+    background-color: #f9f8f4;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+#filterSection h3 {
+    margin-top: 0;
+    margin-bottom: 12px;
+    color: var(--primary-color);
+    font-size: 1rem;
+}
+.filter-row {
+    display: flex;
+    gap: 10px;
+    align-items: end;
+    flex-wrap: wrap;
+}
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    min-width: 120px;
+    flex: 1;
+}
+.filter-group label {
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: var(--primary-color);
+    font-size: 0.8rem;
+}
+.filter-group input,
+.filter-group select {
+    padding: 6px 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 0.8rem;
+    height: 32px;
+}
+.filter-actions {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 4px;
+}
+.filter-actions button {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border-radius: 50%;
+    font-size: 0.9rem;
+}
+#filterBtn, #clearFilterBtn, #printReportBtn {
+    background-color: var(--accent-color);
+    color: var(--primary-color);
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+}
+#clearFilterBtn {
+    background-color: #a8a8a8;
+    color: white;
+}
+#filterBtn:hover {
+    background-color: var(--light-accent);
+}
+#clearFilterBtn:hover {
+    background-color: #8f8f8f;
+}
+#printReportBtn:hover {
+    background-color: var(--light-accent);
+}
+/* تنسيق الجدول */
+.table-container {
+    overflow-x: auto;
+    margin-top: 20px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 1px 8px var(--shadow-color);
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+}
+th, td {
+    padding: 10px 8px;
+    border: 1px solid var(--border-color);
+    text-align: center;
+}
+th {
+    background-color: var(--primary-color);
+    color: var(--white-color);
+    font-weight: 600;
+    font-size: 0.8rem;
+}
+tr:nth-child(even) {
+    background-color: #f9f8f4;
+}
+/* أزرار الإجراءات داخل الجدول */
+.action-buttons {
+    display: flex;
+    gap: 5px;
+    justify-content: center;
+}
+.btn-edit, .btn-delete {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border-radius: 50%;
+    font-size: 0.8rem;
+}
+.btn-edit {
+    background-color: var(--accent-color);
+    color: var(--primary-color);
+}
+.btn-delete {
+    background-color: #c45656;
+    color: var(--white-color);
+}
+.btn-edit:hover {
+    background-color: var(--light-accent);
+}
+.btn-delete:hover {
+    background-color: #a94444;
+}
+/* رسائل التنبيه */
+.message {
+    margin-top: 15px;
+    padding: 10px;
+    border-radius: 6px;
+    font-weight: 500;
+    text-align: right;
+    font-size: 0.85rem;
+}
+.success {
+    background-color: #f0f7f0;
+    color: #2d5a2d;
+    border: 1px solid #b8d8b8;
+}
+.error {
+    background-color: #fdf0f0;
+    color: #8c4242;
+    border: 1px solid #e8b8b8;
+}
+/* تنسيق التقرير المطبوع */
+#printReport {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: white;
+    z-index: 1000;
+    padding: 20px;
+    box-sizing: border-box;
+    overflow-y: auto;
+}
+#printReport .report-header {
+    text-align: center;
+    margin-bottom: 25px;
+    color: var(--primary-color);
+    border-bottom: 2px solid var(--accent-color);
+    padding-bottom: 10px;
+}
+#printReport .report-header h1 {
+    margin: 0;
+    font-size: 22px;
+}
+#printReport .report-date {
+    color: var(--accent-color);
+    font-weight: 600;
+}
+#printReport table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    box-shadow: none;
+    border-radius: 0;
+}
+#printReport th, #printReport td {
+    border: 1px solid var(--border-color);
+    padding: 8px;
+    text-align: center;
+}
+#printReport th {
+    background-color: var(--primary-color);
+    color: var(--white-color);
+}
+#printReport tr:nth-child(even) {
+    background-color: #f9f8f4;
+}
+#printReport .print-btn, #printReport .close-btn {
+    width: auto;
+    height: auto;
+    padding: 8px 16px;
+    border-radius: 6px;
+    margin: 10px 5px;
+}
+#printReport .print-btn {
+    background-color: var(--accent-color);
+    color: var(--primary-color);
+}
+#printReport .close-btn {
+    background-color: #c45656;
+    color: white;
+}
+/* استجابة التصميم للشاشات الصغيرة */
+@media (max-width: 768px) {
+    body { padding: 10px; }
+    .container { padding: 15px; }
+  
+    /* تحسين النموذج للشاشات الصغيرة */
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+  
+    /* تحسين قسم الفلترة للشاشات الصغيرة */
+    #filterSection {
+        padding: 10px;
+    }
+    #filterSection .filter-row {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+    }
+    .filter-group {
+        min-width: 100%;
+    }
+    .filter-actions {
+        justify-content: center;
+        margin-top: 5px;
+    }
+  
+    /* تحسين الجدول للشاشات الصغيرة */
+    .table-container {
+        border: none;
+        box-shadow: none;
+        overflow-x: visible;
+    }
+    table {
+        border: none;
+    }
+    thead {
+        display: none;
+    }
+    tbody {
+        display: block;
+        width: 100%;
+    }
+    tr {
+        display: block;
+        background-color: var(--white-color);
+        border: 1px solid var(--border-color);
+        margin-bottom: 12px;
+        border-radius: 6px;
+        box-shadow: 0 1px 5px var(--shadow-color);
+        padding: 12px;
+    }
+  
+    td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border: none;
+        padding: 6px 0;
+        text-align: right;
+    }
+    td:last-child {
+        justify-content: center;
+        padding-top: 12px;
+        border-top: 1px solid var(--border-color);
+        margin-top: 8px;
+    }
+    td:before {
+        content: attr(data-label);
+        font-weight: bold;
+        color: var(--primary-color);
+        flex-basis: 45%;
+        text-align: right;
+        padding-left: 8px;
+        white-space: nowrap;
+        font-size: 0.8rem;
+    }
+    td:not(:last-child) {
+        border-bottom: 1px dashed var(--border-color);
+    }
+    /* تعديل الهيدر للأجهزة الصغيرة */
+    #pageHeader {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .header-actions {
+        width: 100%;
+        justify-content: flex-start;
+        margin-top: 12px;
+    }
+    /* تحسين التقرير للشاشات الصغيرة */
+    #printReport {
+        padding: 10px;
+    }
+}
+/* تحسينات للشاشات المتوسطة (التابلت) */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .container {
+        padding: 18px;
+    }
+  
+    /* تحسين النموذج للتابلت */
+    .form-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+  
+    /* تحسين قسم الفلترة للتابلت */
+    .filter-row {
+        flex-wrap: nowrap;
+    }
+    .filter-group {
+        min-width: auto;
+    }
+    .filter-actions {
+        flex-wrap: nowrap;
+    }
+}
+@media print {
+    body * { visibility: hidden; }
+    #printReport, #printReport * { visibility: visible; }
+    #printReport { position: absolute; top: 0; left: 0; width: 100%; }
+    #printReport .print-btn, #printReport .close-btn { display: none; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <div id="pageHeader">
+        <h2 id="pageHeaderTitle">إدارة الغرف</h2>
+        <div class="header-actions">
+            <button id="langBtn" title="تبديل اللغة">
+                <i class="fas fa-globe"></i>
+            </button>
+            <button id="newRoomBtn" title="إضافة غرفة جديدة">
+                <i class="fas fa-plus"></i>
+            </button>
+        </div>
+    </div>
+    <div class="form-section">
+        <h3 id="roomDataSection">بيانات الغرفة</h3>
+        <form id="addRoomForm">
+            <input type="hidden" name="id" id="room_id">
+          
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="room_name" id="labelRoomName">اسم الغرفة</label>
+                    <input type="text" id="room_name" name="room_name" required>
+                </div>
+              
+                <div class="form-group">
+                    <label for="room_type" id="labelRoomType">نوع الغرفة</label>
+                    <select id="room_type" name="room_type" required>
+                        <option value="Cats">قطط</option>
+                        <option value="Dogs">كلاب</option>
+                    </select>
+                </div>
+              
+                <div class="form-group">
+                    <label for="location" id="labelLocation">الموقع</label>
+                    <input type="text" id="location" name="location">
+                </div>
+              
+                <div class="form-group">
+                    <label for="capacity" id="labelCapacity">السعة</label>
+                    <input type="number" id="capacity" name="capacity" min="1" value="5">
+                </div>
+            </div>
+          
+            <div class="form-group">
+                <label for="notes" id="labelNotes">ملاحظات</label>
+                <textarea id="notes" name="notes" rows="2"></textarea>
+            </div>
+            <button type="submit" id="saveBtn">
+                <i class="fas fa-save"></i> حفظ البيانات
+            </button>
+        </form>
+    </div>
+    <div id="responseMessage" class="message" style="display:none;"></div>
+    <!-- قسم الفلترة - تصميم مضغوط -->
+    <div id="filterSection">
+        <h3 id="filterSectionTitle">فلترة الغرف</h3>
+        <div class="filter-row">
+            <div class="filter-group">
+                <label id="labelNameFilter" for="nameFilter">اسم الغرفة</label>
+                <input type="text" id="nameFilter" placeholder="أدخل اسم الغرفة">
+            </div>
+            <div class="filter-group">
+                <label id="labelTypeFilter" for="typeFilter">نوع الغرفة</label>
+                <select id="typeFilter">
+                    <option value="">جميع الأنواع</option>
+                    <option value="Cats">قطط</option>
+                    <option value="Dogs">كلاب</option>
+                </select>
+            </div>
+            <div class="filter-actions">
+                <button id="filterBtn" type="button" title="تطبيق الفلتر">
+                    <i class="fas fa-search"></i>
+                </button>
+                <button id="clearFilterBtn" type="button" title="مسح الفلتر">
+                    <i class="fas fa-times"></i>
+                </button>
+                <button id="printReportBtn" type="button" title="طباعة التقرير">
+                    <i class="fas fa-print"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="table-container">
+        <table id="roomsTable">
+            <thead>
+                <tr>
+                    <th id="thRoomName">اسم الغرفة</th>
+                    <th id="thRoomType">نوع الغرفة</th>
+                    <th id="thCapacity">السعة</th>
+                    <th id="thLocation">الموقع</th>
+                    <th id="thCreatedBy">أنشئ بواسطة</th>
+                    <th id="thUpdatedBy">تم التحديث بواسطة</th>
+                    <th id="thActions">إجراءات</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+<!-- قسم التقرير المطبوع -->
+<div id="printReport">
+    <div class="report-header">
+        <h1 id="reportTitle">تقرير الغرف</h1>
+        <p class="report-date" id="reportDateLabel">تاريخ التقرير: <span id="reportDate"></span></p>
+    </div>
+    <table id="reportTable">
+        <thead>
+            <tr>
+                <th id="reportThRoomName">اسم الغرفة</th>
+                <th id="reportThRoomType">نوع الغرفة</th>
+                <th id="reportThCapacity">السعة</th>
+                <th id="reportThLocation">الموقع</th>
+                <th id="reportThCreatedBy">أنشئ بواسطة</th>
+                <th id="reportThUpdatedBy">تم التحديث بواسطة</th>
+            </tr>
+        </thead>
+        <tbody id="reportBody"></tbody>
+    </table>
+    <div style="text-align: center; margin-top: 20px;">
+        <button class="print-btn" onclick="window.print()"><i class="fas fa-print"></i> <span id="printBtnText">طباعة</span></button>
+        <button class="close-btn" onclick="closeReport()"><i class="fas fa-times"></i> <span id="closeBtnText">إغلاق</span></button>
+    </div>
+</div>
+<script src="session_check.js"></script>
+<script>
+let lang = 'ar';
+let translations = {};
+let roomLabels = {};
+// تحميل اللغة
+function loadLanguage(file){
+    fetch(file)
+    .then(res => res.json())
+    .then(data => {
+        translations = data;
+        roomLabels = {
+            'room_name': translations.room_name,
+            'room_type': translations.room_type,
+            'capacity': translations.capacity,
+            'location': translations.location,
+            'created_by': translations.th_created_by,
+            'updated_by': translations.th_updated_by,
+            'actions': translations.actions
+        };
+        applyTranslations();
+        loadRooms();
+    }).catch(error => {
+        console.error('Error loading language file:', error);
+        roomLabels = {
+            'room_name': 'اسم الغرفة',
+            'room_type': 'نوع الغرفة',
+            'capacity': 'السعة',
+            'location': 'الموقع',
+            'created_by': 'أنشئ بواسطة',
+            'updated_by': 'تم التحديث بواسطة',
+            'actions': 'إجراءات'
+        };
+        applyTranslations();
+        loadRooms();
+    });
+}
+// تطبيق الترجمة
+function applyTranslations(){
+    const currentLang = lang;
+    const isArabic = currentLang === 'ar';
+    document.documentElement.setAttribute('lang', currentLang);
+    document.documentElement.setAttribute('dir', isArabic ? 'rtl' : 'ltr');
+    // العنوان الرئيسي
+    document.getElementById('pageTitle').textContent = translations.title;
+    document.getElementById('pageHeaderTitle').textContent = translations.title;
+    // أزرار الهيدر
+    document.getElementById('langBtn').title = translations.lang_button_title;
+    document.getElementById('newRoomBtn').title = translations.new_room_button_title;
+    // قسم النموذج
+    document.getElementById('roomDataSection').textContent = translations.room_data_section;
+    document.getElementById('labelRoomName').textContent = translations.room_name;
+    document.getElementById('labelRoomType').textContent = translations.room_type;
+    document.getElementById('labelLocation').textContent = translations.location;
+    document.getElementById('labelCapacity').textContent = translations.capacity;
+    document.getElementById('labelNotes').textContent = translations.notes;
+    document.getElementById('saveBtn').innerHTML = `<i class="fas fa-save"></i> ${translations.save}`;
+    // الجدول
+    document.getElementById('thRoomName').textContent = translations.room_name;
+    document.getElementById('thRoomType').textContent = translations.room_type;
+    document.getElementById('thCapacity').textContent = translations.capacity;
+    document.getElementById('thLocation').textContent = translations.location;
+    document.getElementById('thCreatedBy').textContent = translations.th_created_by;
+    document.getElementById('thUpdatedBy').textContent = translations.th_updated_by;
+    document.getElementById('thActions').textContent = translations.actions;
+    // خيارات النموذج
+    document.querySelector('#room_type option[value="Cats"]').textContent = isArabic ? translations.room_type_cats : translations.room_type_cats_en || 'Cats';
+    document.querySelector('#room_type option[value="Dogs"]').textContent = isArabic ? translations.room_type_dogs : translations.room_type_dogs_en || 'Dogs';
+    // قسم الفلترة
+    document.getElementById('filterSectionTitle').textContent = translations.filter_section_title;
+    document.getElementById('labelNameFilter').textContent = translations.name_filter_label || translations.room_name;
+    document.getElementById('nameFilter').placeholder = translations.name_filter_placeholder || 'أدخل اسم الغرفة';
+    document.getElementById('labelTypeFilter').textContent = translations.type_filter_label;
+    document.querySelector('#typeFilter option[value=""]').textContent = translations.all_types;
+    document.querySelector('#typeFilter option[value="Cats"]').textContent = isArabic ? translations.room_type_cats : translations.room_type_cats_en || 'Cats';
+    document.querySelector('#typeFilter option[value="Dogs"]').textContent = isArabic ? translations.room_type_dogs : translations.room_type_dogs_en || 'Dogs';
+    document.getElementById('filterBtn').title = translations.filter_button_title;
+    document.getElementById('clearFilterBtn').title = translations.clear_filter_button_title;
+    document.getElementById('printReportBtn').title = translations.print_report_button_title;
+    // التقرير
+    document.getElementById('reportTitle').textContent = translations.report_title;
+    document.getElementById('reportDateLabel').innerHTML = `${translations.report_date_label} <span id="reportDate"></span>`;
+    document.getElementById('reportThRoomName').textContent = translations.report_room_name;
+    document.getElementById('reportThRoomType').textContent = translations.report_room_type;
+    document.getElementById('reportThCapacity').textContent = translations.report_capacity;
+    document.getElementById('reportThLocation').textContent = translations.report_location;
+    document.getElementById('reportThCreatedBy').textContent = translations.report_created_by;
+    document.getElementById('reportThUpdatedBy').textContent = translations.report_updated_by;
+    document.getElementById('printBtnText').textContent = translations.print_button;
+    document.getElementById('closeBtnText').textContent = translations.close_button;
+    loadRooms();
+}
+// تبديل اللغة
+document.getElementById('langBtn').addEventListener('click', () => {
+    lang = lang === 'ar' ? 'en' : 'ar';
+    loadLanguage('/health_vet/languages/' + lang + '_add_room.json');
+});
+// زر إضافة جديد
+document.getElementById('newRoomBtn').addEventListener('click', () => {
+    form.reset();
+    form.room_id.value = '';
+    document.getElementById('saveBtn').innerHTML = `<i class="fas fa-plus"></i> ${translations.add_new_room_text}`;
+});
+// تحميل اللغة الافتراضية عند بداية الصفحة
+loadLanguage('/health_vet/languages/' + lang + '_add_room.json');
+const form = document.getElementById('addRoomForm');
+const responseDiv = document.getElementById('responseMessage');
+const tableBody = document.querySelector('#roomsTable tbody');
+// عناصر الفلترة
+const nameFilter = document.getElementById('nameFilter');
+const typeFilter = document.getElementById('typeFilter');
+const filterBtn = document.getElementById('filterBtn');
+const clearFilterBtn = document.getElementById('clearFilterBtn');
+const printReportBtn = document.getElementById('printReportBtn');
+function showMessage(msg, type='success'){
+    responseDiv.style.display = 'block';
+    responseDiv.className = 'message '+type;
+    responseDiv.textContent = msg;
+}
+// تحميل الغرف مع الفلترة
+function loadRooms(){
+    const params = new URLSearchParams();
+    if (nameFilter.value) {
+        params.append('name_filter', nameFilter.value);
+    }
+    if (typeFilter.value) {
+        params.append('type_filter', typeFilter.value);
+    }
+    fetch(`/health_vet/api/add_room.php?action=list&${params.toString()}`)
+    .then(res=>res.json())
+    .then(data=>{
+        tableBody.innerHTML = '';
+        data.forEach(room=>{
+            const tr = document.createElement('tr');
+            const roomTypeDisplay = (lang === 'ar' && room.room_type === 'Cats') ? translations.room_type_cats :
+                                    (lang === 'ar' && room.room_type === 'Dogs') ? translations.room_type_dogs : room.room_type;
+          
+            tr.innerHTML = `
+                <td data-label="${roomLabels['room_name']}">${room.room_name}</td>
+                <td data-label="${roomLabels['room_type']}">${roomTypeDisplay}</td>
+                <td data-label="${roomLabels['capacity']}">${room.capacity || 5}</td>
+                <td data-label="${roomLabels['location']}">${room.location||''}</td>
+                <td data-label="${roomLabels['created_by']}">${room.created_by || translations.system}</td>
+                <td data-label="${roomLabels['updated_by']}">${room.updated_by || '--'}</td>
+                <td data-label="${roomLabels['actions']}">
+                    <div class="action-buttons">
+                        <button class="btn-edit" data-id="${room.id}" title="${translations.edit}">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn-delete" data-id="${room.id}" title="${translations.delete}">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+                </td>
+            `;
+            tableBody.appendChild(tr);
+        });
+    });
+}
+// فلترة الغرف
+filterBtn.addEventListener('click', () => {
+    loadRooms();
+});
+// مسح الفلتر
+clearFilterBtn.addEventListener('click', () => {
+    nameFilter.value = '';
+    typeFilter.value = '';
+    loadRooms();
+});
+// إنشاء وطباعة التقرير
+function generateReport() {
+    const params = new URLSearchParams();
+    if (nameFilter.value) {
+        params.append('name_filter', nameFilter.value);
+    }
+    if (typeFilter.value) {
+        params.append('type_filter', typeFilter.value);
+    }
+    fetch(`/health_vet/api/add_room.php?action=list&${params.toString()}`)
+    .then(res => res.json())
+    .then(data => {
+        const reportBody = document.getElementById('reportBody');
+        const reportDate = document.getElementById('reportDate');
+        reportBody.innerHTML = '';
+        reportDate.textContent = new Date().toLocaleDateString(lang === 'ar' ? 'ar-SA' : 'en-US');
+      
+        data.forEach(room => {
+            const roomTypeDisplay = room.room_type === 'Cats' ? (lang === 'ar' ? translations.room_type_cats : 'Cats') : (lang === 'ar' ? translations.room_type_dogs : 'Dogs');
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${room.room_name}</td>
+                <td>${roomTypeDisplay}</td>
+                <td>${room.capacity || 5}</td>
+                <td>${room.location || ''}</td>
+                <td>${room.created_by || translations.system}</td>
+                <td>${room.updated_by || '--'}</td>
+            `;
+            reportBody.appendChild(tr);
+        });
+      
+        document.getElementById('printReport').style.display = 'block';
+    });
+}
+printReportBtn.addEventListener('click', generateReport);
+function closeReport() {
+    document.getElementById('printReport').style.display = 'none';
+}
+// حفظ أو تعديل الغرفة
+form.addEventListener('submit', function(e){
+    e.preventDefault();
+    const formData = new FormData(form);
+    fetch('/health_vet/api/add_room.php', {method:'POST', body:formData})
+    .then(res=>res.json())
+    .then(data=>{
+        if(data.success){
+            showMessage(data.message || translations.success_message,'success');
+            form.reset();
+            form.room_id.value = '';
+            form.capacity.value = '5';
+            document.getElementById('saveBtn').innerHTML = `<i class="fas fa-save"></i> ${translations.save}`;
+            loadRooms();
+        } else showMessage(data.message || translations.error_message,'error');
+    }).catch(()=>showMessage(translations.server_error,'error'));
+});
+// تعديل أو حذف غرفة
+tableBody.addEventListener('click', function(e){
+    const targetButton = e.target.closest('button');
+    if (!targetButton) return;
+    const id = targetButton.getAttribute('data-id');
+    if(targetButton.classList.contains('btn-edit')){
+        fetch('/health_vet/api/add_room.php?action=get&id='+id)
+        .then(res=>res.json())
+        .then(room=>{
+            form.room_id.value = room.id;
+            form.room_name.value = room.room_name;
+            form.room_type.value = room.room_type;
+            form.location.value = room.location;
+            form.capacity.value = room.capacity || 5;
+            form.notes.value = room.notes;
+            document.getElementById('saveBtn').innerHTML = `<i class="fas fa-sync-alt"></i> ${translations.update}`;
+        });
+    }
+    if(targetButton.classList.contains('btn-delete')){
+        if(confirm(translations.confirm_delete)){
+            fetch('/health_vet/api/add_room.php?action=delete&id='+id)
+            .then(res=>res.json())
+            .then(data=>{
+                showMessage(data.message || (data.success ? translations.delete_success : translations.delete_error), data.success?'success':'error');
+                loadRooms();
+            });
+        }
+    }
+});
+// تحميل الغرف عند البداية
+loadRooms();
+</script>
+</body>
+</html>

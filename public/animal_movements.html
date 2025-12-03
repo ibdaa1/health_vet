@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title id="pageTitle">حركات الحيوانات</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<style>
+/* تعيين متغيرات الألوان المؤسسية */
+:root {
+    --primary-color: #3B4D3A; /* أخضر داكن / زيتوني غامق */
+    --accent-color: #C2A76D; /* ذهبي / بيج داكن */
+    --white-color: #ffffff;
+    --light-bg: #f7f7f7;
+    --shadow-color: rgba(0, 0, 0, 0.08);
+}
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 15px;
+    background-color: var(--light-bg);
+    color: var(--primary-color);
+    font-size: 0.9rem;
+}
+.container {
+    max-width: 1200px;
+    margin: auto;
+    background: var(--white-color);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 3px 15px var(--shadow-color);
+}
+/* تنسيق العنوان والأزرار العلوية */
+#pageHeader {
+    color: var(--primary-color);
+    border-bottom: 2px solid var(--accent-color);
+    padding-bottom: 12px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}
+.header-actions {
+    display: flex;
+    gap: 8px;
+}
+/* تنسيق الحقول والنماذج */
+.form-section {
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: #fcfbf7;
+    border-radius: 8px;
+    border: 1px solid #e8e6df;
+}
+.form-section h3 {
+    margin-top: 0;
+    color: var(--primary-color);
+    font-size: 1rem;
+    padding-bottom: 8px;
+    border-bottom: 1px dashed var(--accent-color);
+}
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 15px;
+}
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+label {
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: var(--primary-color);
+    font-size: 0.85rem;
+}
+input[type="text"], select, textarea, input[type="datetime-local"] {
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    box-sizing: border-box;
+    transition: border-color 0.3s;
+    font-size: 0.85rem;
+}
+input[type="text"]:focus, select:focus, textarea:focus, input[type="datetime-local"]:focus {
+    border-color: var(--accent-color);
+    outline: none;
+    box-shadow: 0 0 5px rgba(194, 167, 109, 0.3);
+}
+/* تنسيق الأزرار العامة */
+button {
+    padding: 7px 12px;
+    font-weight: 500;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s, box-shadow 0.3s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+    font-size: 0.85rem;
+}
+button i {
+    margin-left: 5px;
+    font-size: 0.9em;
+}
+/* أزرار الإجراءات العلوية */
+#langBtn, #newMovementBtn {
+    background-color: var(--primary-color);
+    color: var(--white-color);
+    box-shadow: 0 1px 3px rgba(59, 77, 58, 0.2);
+}
+#langBtn:hover, #newMovementBtn:hover {
+    background-color: #4a5f49;
+}
+/* زر الحفظ (الأساسي) */
+.btn-save {
+    background-color: var(--accent-color);
+    color: var(--primary-color);
+    font-weight: bold;
+    margin-top: 15px;
+    box-shadow: 0 1px 3px rgba(194, 167, 109, 0.3);
+    padding: 8px 16px;
+}
+.btn-save:hover {
+    background-color: #d1b88c;
+}
+/* تنسيق قسم الفلترة */
+#filterSection {
+    margin: 20px 0;
+    padding: 12px 15px;
+    background-color: #f9f8f4;
+    border-radius: 8px;
+    border: 1px solid #e8e6df;
+}
+#filterSection h3 {
+    margin-top: 0;
+    margin-bottom: 12px;
+    color: var(--primary-color);
+    font-size: 1rem;
+}
+.filter-row {
+    display: flex;
+    gap: 10px;
+    align-items: end;
+    flex-wrap: wrap;
+}
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    min-width: 120px;
+    flex: 1;
+}
+.filter-group label {
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: var(--primary-color);
+    font-size: 0.8rem;
+}
+.filter-group input,
+.filter-group select {
+    padding: 6px 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    height: 32px;
+}
+.filter-actions {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 4px;
+}
+.filter-actions button {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border-radius: 50%;
+    font-size: 0.9rem;
+}
+#filterBtn, #clearFilterBtn, #printReportBtn {
+    background-color: var(--accent-color);
+    color: var(--primary-color);
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+}
+#clearFilterBtn {
+    background-color: #a8a8a8;
+    color: white;
+}
+#filterBtn:hover {
+    background-color: #d1b88c;
+}
+#clearFilterBtn:hover {
+    background-color: #8f8f8f;
+}
+#printReportBtn:hover {
+    background-color: #d1b88c;
+}
+/* تنسيق الجدول */
+.table-container {
+    overflow-x: auto;
+    margin-top: 20px;
+    border-radius: 8px;
+    border: 1px solid #e8e6df;
+    box-shadow: 0 1px 8px var(--shadow-color);
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+}
+th, td {
+    padding: 10px 8px;
+    border: 1px solid #e0e0e0;
+    text-align: center;
+}
+th {
+    background-color: var(--primary-color);
+    color: var(--white-color);
+    font-weight: 600;
+    font-size: 0.8rem;
+}
+tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+/* أزرار الإجراءات داخل الجدول */
+.action-buttons {
+    display: flex;
+    gap: 5px;
+    justify-content: center;
+}
+.btn-edit, .btn-delete {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border-radius: 50%;
+    font-size: 0.8rem;
+}
+.btn-edit {
+    background-color: var(--accent-color);
+    color: var(--primary-color);
+}
+.btn-delete {
+    background-color: #c45656;
+    color: var(--white-color);
+}
+.btn-edit:hover {
+    background-color: #d1b88c;
+}
+.btn-delete:hover {
+    background-color: #a94444;
+}
+/* رسائل التنبيه */
+.message {
+    margin-top: 15px;
+    padding: 10px;
+    border-radius: 6px;
+    font-weight: 500;
+    text-align: right;
+    font-size: 0.85rem;
+}
+.success {
+    background-color: #e6f3e6;
+    color: #3b6d3b;
+    border: 1px solid #3b6d3b;
+}
+.error {
+    background-color: #fbebeb;
+    color: #8c4242;
+    border: 1px solid #8c4242;
+}
+/* تنسيق حقل الغرفة الذكي */
+#room_id_status {
+    margin-top: 5px;
+    font-size: 0.8em;
+    padding: 5px;
+    border-radius: 5px;
+    color: #000;
+    display: none;
+}
+.status-current { background-color: #fff3cd; border: 1px solid #ffc107; color: #856404; }
+.status-vacant { background-color: #d4edda; border: 1px solid #155724; color: #155724; }
+.status-error { background-color: #fbebeb; border: 1px solid #8c4242; color: #8c4242; }
+/* ---------------------------------------------------------------------------------- */
+/* التنسيقات المتجاوبة (Responsive) للحاسوب اللوحي والهاتف (Mobile/Tablet) */
+/* ---------------------------------------------------------------------------------- */
+@media (max-width: 768px) {
+    body { padding: 10px; }
+    .container { padding: 15px; }
+   
+    /* تحسين النموذج للشاشات الصغيرة */
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+   
+    /* تحسين قسم الفلترة للشاشات الصغيرة */
+    #filterSection {
+        padding: 10px;
+    }
+    #filterSection .filter-row {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+    }
+    .filter-group {
+        min-width: 100%;
+    }
+    .filter-actions {
+        justify-content: center;
+        margin-top: 5px;
+    }
+   
+    /* تحسين الجدول للشاشات الصغيرة */
+    .table-container {
+        border: none;
+        box-shadow: none;
+        overflow-x: visible;
+    }
+    table {
+        border: none;
+    }
+    thead {
+        display: none;
+    }
+    tbody {
+        display: block;
+        width: 100%;
+    }
+    tr {
+        display: block;
+        background-color: var(--white-color);
+        border: 1px solid #eee;
+        margin-bottom: 12px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px var(--shadow-color);
+        padding: 12px;
+    }
+    td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border: none;
+        padding: 6px 0;
+        text-align: right;
+    }
+    td:last-child {
+        justify-content: center;
+        padding-top: 12px;
+        border-top: 1px solid #eee;
+        margin-top: 8px;
+    }
+    td:before {
+        content: attr(data-label);
+        font-weight: bold;
+        color: var(--primary-color);
+        flex-basis: 45%;
+        text-align: right;
+        padding-left: 8px;
+        white-space: nowrap;
+        font-size: 0.8rem;
+    }
+    td:not(:last-child) {
+        border-bottom: 1px dashed #eee;
+    }
+    /* تعديل الهيدر للأجهزة الصغيرة */
+    #pageHeader {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .header-actions {
+        width: 100%;
+        justify-content: flex-start;
+        margin-top: 12px;
+    }
+}
+/* تحسينات للشاشات المتوسطة (التابلت) */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .container {
+        padding: 18px;
+    }
+   
+    /* تحسين النموذج للتابلت */
+    .form-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+   
+    /* تحسين قسم الفلترة للتابلت */
+    .filter-row {
+        flex-wrap: nowrap;
+    }
+    .filter-group {
+        min-width: auto;
+    }
+    .filter-actions {
+        flex-wrap: nowrap;
+    }
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <div id="pageHeader">
+        <h2>حركات الحيوانات</h2>
+        <div class="header-actions">
+            <button id="langBtn" title="تبديل اللغة"><i class="fas fa-globe"></i></button>
+            <button id="newMovementBtn" class="btn-add" title="إضافة حركة جديدة"><i class="fas fa-plus"></i></button>
+        </div>
+    </div>
+    <div class="form-section">
+        <h3>بيانات الحركة</h3>
+        <form id="movementForm">
+            <input type="hidden" name="id" id="movement_id">
+            <input type="hidden" id="animal_type_hidden">
+            <input type="hidden" id="current_room_id_hidden">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="animal_code" id="labelAnimal">الحيوان</label>
+                    <select id="animal_code" name="animal_code" required>
+                        <option value="">-- اختر حيوان --</option>
+                    </select>
+                </div>
+               
+                <div class="form-group">
+                    <label for="movement_type" id="labelMovementType">نوع الحركة</label>
+                    <select id="movement_type" name="movement_type" required>
+                        <option value="In">دخول</option>
+                        <option value="Out">خروج نهائي</option>
+                        <option value="Transfer">نقل</option>
+                        <option value="TemporaryOut">خروج مؤقت</option>
+                    </select>
+                </div>
+               
+                <div class="form-group">
+                    <label for="movement_date" id="labelMovementDate">تاريخ الحركة</label>
+                    <input type="datetime-local" id="movement_date" name="movement_date">
+                </div>
+               
+                <div class="form-group">
+                    <label for="reason" id="labelReason">السبب</label>
+                    <select id="reason" name="reason">
+                        <option value="Adoption">تبني</option>
+                        <option value="Death">وفاة</option>
+                        <option value="Treatment">علاج</option>
+                        <option value="Cleaning">تنظيف</option>
+                        <option value="Transfer">نقل</option>
+                    </select>
+                </div>
+            </div>
+           
+            <div id="roomGroup" class="form-group">
+                <label for="room_id" id="labelRoom">الغرفة المستهدفة</label>
+                <select id="room_id" name="room_id">
+                    <option value="">-- اختر غرفة --</option>
+                </select>
+                <div id="room_id_status"></div>
+            </div>
+            <div class="form-group">
+                <label for="notes" id="labelNotes">ملاحظات</label>
+                <textarea id="notes" name="notes" rows="2"></textarea>
+            </div>
+            <button type="submit" class="btn-save" id="saveBtn"><i class="fas fa-save"></i> حفظ</button>
+        </form>
+    </div>
+    <div id="responseMessage" class="message" style="display:none;"></div>
+    <!-- قسم الفلترة -->
+    <div id="filterSection">
+        <h3>فلترة الحركات</h3>
+        <div class="filter-row">
+            <div class="filter-group">
+                <label for="animalFilter">الحيوان</label>
+                <select id="animalFilter">
+                    <option value="">جميع الحيوانات</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="roomFilter">الغرفة</label>
+                <select id="roomFilter">
+                    <option value="">جميع الغرف</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="typeFilter">نوع الحركة</label>
+                <select id="typeFilter">
+                    <option value="">جميع الأنواع</option>
+                    <option value="In">دخول</option>
+                    <option value="Out">خروج نهائي</option>
+                    <option value="Transfer">نقل</option>
+                    <option value="TemporaryOut">خروج مؤقت</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="dateFilter">تاريخ الحركة</label>
+                <input type="date" id="dateFilter">
+            </div>
+            <div class="filter-actions">
+                <button id="filterBtn" type="button" title="تطبيق الفلتر"><i class="fas fa-search"></i></button>
+                <button id="clearFilterBtn" type="button" title="مسح الفلتر"><i class="fas fa-times"></i></button>
+            </div>
+        </div>
+    </div>
+    <div class="table-container">
+        <table id="movementsTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th id="thAnimal">الحيوان</th>
+                    <th id="thRoom">الغرفة</th>
+                    <th id="thMovementType">نوع الحركة</th>
+                    <th id="thDate">التاريخ</th>
+                    <th id="thReason">السبب</th>
+                    <th id="thNotes">ملاحظات</th>
+                    <th id="thCreatedBy">أنشئ بواسطة</th>
+                    <th id="thUpdatedBy">حدث بواسطة</th>
+                    <th id="thActions">إجراءات</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+<script src="session_check.js"></script>
+<script>
+let lang = 'ar';
+let translations = {};
+let animalStatusData = [];
+let allRoomsData = [];
+let movementLabels = {};
+let isFormValid = true;
+let currentUserEmpID = null;
+let isEditing = false; // متغير لتتبع حالة التعديل
+const form = document.getElementById('movementForm');
+const responseDiv = document.getElementById('responseMessage');
+const tableBody = document.querySelector('#movementsTable tbody');
+const animalCodeSelect = document.getElementById('animal_code');
+const movementTypeSelect = document.getElementById('movement_type');
+const roomIdSelect = document.getElementById('room_id');
+const roomIdStatusDiv = document.getElementById('room_id_status');
+const animalTypeHidden = document.getElementById('animal_type_hidden');
+const currentRoomIdHidden = document.getElementById('current_room_id_hidden');
+const roomGroup = document.getElementById('roomGroup');
+// عناصر الفلترة
+const animalFilter = document.getElementById('animalFilter');
+const roomFilter = document.getElementById('roomFilter');
+const typeFilter = document.getElementById('typeFilter');
+const dateFilter = document.getElementById('dateFilter');
+const filterBtn = document.getElementById('filterBtn');
+const clearFilterBtn = document.getElementById('clearFilterBtn');
+// ----------------------------------------------------------------------------------
+// وظائف المساعدة العامة والترجمة
+// ----------------------------------------------------------------------------------
+function showMessage(msg, type = 'success') {
+    responseDiv.style.display = 'block';
+    responseDiv.className = 'message ' + type;
+    responseDiv.textContent = msg;
+    setTimeout(() => { responseDiv.style.display = 'none'; }, 5000); // إخفاء تلقائي بعد 5 ثوان
+}
+function translateEnumOptions(selectElement, translationsMap) {
+    if (lang === 'ar') {
+        Array.from(selectElement.options).forEach(option => {
+            if (translationsMap[option.value]) {
+                option.textContent = translationsMap[option.value];
+            }
+        });
+    }
+}
+function applyTranslations() {
+    const isArabic = lang === 'ar';
+    document.getElementById('pageTitle').textContent = translations.title || 'حركات الحيوانات';
+    document.querySelector('#pageHeader h2').textContent = translations.title || 'حركات الحيوانات';
+    document.getElementById('langBtn').innerHTML = `<i class="fas fa-globe"></i>`;
+    document.getElementById('newMovementBtn').innerHTML = `<i class="fas fa-plus"></i>`;
+    
+    // تسميات الحقول
+    document.getElementById('labelAnimal').textContent = translations.animal || 'الحيوان';
+    document.getElementById('labelRoom').textContent = translations.target_room || 'الغرفة المستهدفة';
+    document.getElementById('labelMovementType').textContent = translations.movement_type || 'نوع الحركة';
+    document.getElementById('labelMovementDate').textContent = translations.movement_date || 'تاريخ الحركة';
+    document.getElementById('labelReason').textContent = translations.reason || 'السبب';
+    document.getElementById('labelNotes').textContent = translations.notes || 'ملاحظات';
+    document.getElementById('saveBtn').innerHTML = `<i class="fas fa-save"></i> ${translations.save || 'حفظ'}`;
+    // رؤوس الجدول وتسميات data-label
+    movementLabels = {
+        'ID': 'ID',
+        'animal': translations.animal || 'الحيوان',
+        'room': translations.room || 'الغرفة',
+        'movement_type': translations.movement_type || 'نوع الحركة',
+        'date': translations.movement_date || 'التاريخ',
+        'reason': translations.reason || 'السبب',
+        'notes': translations.notes || 'ملاحظات',
+        'created_by': translations.created_by || 'أنشئ بواسطة',
+        'updated_by': translations.updated_by || 'حدث بواسطة',
+        'actions': translations.actions || 'إجراءات'
+    };
+    document.getElementById('thAnimal').textContent = movementLabels.animal;
+    document.getElementById('thRoom').textContent = movementLabels.room;
+    document.getElementById('thMovementType').textContent = movementLabels.movement_type;
+    document.getElementById('thDate').textContent = movementLabels.date;
+    document.getElementById('thReason').textContent = movementLabels.reason;
+    document.getElementById('thNotes').textContent = movementLabels.notes;
+    document.getElementById('thCreatedBy').textContent = movementLabels.created_by;
+    document.getElementById('thUpdatedBy').textContent = movementLabels.updated_by;
+    document.getElementById('thActions').textContent = movementLabels.actions;
+    
+    // ترجمة الخيارات (ENUMs)
+    translateEnumOptions(document.getElementById('movement_type'), {
+        'In': 'دخول',
+        'Out': 'خروج نهائي',
+        'Transfer': 'نقل',
+        'TemporaryOut': 'خروج مؤقت'
+    });
+    translateEnumOptions(document.getElementById('reason'), {
+        'Adoption': 'تبني',
+        'Death': 'وفاة',
+        'Treatment': 'علاج',
+        'Cleaning': 'تنظيف',
+        'Transfer': 'نقل'
+    });
+    
+    // تحميل البيانات بعد الترجمة
+    loadAnimals();
+    loadMovements();
+}
+// ----------------------------------------------------------------------------------
+// وظائف تحميل البيانات (مع تحسينات للـ Error Handling و Loading States)
+// ----------------------------------------------------------------------------------
+function loadUserData() {
+    fetch('/health_vet/api/user_data.php')
+        .then(res => {
+            if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+            return res.json();
+        })
+        .then(data => {
+            if (data.success && data.user_data) {
+                currentUserEmpID = data.user_data.EmpID;
+                console.log('User data loaded successfully:', currentUserEmpID);
+            } else {
+                console.error('Failed to load user data:', data.message || 'Unknown error');
+                showMessage('خطأ في تحميل بيانات المستخدم: ' + (data.message || 'غير معروف'), 'error');
+            }
+        }).catch(err => {
+            console.error('Error loading user data:', err);
+            showMessage('خطأ في الاتصال ببيانات المستخدم: ' + err.message, 'error');
+        });
+}
+function loadAnimals(selectAnimalCode = null) {
+    console.log('Loading animals...');
+    animalCodeSelect.innerHTML = '<option value="">جاري التحميل...</option>';
+    animalCodeSelect.disabled = true;
+    fetch('/health_vet/api/animal_movements.php?action=animal_status_list')
+        .then(res => {
+            if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+            return res.json();
+        })
+        .then(data => {
+            console.log('Animals response:', data);
+            if (data.success && data.data) {
+                animalStatusData = data.data;
+                const sel = animalCodeSelect;
+                sel.innerHTML = `<option value="">-- ${translations.select_animal || 'اختر حيوان'} --</option>`;
+                sel.disabled = false;
+                
+                if (animalStatusData && animalStatusData.length > 0) {
+                    animalStatusData.forEach(a => {
+                        const opt = document.createElement('option');
+                        opt.value = a.animal_code;
+                        opt.textContent = `${a.animal_name || a.animal_code} (${a.animal_code})`;
+                        opt.dataset.currentRoomId = a.current_room_id || '';
+                        opt.dataset.currentRoomName = a.current_room_name || '';
+                        opt.dataset.animalType = a.animal_type;
+                        
+                        if (a.current_room_id) {
+                             opt.textContent += ` [${translations.in_room || 'في غرفة'}: ${a.current_room_name}]`;
+                        } else {
+                             opt.textContent += ` [${translations.no_room || 'غير مسجل بغرفة'}]`;
+                        }
+                        
+                        sel.appendChild(opt);
+                    });
+                    console.log(`Loaded ${animalStatusData.length} animals successfully.`);
+                } else {
+                        const opt = document.createElement('option');
+                        opt.value = "";
+                        opt.textContent = translations.no_animals_found || "لا توجد حيوانات مسجلة.";
+                        sel.appendChild(opt);
+                        sel.disabled = true;
+                        console.warn('No animals found.');
+                }
+                if (selectAnimalCode) {
+                    sel.value = selectAnimalCode;
+                    animalCodeSelect.dispatchEvent(new Event('change'));
+                }
+               
+                // ملء فلتر الحيوانات بعد تحميل البيانات
+                populateAnimalFilter();
+            } else {
+                console.error('Failed to load animals:', data.message || 'No data');
+                showMessage(translations.error_loading_animals || 'حدث خطأ أثناء تحميل قائمة الحيوانات: ' + (data.message || 'غير معروف'), 'error');
+                animalCodeSelect.innerHTML = '<option value="">خطأ في التحميل</option>';
+                animalCodeSelect.disabled = true;
+            }
+        }).catch(err => {
+             console.error("Error loading animals:", err);
+             showMessage(translations.error_loading_animals || 'حدث خطأ أثناء تحميل قائمة الحيوانات: ' + err.message, 'error');
+             animalCodeSelect.innerHTML = '<option value="">خطأ في التحميل</option>';
+             animalCodeSelect.disabled = true;
+        });
+}
+function loadAllRoomsData() {
+    console.log('Loading all rooms...');
+    roomIdSelect.innerHTML = '<option value="">جاري التحميل...</option>';
+    roomIdSelect.disabled = true;
+    fetch('/health_vet/api/animal_movements.php?action=all_rooms')
+        .then(res => {
+            if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+            return res.json();
+        })
+        .then(data => {
+            console.log('Rooms response:', data);
+            if (data.success && data.data) {
+                allRoomsData = data.data;
+                loadRoomsByType(null);
+               
+                // ملء فلتر الغرف بعد تحميل البيانات
+                populateRoomFilter();
+                console.log(`Loaded ${allRoomsData.length} rooms successfully.`);
+            } else {
+                console.error('Failed to load rooms:', data.message || 'No data');
+                showMessage(translations.error_loading_rooms || 'حدث خطأ أثناء تحميل قائمة الغرف: ' + (data.message || 'غير معروف'), 'error');
+                roomIdSelect.innerHTML = '<option value="">خطأ في التحميل</option>';
+                roomIdSelect.disabled = true;
+            }
+        }).catch(err => {
+             console.error("Error loading all rooms data:", err);
+             showMessage(translations.error_loading_rooms || 'حدث خطأ أثناء تحميل قائمة الغرف: ' + err.message, 'error');
+             roomIdSelect.innerHTML = '<option value="">خطأ في التحميل</option>';
+             roomIdSelect.disabled = true;
+        });
+}
+// دالة ملء وفلترة قائمة الغرف
+function loadRoomsByType(animalType) {
+    roomIdSelect.innerHTML = `<option value="">-- ${translations.select_room || 'اختر غرفة'} --</option>`;
+    roomIdSelect.disabled = false;
+   
+    // فلترة الغرف بناءً على نوع الحيوان المختار
+    const filteredRooms = allRoomsData.filter(r =>
+        !animalType || r.room_type === animalType
+    );
+    if (filteredRooms.length > 0) {
+        filteredRooms.forEach(r => {
+            const opt = document.createElement('option');
+            opt.value = r.id;
+            const roomTypeText = r.room_type === 'Cats' ? (lang === 'ar' ? 'قطط' : 'Cats') :
+                                     r.room_type === 'Dogs' ? (lang === 'ar' ? 'كلاب' : 'Dogs') : r.room_type;
+            opt.textContent = `${r.room_name} (${roomTypeText})`;
+            roomIdSelect.appendChild(opt);
+        });
+    } else {
+           const opt = document.createElement('option');
+           opt.value = "";
+           opt.textContent = translations.no_rooms_found || "لا توجد غرف مسجلة.";
+           roomIdSelect.appendChild(opt);
+           roomIdSelect.disabled = true;
+    }
+}
+function loadMovements() {
+    const params = new URLSearchParams();
+   
+    // إضافة معايير الفلترة إذا كانت موجودة
+    if (animalFilter.value) params.append('animal_filter', animalFilter.value);
+    if (roomFilter.value) params.append('room_filter', roomFilter.value);
+    if (typeFilter.value) params.append('type_filter', typeFilter.value);
+    if (dateFilter.value) params.append('date_filter', dateFilter.value);
+   
+    fetch(`/health_vet/api/animal_movements.php?action=list&${params.toString()}`)
+        .then(res => {
+            if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+            return res.json();
+        })
+        .then(data => {
+            console.log('Movements response:', data);
+            tableBody.innerHTML = '';
+            if (data.success && data.data) {
+                data.data.forEach(m => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td data-label="${movementLabels.ID}">#${m.id}</td>
+                        <td data-label="${movementLabels.animal}">${m.animal_name || m.animal_code}</td>
+                        <td data-label="${movementLabels.room}">${m.room_name || translations.out || 'خارج النظام'}</td>
+                        <td data-label="${movementLabels.movement_type}">${m.movement_type}</td>
+                        <td data-label="${movementLabels.date}">${m.movement_date}</td>
+                        <td data-label="${movementLabels.reason}">${m.reason}</td>
+                        <td data-label="${movementLabels.notes}">${m.notes || ''}</td>
+                        <td data-label="${movementLabels.created_by}">${m.created_by_name || ''}</td>
+                        <td data-label="${movementLabels.updated_by}">${m.updated_by_name || ''}</td>
+                        <td data-label="${movementLabels.actions}">
+                            <div class="action-buttons">
+                                <button class="btn-edit" data-id="${m.id}" title="${translations.edit || 'تعديل'}"><i class="fas fa-edit"></i></button>
+                                <button class="btn-delete" data-id="${m.id}" title="${translations.delete || 'حذف'}"><i class="fas fa-trash-alt"></i></button>
+                            </div>
+                        </td>
+                    `;
+                    tableBody.appendChild(tr);
+                });
+                console.log(`Loaded ${data.data.length} movements.`);
+            } else {
+                console.error('Failed to load movements:', data.message);
+                showMessage('خطأ في تحميل الحركات: ' + (data.message || 'غير معروف'), 'error');
+            }
+        }).catch(err => {
+            console.error('Error loading movements:', err);
+            showMessage('خطأ في تحميل الحركات: ' + err.message, 'error');
+        });
+}
+// ملء خيارات الفلترة
+function populateAnimalFilter() {
+    if (animalStatusData && animalStatusData.length > 0) {
+        animalFilter.innerHTML = '<option value="">جميع الحيوانات</option>';
+        animalStatusData.forEach(a => {
+            const opt = document.createElement('option');
+            opt.value = a.animal_code;
+            opt.textContent = `${a.animal_name || a.animal_code} (${a.animal_code})`;
+            animalFilter.appendChild(opt);
+        });
+    }
+}
+function populateRoomFilter() {
+    if (allRoomsData && allRoomsData.length > 0) {
+        roomFilter.innerHTML = '<option value="">جميع الغرف</option>';
+        allRoomsData.forEach(r => {
+            const opt = document.createElement('option');
+            opt.value = r.id;
+            const roomTypeText = r.room_type === 'Cats' ? (lang === 'ar' ? 'قطط' : 'Cats') :
+                                 r.room_type === 'Dogs' ? (lang === 'ar' ? 'كلاب' : 'Dogs') : r.room_type;
+            opt.textContent = `${r.room_name} (${roomTypeText})`;
+            roomFilter.appendChild(opt);
+        });
+    }
+}
+// ----------------------------------------------------------------------------------
+// منطق التحقق من صحة الغرفة وتحديث الحالة
+// ----------------------------------------------------------------------------------
+function checkRoomValidity() {
+    isFormValid = true;
+    roomIdStatusDiv.style.display = 'none';
+    roomIdStatusDiv.className = '';
+   
+    const selectedRoomId = roomIdSelect.value;
+    const currentRoomId = currentRoomIdHidden.value;
+    const animalType = animalTypeHidden.value;
+    const movementType = movementTypeSelect.value;
+    if (!animalCodeSelect.value) return;
+    // 1. التعامل مع حالة الخروج النهائي (Out)
+    if (movementType === 'Out') {
+        roomIdSelect.value = ''; // تأكد من تفريغ الحقل
+        if (currentRoomId) {
+            roomIdStatusDiv.textContent = translations.out_final_msg || `سيتم تسجيل خروج نهائي للحيوان من النظام وتفريغ الغرفة الحالية: ${animalCodeSelect.options[animalCodeSelect.selectedIndex].dataset.currentRoomName}.`;
+            roomIdStatusDiv.className = 'status-vacant';
+        } else {
+            roomIdStatusDiv.textContent = translations.out_final_already_out || 'الحيوان غير مسجل في أي غرفة. سيتم تسجيل خروج نهائي من النظام.';
+            roomIdStatusDiv.className = 'status-vacant';
+        }
+        roomIdStatusDiv.style.display = 'block';
+        roomIdSelect.removeAttribute('required');
+        return;
+    }
+    // 2. التحقق من الغرفة غير المختارة (مطلوبة للدخول والنقل والخروج المؤقت)
+    if (movementType !== 'Out' && !selectedRoomId) {
+        roomIdStatusDiv.textContent = translations.room_is_required || 'اختيار الغرفة مطلوب لهذه الحركة (دخول/نقل/مؤقت).';
+        roomIdStatusDiv.className = 'status-error';
+        roomIdStatusDiv.style.display = 'block';
+        isFormValid = false;
+        return;
+    }
+    // 3. قاعدة عدم التكرار (تطبق على الدخول والنقل والخروج المؤقت) - لا يجوز دخول مرتين في نفس الغرفة
+    // استثناء حالة التعديل - لا نتحقق من التكرار إذا كنا في وضع التعديل
+    if (selectedRoomId && selectedRoomId === currentRoomId && movementType === 'In' && !isEditing) {
+        roomIdStatusDiv.textContent = translations.room_repeat_error || `لا يمكن تسجيل دخول الحيوان مرة أخرى في نفس الغرفة (${animalCodeSelect.options[animalCodeSelect.selectedIndex].dataset.currentRoomName}). استخدم "نقل" للانتقال.`;
+        roomIdStatusDiv.className = 'status-error';
+        roomIdStatusDiv.style.display = 'block';
+        isFormValid = false;
+        return;
+    }
+   
+    // 4. قاعدة الكلاب (تطبق على الكلاب والحركة "دخول")
+    if (animalType === 'Dogs' && currentRoomId && movementType === 'In' && selectedRoomId && !isEditing) {
+        // إذا كان كلباً ومسجلاً حاليًا في غرفة ويريد عمل "دخول" لغرفة أخرى
+        roomIdStatusDiv.textContent = translations.dog_must_transfer || `الكلب مسجل بالفعل في غرفة. يجب استخدام نوع الحركة "نقل" أو "خروج مؤقت" للانتقال إلى غرفة أخرى.`;
+        roomIdStatusDiv.className = 'status-error';
+        roomIdStatusDiv.style.display = 'block';
+        isFormValid = false;
+        return;
+    }
+    // 5. رسائل النجاح والتحذير المتبقية للدخول والنقل والخروج المؤقت
+   
+    // حالة: دخول (In)
+    if (movementType === 'In' && !currentRoomId) {
+        roomIdStatusDiv.textContent = translations.in_room_allowed || 'سيتم تسجيل دخول الحيوان إلى هذه الغرفة.';
+        roomIdStatusDiv.className = 'status-vacant';
+        roomIdStatusDiv.style.display = 'block';
+    }
+    // حالة: دخول (In) لكن مسجل بالفعل
+    else if (movementType === 'In' && currentRoomId && !isEditing) {
+         roomIdStatusDiv.textContent = translations.already_in_room_in_error || `الحيوان مسجل بالفعل في غرفة: ${animalCodeSelect.options[animalCodeSelect.selectedIndex].dataset.currentRoomName}. استخدم نقل!`;
+         roomIdStatusDiv.className = 'status-error';
+         roomIdStatusDiv.style.display = 'block';
+         isFormValid = false;
+    }
+    // حالة: نقل (Transfer) أو خروج مؤقت (TemporaryOut)
+    else if ((movementType === 'Transfer' || movementType === 'TemporaryOut') && currentRoomId && selectedRoomId && selectedRoomId !== currentRoomId) {
+        const actionText = movementType === 'Transfer' ? translations.transfer_room_allowed : translations.temp_out_allowed;
+        roomIdStatusDiv.textContent = actionText;
+        roomIdStatusDiv.className = 'status-vacant';
+        roomIdStatusDiv.style.display = 'block';
+    }
+    // حالة: نقل أو خروج مؤقت لكن الحيوان غير مسجل في الأصل
+    else if ((movementType === 'Transfer' || movementType === 'TemporaryOut') && !currentRoomId) {
+        roomIdStatusDiv.textContent = translations.transfer_not_in_room || `لا يمكن إجراء نقل أو خروج مؤقت لحيوان غير مسجل في غرفة حالياً. استخدم "دخول"!`;
+        roomIdStatusDiv.className = 'status-error';
+        roomIdStatusDiv.style.display = 'block';
+        isFormValid = false;
+    }
+    // إخفاء الحالة إذا كانت القواعد سليمة (افتراضياً)
+    if (isFormValid && roomIdStatusDiv.style.display !== 'block') {
+         roomIdStatusDiv.style.display = 'none';
+    }
+}
+// ----------------------------------------------------------------------------------
+// معالجة الأحداث
+// ----------------------------------------------------------------------------------
+function updateRoomFields() {
+    const selectedOption = animalCodeSelect.options[animalCodeSelect.selectedIndex];
+    const currentRoomId = selectedOption.dataset.currentRoomId || null;
+    const animalType = selectedOption.dataset.animalType;
+    const movementType = movementTypeSelect.value;
+   
+    animalTypeHidden.value = animalType || '';
+    currentRoomIdHidden.value = currentRoomId || '';
+   
+    // إذا كانت الحركة خروج نهائي، نخفي حقل الغرفة ونلغي متطلب الـ required
+    if (movementType === 'Out') {
+        roomGroup.style.display = 'none';
+        roomIdSelect.removeAttribute('required');
+        roomIdSelect.value = ''; // تصفير قيمة الغرفة عند الخروج النهائي
+    } else {
+        // لـ In, Transfer, TemporaryOut
+        roomGroup.style.display = 'block';
+        roomIdSelect.setAttribute('required', 'required');
+        loadRoomsByType(animalType); // إعادة تحميل قائمة الغرف وفلترتها
+    }
+   
+    // إعادة التحقق من الصحة لعرض الرسائل الصحيحة
+    checkRoomValidity();
+}
+animalCodeSelect.addEventListener('change', updateRoomFields);
+movementTypeSelect.addEventListener('change', updateRoomFields);
+roomIdSelect.addEventListener('change', checkRoomValidity);
+// أحداث الفلترة
+filterBtn.addEventListener('click', loadMovements);
+clearFilterBtn.addEventListener('click', () => {
+    animalFilter.value = '';
+    roomFilter.value = '';
+    typeFilter.value = '';
+    dateFilter.value = '';
+    loadMovements();
+});
+// تبديل اللغة
+document.getElementById('langBtn').addEventListener('click', () => {
+    lang = lang === 'ar' ? 'en' : 'ar';
+    loadLanguage('/health_vet/languages/' + lang + '.json');
+});
+// إضافة جديد
+document.getElementById('newMovementBtn').addEventListener('click', () => {
+    form.reset();
+    form.movement_id.value = '';
+    document.getElementById('movement_date').value = new Date().toISOString().slice(0, 16);
+    document.getElementById('saveBtn').innerHTML = `<i class="fas fa-plus"></i> ${translations.add || 'إضافة'}`;
+    roomIdStatusDiv.style.display = 'none';
+    currentRoomIdHidden.value = '';
+    isFormValid = true;
+    isEditing = false; // الخروج من وضع التعديل
+    loadAnimals();
+    loadRoomsByType(null);
+    updateRoomFields();
+});
+// حفظ أو تعديل الحركة
+form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    checkRoomValidity();
+    if (!isFormValid) {
+        showMessage(translations.form_validation_error || 'يرجى تصحيح الأخطاء في اختيار الغرفة قبل الحفظ.', 'error');
+        return;
+    }
+    if (!currentUserEmpID) {
+        showMessage('خطأ في تحميل بيانات المستخدم', 'error');
+        return;
+    }
+    const formData = new FormData(form);
+   
+    // حذف حقل الغرفة من الإرسال إذا كانت الحركة "خروج نهائي"
+    if (movementTypeSelect.value === 'Out') {
+        formData.delete('room_id');
+    }
+    // إضافة EmpID المستخدم
+    formData.append('created_by', currentUserEmpID);
+    formData.append('updated_by', currentUserEmpID);
+    fetch('/health_vet/api/animal_movements.php', { method: 'POST', body: formData })
+        .then(res => {
+            if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+            return res.json();
+        })
+        .then(data => {
+            showMessage(data.message, data.success ? 'success' : 'error');
+            if (data.success) {
+                form.reset();
+                document.getElementById('movement_date').value = new Date().toISOString().slice(0, 16);
+                document.getElementById('saveBtn').innerHTML = `<i class="fas fa-save"></i> ${translations.save}`;
+                loadAnimals();
+                loadMovements();
+                loadAllRoomsData(); // إعادة تحميل الغرف أيضاً بعد الحفظ
+                roomIdStatusDiv.style.display = 'none';
+                currentRoomIdHidden.value = '';
+                isEditing = false; // الخروج من وضع التعديل بعد الحفظ
+            }
+        }).catch(err => {
+            console.error('Error saving movement:', err);
+            showMessage(translations.server_error || 'خطأ في الاتصال بالخادم: ' + err.message, 'error');
+        });
+});
+// تعديل أو حذف حركة
+tableBody.addEventListener('click', function(e) {
+    const targetButton = e.target.closest('button');
+    if (!targetButton) return;
+    const id = targetButton.getAttribute('data-id');
+    if (targetButton.classList.contains('btn-edit')) {
+        isEditing = true; // الدخول في وضع التعديل
+        console.log('Editing movement ID:', id); // للتصحيح
+        fetch('/health_vet/api/animal_movements.php?action=get&id=' + id)
+            .then(res => {
+                if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+                return res.json();
+            })
+            .then(data => {
+                console.log('Edit response:', data); // للتصحيح
+                if (data.success && data.data) {
+                    const movement = data.data.movement; // الوصول إلى data.movement
+                    console.log('Movement data:', movement); // للتصحيح
+                    
+                    form.movement_id.value = movement.id;
+                    form.animal_code.value = movement.animal_code;
+                    form.movement_type.value = movement.movement_type;
+                    form.movement_date.value = movement.movement_date ? movement.movement_date.replace(' ', 'T').slice(0, 16) : new Date().toISOString().slice(0, 16);
+                    form.reason.value = movement.reason;
+                    form.notes.value = movement.notes;
+                    form.room_id.value = movement.room_id || '';
+                   
+                    // إعادة تحميل الحيوانات وتحديد الحيوان
+                    loadAnimals(movement.animal_code);
+                   
+                    // استخدام Promise للانتظار على تحميل الحيوانات والغرف
+                    const loadPromise = new Promise((resolve) => {
+                        const checkLoaded = () => {
+                            if (animalCodeSelect.options.length > 1 && roomIdSelect.options.length > 1) {
+                                // تحديث الحقول المخفية
+                                const selectedAnimalOption = Array.from(animalCodeSelect.options).find(opt => opt.value === movement.animal_code);
+                                if (selectedAnimalOption) {
+                                    animalTypeHidden.value = selectedAnimalOption.dataset.animalType || '';
+                                    currentRoomIdHidden.value = selectedAnimalOption.dataset.currentRoomId || '';
+                                }
+                                // تحديث الغرفة
+                                loadRoomsByType(animalTypeHidden.value);
+                                setTimeout(() => {
+                                    form.room_id.value = movement.room_id || '';
+                                    updateRoomFields();
+                                    checkRoomValidity();
+                                    resolve();
+                                }, 300); // تأخير قصير لإعادة تحميل الغرف
+                            } else {
+                                setTimeout(checkLoaded, 200); // إعادة المحاولة بعد 200ms
+                            }
+                        };
+                        checkLoaded();
+                    });
+                    
+                    loadPromise.then(() => {
+                        document.getElementById('saveBtn').innerHTML = `<i class="fas fa-sync-alt"></i> ${translations.update || 'تعديل'}`;
+                        showMessage(translations.editing_mode || 'وضع التعديل مفعّل. قم بإجراء التغييرات ثم احفظ.', 'success');
+                    });
+                } else {
+                    showMessage('خطأ في تحميل بيانات الحركة: ' + (data.message || 'غير معروف'), 'error');
+                    isEditing = false;
+                }
+            }).catch(err => {
+                console.error('Error loading edit data:', err);
+                showMessage('خطأ في تحميل بيانات التعديل: ' + err.message, 'error');
+                isEditing = false;
+            });
+    }
+    if (targetButton.classList.contains('btn-delete')) {
+        if (confirm(translations.confirm_delete || 'هل أنت متأكد من الحذف؟ هذا الإجراء غير قابل للتراجع.')) {
+            console.log('Deleting movement ID:', id); // للتصحيح
+            fetch('/health_vet/api/animal_movements.php?action=delete&id=' + id)
+                .then(res => {
+                    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+                    return res.json();
+                })
+                .then(data => {
+                    console.log('Delete response:', data); // للتصحيح
+                    showMessage(data.message, data.success ? 'success' : 'error');
+                    if (data.success) {
+                        loadMovements();
+                        loadAnimals(); // إعادة تحميل الحيوانات لتحديث الحالة
+                        loadAllRoomsData(); // إعادة تحميل الغرف لتحديث السعة
+                    }
+                }).catch(err => {
+                    console.error('Error deleting movement:', err);
+                    showMessage('خطأ في الحذف: ' + err.message, 'error');
+                });
+        }
+    }
+});
+// تحميل اللغة الافتراضية والبدء
+function loadLanguage(file){
+    console.log('Loading language:', file);
+    fetch(file)
+    .then(res => {
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        return res.json();
+    })
+    .then(data=>{
+        translations=data;
+        // إضافة ترجمة الخيار الجديد إذا لم تكن موجودة
+        if (lang === 'ar' && !translations.temp_out_allowed) {
+            translations.temp_out_allowed = 'سيتم نقل الحيوان مؤقتاً لغرفة جديدة (علاج/تنظيف).';
+            translations.out_final_msg = 'سيتم تسجيل خروج نهائي للحيوان من النظام وتفريغ الغرفة الحالية.';
+            translations.out_final_already_out = 'الحيوان غير مسجل في أي غرفة. سيتم تسجيل خروج نهائي من النظام.';
+            translations.room_is_required = 'اختيار الغرفة مطلوب لهذه الحركة (دخول/نقل/مؤقت).';
+            translations.created_by = 'أنشئ بواسطة';
+            translations.updated_by = 'حدث بواسطة';
+            translations.confirm_delete = 'هل أنت متأكد من الحذف؟ هذا الإجراء غير قابل للتراجع.';
+            translations.editing_mode = 'وضع التعديل مفعّل. قم بإجراء التغييرات ثم احفظ.';
+            translations.add = 'إضافة';
+            translations.update = 'تعديل';
+            translations.edit = 'تعديل';
+            translations.delete = 'حذف';
+            translations.select_animal = 'اختر حيوان';
+            translations.select_room = 'اختر غرفة';
+            translations.no_animals_found = 'لا توجد حيوانات مسجلة.';
+            translations.no_rooms_found = 'لا توجد غرف مسجلة.';
+            translations.in_room = 'في غرفة';
+            translations.no_room = 'غير مسجل بغرفة';
+            translations.room_repeat_error = 'لا يمكن تسجيل دخول الحيوان مرة أخرى في نفس الغرفة. استخدم "نقل" للانتقال.';
+            translations.dog_must_transfer = 'الكلب مسجل بالفعل في غرفة. يجب استخدام نوع الحركة "نقل" أو "خروج مؤقت" للانتقال إلى غرفة أخرى.';
+            translations.in_room_allowed = 'سيتم تسجيل دخول الحيوان إلى هذه الغرفة.';
+            translations.already_in_room_in_error = 'الحيوان مسجل بالفعل في غرفة. استخدم نقل!';
+            translations.transfer_room_allowed = 'سيتم نقل الحيوان إلى غرفة جديدة.';
+            translations.transfer_not_in_room = 'لا يمكن إجراء نقل أو خروج مؤقت لحيوان غير مسجل في غرفة حالياً. استخدم "دخول"!';
+            translations.form_validation_error = 'يرجى تصحيح الأخطاء في اختيار الغرفة قبل الحفظ.';
+            translations.server_error = 'خطأ في الاتصال بالخادم';
+            translations.error_loading_animals = 'حدث خطأ أثناء تحميل قائمة الحيوانات';
+            translations.error_loading_rooms = 'حدث خطأ أثناء تحميل قائمة الغرف';
+            translations.out = 'خارج النظام';
+        }
+        applyTranslations();
+        // تحميل الغرف بعد الترجمة
+        loadAllRoomsData();
+    }).catch(err => {
+        console.error('Error loading language:', err);
+        // استخدام الترجمة الافتراضية العربية إذا فشل التحميل
+        translations = {
+            title: 'حركات الحيوانات',
+            animal: 'الحيوان',
+            target_room: 'الغرفة المستهدفة',
+            movement_type: 'نوع الحركة',
+            movement_date: 'تاريخ الحركة',
+            reason: 'السبب',
+            notes: 'ملاحظات',
+            save: 'حفظ',
+            room: 'الغرفة',
+            date: 'التاريخ',
+            actions: 'إجراءات',
+            created_by: 'أنشئ بواسطة',
+            updated_by: 'حدث بواسطة',
+            // أضف المزيد حسب الحاجة
+        };
+        applyTranslations();
+        loadAllRoomsData();
+    });
+}
+document.getElementById('movement_date').value = new Date().toISOString().slice(0, 16);
+loadUserData(); // تحميل بيانات المستخدم أولاً
+loadLanguage('/health_vet/languages/' + lang + '.json');
+</script>
+</body>
+</html>

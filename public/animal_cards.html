@@ -1,0 +1,1594 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="page_title">حيوانات للتبني - قسم الرقابة البيطرية</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-green: #2E5939;
+            --primary-light: #4A7C59;
+            --primary-dark: #1E472B;
+            --secondary-beige: #B38E5D;
+            --secondary-light: #D4B78C;
+            --background-white: #ffffff;
+            --text-dark: #343a40;
+            --border-color: #ced4da;
+            --light-gray: #f8f9fa;
+            --card-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            --cat-color: #B38E5D;
+            --dog-color: #B38E5D;
+            --label-color: #6c757d;
+            --value-color: #495057;
+            --footer-bg: #2E5939;
+            --footer-text: #ffffff;
+            --gradient-bg: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            --status-available: #28a745;
+            --status-reserved: #ffc107;
+            --status-adopted: #dc3545;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Tajawal', 'Tahoma', sans-serif;
+            background: var(--background-white); /* خلفية بيضاء للصفحة كاملة */
+            color: var(--text-dark);
+            line-height: 1.6;
+            padding-top: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        body[dir="ltr"] {
+            font-family: 'Roboto', 'Arial', sans-serif;
+        }
+        /* القسم العلوي الثابت - مع مفتاح اللغة */
+        .top-banner {
+            background: var(--footer-bg);
+            color: var(--footer-text);
+            padding: 8px 15px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .banner-text {
+            font-size: 0.9em;
+            font-weight: 500;
+            margin: 0;
+            flex-grow: 1;
+            text-align: center;
+            flex-shrink: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .language-toggle {
+            background: var(--primary-light);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            font-family: inherit;
+            transition: all 0.3s ease;
+            font-size: 0.85em;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .language-toggle:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        /* الهيدر مع الشعارات - حجم ثابت وشكل متسق على الموبايل */
+        .header-with-logos {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: var(--background-white);
+            border-bottom: 2px solid var(--secondary-beige);
+            position: sticky;
+            top: 48px;
+            z-index: 999;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .logo {
+            height: 50px; /* حجم ثابت */
+            width: auto;
+            object-fit: contain;
+            max-height: 50px;
+            max-width: 100px;
+        }
+        .header-text {
+            text-align: center;
+            flex-grow: 1;
+            padding: 0 10px;
+        }
+        .page-title {
+            font-size: 1.6em;
+            margin-bottom: 5px;
+            color: var(--primary-green);
+            font-weight: 700;
+        }
+        .page-subtitle {
+            font-size: 0.9em;
+            color: #666;
+            font-weight: 400;
+        }
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 0 15px;
+            flex: 1;
+            background: var(--background-white); /* خلفية بيضاء للكونتينر */
+        }
+        /* فلتر عام للنوع - نظام بحث واحد - تحسين الشكل */
+        .global-filters {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            background: linear-gradient(135deg, var(--light-gray), white);
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 25px;
+            align-items: center;
+            border: 2px solid var(--primary-light);
+            position: relative;
+            overflow: hidden;
+        }
+        .global-filters::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-green), var(--secondary-beige));
+        }
+        .global-filters input[type="text"] {
+            padding: 14px 18px;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            min-width: 200px;
+            font-size: 1em;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .global-filters input[type="text"]:focus {
+            outline: none;
+            border-color: var(--primary-green);
+            box-shadow: 0 0 0 4px rgba(46, 89, 57, 0.15), 0 2px 8px rgba(0,0,0,0.1);
+            transform: translateY(-1px);
+        }
+        .global-filters select {
+            padding: 14px 18px;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            min-width: 160px;
+            font-size: 1em;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .global-filters select:focus {
+            outline: none;
+            border-color: var(--primary-green);
+            box-shadow: 0 0 0 4px rgba(46, 89, 57, 0.15), 0 2px 8px rgba(0,0,0,0.1);
+            transform: translateY(-1px);
+        }
+        .apply-global-filter {
+            padding: 14px 28px;
+            background: linear-gradient(135deg, var(--primary-green), var(--primary-light));
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(46, 89, 57, 0.2);
+        }
+        .apply-global-filter:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(46, 89, 57, 0.3);
+        }
+        /* إخفاء الفلاتر المنفصلة في الأقسام */
+        .filters {
+            display: none; /* إخفاء الفلاتر المنفصلة لأن النظام الآن عام */
+        }
+        /* قسم الإحصائيات - أفخم */
+        .stats-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+            padding: 20px;
+            background: var(--background-white);
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
+            border: 2px solid var(--primary-light);
+            animation: fadeIn 0.8s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .stat-card {
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, var(--light-gray), white);
+            border-radius: 15px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
+        }
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary-green), var(--secondary-beige));
+        }
+        .stat-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        .stat-icon {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        .stat-number {
+            font-size: 2em;
+            font-weight: 700;
+            color: var(--primary-green);
+            margin-bottom: 8px;
+        }
+        .stat-label {
+            font-size: 1em;
+            color: var(--label-color);
+            font-weight: 500;
+        }
+        .all-animals .stat-icon { color: var(--primary-green); }
+        .cats .stat-icon { color: var(--cat-color); }
+        .dogs .stat-icon { color: var(--dog-color); }
+        /* أقسام القطط والكلاب - قسمين منفصلين للعرض فقط */
+        .animal-sections {
+            margin-bottom: 40px;
+        }
+        .section-title {
+            font-size: 2em;
+            margin-bottom: 20px;
+            color: var(--primary-green);
+            font-weight: 700;
+            text-align: center;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .section-title i {
+            font-size: 1.2em;
+            color: var(--primary-green);
+        }
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: var(--secondary-beige);
+            border-radius: 2px;
+        }
+        /* شبكة الحيوانات - grid رأسي بدون تمرير أفقي */
+        .animals-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr); /* 4 بطاقات ثابتة على الحاسوب */
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        /* التجاوب */
+        @media (max-width: 1200px) {
+            .animals-grid {
+                grid-template-columns: repeat(3, 1fr); /* 3 بطاقات على المتوسط */
+            }
+        }
+        @media (max-width: 992px) {
+            .animals-grid {
+                grid-template-columns: repeat(2, 1fr); /* 2 بطاقات على الموبايل المتوسط */
+            }
+            /* باقي الـ CSS... */
+        }
+        @media (max-width: 576px) {
+            .animals-grid {
+                grid-template-columns: 1fr; /* واحدة على الصغير */
+            }
+            /* باقي الـ CSS... */
+        }
+        .animal-card {
+            background: var(--background-white);
+            border-radius: 15px;
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+            transition: all 0.4s ease;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            border: 2px solid var(--secondary-beige);
+            animation: slideInUp 0.6s ease-out;
+            cursor: default; /* إزالة المؤشر لأن النقر لم يعد على البطاقة كاملة */
+        }
+        @keyframes slideInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animal-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+        }
+        .card-images {
+            height: 400px; /* تعديل: تكبير الصور */
+            position: relative;
+            overflow: hidden;
+            cursor: pointer; /* إضافة مؤشر يشير إلى أن الصورة قابلة للنقر */
+        }
+        .card-images img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.6s ease;
+        }
+        .animal-card:hover .card-images img {
+            transform: scale(1.1);
+        }
+        .image-nav {
+            position: absolute;
+            top: 50%;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            transform: translateY(-50%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .animal-card:hover .image-nav {
+            opacity: 1;
+        }
+        .nav-btn {
+            background: rgba(0,0,0,0.7);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 10px;
+            transition: all 0.3s ease;
+        }
+        .nav-btn:hover {
+            background: rgba(0,0,0,0.9);
+            transform: scale(1.1);
+        }
+        .image-counter {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+        }
+        .card-content {
+            padding: 15px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .animal-code {
+            font-weight: bold;
+            color: var(--primary-green);
+            font-size: 0.95em;
+            margin-bottom: 8px;
+            text-align: center;
+            border-bottom: 1px solid var(--light-gray);
+            padding-bottom: 6px;
+            font-weight: 700;
+        }
+        .animal-name {
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 8px;
+            color: #2c3e50;
+            font-size: 1.1em;
+            font-weight: 700;
+        }
+        .animal-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            font-size: 0.8em;
+            margin-bottom: 12px;
+        }
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+        .detail-label {
+            font-weight: 600;
+            color: var(--label-color);
+            font-size: 0.75em;
+            margin-bottom: 2px;
+        }
+        .detail-value {
+            color: var(--value-color);
+            font-weight: 500;
+            font-size: 0.85em;
+        }
+        .status-active {
+            color: var(--primary-green);
+            font-weight: 600;
+        }
+        .status-reserved {
+            color: var(--status-reserved);
+            font-weight: 600;
+            background: rgba(255, 193, 7, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        .status-adopted {
+            color: var(--status-adopted);
+            font-weight: 600;
+            background: rgba(220, 53, 69, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        .status-available {
+            color: var(--status-available);
+            font-weight: 600;
+            background: rgba(40, 167, 69, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        .full-width {
+            grid-column: 1 / -1;
+        }
+        .marking-text {
+            font-style: italic;
+            background: var(--light-gray);
+            padding: 6px;
+            border-radius: 6px;
+            margin-top: 6px;
+            font-size: 0.8em;
+        }
+        .contact-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: auto;
+            padding-top: 10px;
+            border-top: 1px solid var(--light-gray);
+        }
+        .contact-btn {
+            width: 45px;
+            height: 45px;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            background: white;
+            color: #333;
+            border: 2px solid var(--border-color);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        .whatsapp-btn:hover {
+            background: #25D366;
+            color: white;
+            border-color: #25D366;
+            transform: translateY(-3px) scale(1.1);
+        }
+        .phone-btn:hover {
+            background: var(--primary-green);
+            color: white;
+            border-color: var(--primary-green);
+            transform: translateY(-3px) scale(1.1);
+        }
+        .email-btn:hover {
+            background: #ea4335;
+            color: white;
+            border-color: #ea4335;
+            transform: translateY(-3px) scale(1.1);
+        }
+        /* أزرار التبني/الحجز */
+        .adoption-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: auto;
+            padding-top: 10px;
+            border-top: 1px solid var(--light-gray);
+        }
+        .adopt-btn {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, var(--status-available), #20c997);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+        .adopt-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+        }
+        .reserved-btn {
+            padding: 10px 20px;
+            background: var(--status-reserved);
+            color: #856404;
+            border: 2px solid var(--status-reserved);
+            border-radius: 8px;
+            font-size: 0.9em;
+            font-weight: 600;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        .adopted-btn {
+            padding: 10px 20px;
+            background: var(--status-adopted);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9em;
+            font-weight: 600;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        /* إخفاء التصفح تمامًا */
+        .pagination {
+            display: none;
+        }
+        /* حالات التحميل */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.1em;
+            color: #666;
+            grid-column: 1 / -1;
+        }
+        .no-animals {
+            text-align: center;
+            padding: 60px 15px;
+            color: #666;
+            font-size: 1.1em;
+            grid-column: 1 / -1;
+        }
+        /* الفوتر - تأكيد أيقونة X */
+        .main-footer {
+            background: linear-gradient(135deg, var(--footer-bg), var(--primary-dark));
+            color: var(--footer-text);
+            padding: 20px 0 15px;
+            margin-top: 50px;
+        }
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+            text-align: center;
+        }
+        .contact-info {
+            margin-bottom: 20px;
+            font-size: 1em;
+        }
+        .contact-info p {
+            margin: 8px 0;
+        }
+        .social-icons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        .social-icon {
+            color: var(--footer-text);
+            font-size: 1.4em;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.1);
+        }
+        .social-icon:hover {
+            transform: translateY(-5px) scale(1.1);
+            background: rgba(255,255,255,0.2);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        .copyright {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255,255,255,0.2);
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+        /* إضافة CSS لـ Modal الصور */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1001;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.9);
+        }
+        .modal-content {
+            margin: auto;
+            display: block;
+            width: 80%;
+            max-width: 900px;
+            max-height: 80%;
+            object-fit: contain;
+            padding-top: 60px;
+        }
+        .close {
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 1002;
+        }
+        .close:hover {
+            color: #999;
+        }
+        .modal-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0,0,0,0.5);
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+            margin: 0 10px;
+        }
+        .prev-modal {
+            left: 10px;
+        }
+        .next-modal {
+            right: 10px;
+        }
+        /* التجاوب - تحسين للموبايل، حجم شعارات صغير وشكل متسق */
+        @media (max-width: 1200px) {
+            .animals-grid {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* 3-4 بطاقات */
+            }
+        }
+        @media (max-width: 992px) {
+            /* الهيدر يبقى في صف واحد على الموبايل */
+            .header-with-logos {
+                flex-direction: row;
+                gap: 10px;
+                padding: 12px;
+                top: 48px;
+                justify-content: space-between;
+                align-items: center;
+            }
+            .logo {
+                height: 40px; /* تصغير الشعارات على الموبايل */
+                max-width: 80px;
+            }
+            .header-text {
+                padding: 0 5px;
+            }
+            .page-title {
+                font-size: 1.3em;
+            }
+            .animals-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); /* 2 بطاقات */
+            }
+            .global-filters {
+                flex-direction: column;
+                align-items: center;
+                gap: 15px;
+            }
+            .global-filters input[type="text"], .global-filters select {
+                min-width: 100%;
+            }
+            .apply-global-filter {
+                width: 100%;
+            }
+            .card-images {
+                height: 300px; /* تقليل على الموبايل */
+            }
+            .stats-section {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                gap: 12px;
+            }
+            .social-icons {
+                gap: 12px;
+            }
+            .social-icon {
+                font-size: 1.3em;
+                width: 36px;
+                height: 36px;
+            }
+            .banner-text {
+                font-size: 0.8em; /* تصغير النص في البانر على الموبايل */
+            }
+            .adoption-buttons, .contact-buttons {
+                flex-direction: column;
+                gap: 8px;
+            }
+            .adopt-btn {
+                width: 100%;
+            }
+            .contact-btn {
+                width: 100%;
+                height: 40px;
+                border-radius: 8px;
+            }
+        }
+        @media (max-width: 768px) {
+            .animals-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); /* 2 بطاقات */
+            }
+            .container {
+                padding: 0 10px;
+            }
+            .logo {
+                height: 35px; /* تصغير أكثر */
+                max-width: 70px;
+            }
+            .footer-content {
+                padding: 0 15px;
+            }
+            .contact-buttons {
+                gap: 6px;
+            }
+            .contact-btn {
+                width: 36px;
+                height: 36px;
+                font-size: 1em;
+            }
+            /* تعديل: الحفاظ على row للـ top-banner على الموبايل */
+            .top-banner {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+                padding: 8px 10px;
+                gap: 10px;
+            }
+            .banner-text {
+                font-size: 0.75em;
+                text-align: right; /* للعربية */
+                max-width: 70%; /* للسماح للزر بالبقاء في السطر */
+            }
+        }
+        @media (max-width: 576px) {
+            .animals-grid {
+                grid-template-columns: 1fr; /* واحدة على الأصغر */
+            }
+            .card-images {
+                height: 250px;
+            }
+            .card-content {
+                padding: 10px;
+            }
+            .animal-details {
+                grid-template-columns: 1fr;
+                gap: 4px;
+            }
+            .contact-info p {
+                font-size: 0.9em;
+            }
+            .header-with-logos {
+                padding: 10px;
+            }
+            .logo {
+                height: 30px; /* تصغير إضافي */
+                max-width: 60px;
+            }
+            .page-title {
+                font-size: 1.2em;
+            }
+            /* تعديل إضافي للـ banner على الشاشات الصغيرة */
+            .top-banner {
+                padding: 6px 8px;
+                gap: 5px;
+            }
+            .banner-text {
+                font-size: 0.7em;
+                max-width: 60%;
+            }
+            .language-toggle {
+                padding: 6px 10px;
+                font-size: 0.8em;
+            }
+        }
+        @media (max-width: 480px) {
+            .animals-grid {
+                grid-template-columns: 1fr;
+            }
+            .card-images {
+                height: 220px;
+            }
+            /* الهيدر يبقى row لكن مع flex-wrap إذا لزم */
+            .header-with-logos {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 5px;
+            }
+            .header-text {
+                order: 2;
+                flex-grow: 0;
+            }
+            .logo {
+                order: 1;
+            }
+            .logo:last-child {
+                order: 3;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- القسم العلوي الثابت - مع مفتاح اللغة -->
+    <div class="top-banner">
+        <p class="banner-text" data-i18n="top_banner_text">مأوي الشارقة للقطط والكلاب - امنح حيوانًا أليفًا منزلاً دافئًا</p>
+        <button id="lang-toggle" class="language-toggle">EN</button>
+    </div>
+    <!-- الهيدر مع الشعارات -->
+    <header class="header-with-logos">
+        <img src="../public/dclogo.png" alt="شعار المركز" class="logo">
+        <div class="header-text">
+            <h1 class="page-title" data-i18n="page_title">حيوانات للتبني</h1>
+        </div>
+        <img src="../public/shjmunlogo.png" alt="شعار الشارقة" class="logo">
+    </header>
+    <!-- المحتوى الرئيسي -->
+    <main class="container">
+        <!-- فلتر عام للنظام - إضافة حقل بحث وفلتر حالة -->
+        <div class="global-filters">
+            <input type="text" id="search-q" placeholder="ابحث...">
+            <select id="filter-type">
+                <option value="" data-i18n="all_types">كل الأنواع</option>
+                <option value="Cats" data-i18n="cats">القطط</option>
+                <option value="Dogs" data-i18n="dogs">الكلاب</option>
+            </select>
+            <select id="filter-source">
+                <option value="" data-i18n="all_sources">كل المصادر</option>
+                <option value="Stray" data-i18n="stray">حيوانات شارع</option>
+                <option value="Adoption" data-i18n="adoption">حيوانات للتبني</option>
+            </select>
+            <select id="filter-gender">
+                <option value="" data-i18n="all_genders">كل الأجناس</option>
+                <option value="Male" data-i18n="male">ذكر</option>
+                <option value="Female" data-i18n="female">أنثى</option>
+            </select>
+            <select id="filter-status">
+                <option value="" data-i18n="all_statuses">كل الحالات</option>
+                <option value="available" data-i18n="ready_for_adoption">جاهز للتبني</option>
+                <option value="reserved" data-i18n="reserved">محجوز</option>
+            </select>
+            <button class="apply-global-filter" onclick="applyGlobalFilter()" data-i18n="apply_filter">تطبيق الفلتر</button>
+        </div>
+        <!-- قسم الإحصائيات -->
+        <section id="stats-section" class="stats-section" style="display: none;">
+            <div class="stat-card all-animals">
+                <i class="fas fa-paw stat-icon"></i>
+                <div class="stat-number" id="total-animals">0</div>
+                <div class="stat-label" data-i18n="total_animals">إجمالي الحيوانات</div>
+            </div>
+            <div class="stat-card cats">
+                <i class="fas fa-cat stat-icon"></i>
+                <div class="stat-number" id="cats-count">0</div>
+                <div class="stat-label" data-i18n="cats">القطط</div>
+            </div>
+            <div class="stat-card dogs">
+                <i class="fas fa-dog stat-icon"></i>
+                <div class="stat-number" id="dogs-count">0</div>
+                <div class="stat-label" data-i18n="dogs">الكلاب</div>
+            </div>
+        </section>
+        <!-- أقسام القطط والكلاب - قسمين للعرض فقط -->
+        <div class="animal-sections">
+            <!-- قسم القطط -->
+            <section id="cats-section">
+                <h2 class="section-title"><i class="fas fa-cat"></i><span data-i18n="cats">القطط</span></h2>
+                <div id="cats-container" class="animals-grid">
+                    <div class="loading" data-i18n="loading">جارٍ تحميل القطط...</div>
+                </div>
+            </section>
+            <!-- قسم الكلاب -->
+            <section id="dogs-section">
+                <h2 class="section-title"><i class="fas fa-dog"></i><span data-i18n="dogs">الكلاب</span></h2>
+                <div id="dogs-container" class="animals-grid">
+                    <div class="loading" data-i18n="loading">جارٍ تحميل الكلاب...</div>
+                </div>
+            </section>
+        </div>
+    </main>
+    <!-- الفوتر -->
+    <footer class="main-footer">
+        <div class="footer-content">
+            <div class="contact-info">
+                <p data-i18n="contact_center"><i class="fas fa-phone-alt"></i> مركز الاتصال: +971563299669</p>
+                <p data-i18n="email"><i class="fas fa-envelope"></i> البريد الإلكتروني: scads@epaa.shj.ae</p>
+            </div>
+            <div class="social-icons">
+                <a href="https://www.facebook.com/ShjMunicipality" target="_blank" class="social-icon" title="فيسبوك">
+                    <i class="fab fa-facebook-f"></i>
+                </a>
+                <a href="https://www.instagram.com/shjmunicipality" target="_blank" class="social-icon" title="انستجرام">
+                    <i class="fab fa-instagram"></i>
+                </a>
+                <a href="https://x.com/ShjMunicipality" target="_blank" class="social-icon" title="تويتر X">
+                    <i class="fab fa-x-twitter"></i> <!-- أيقونة X من Font Awesome - معروضة بوضوح -->
+                </a>
+                <a href="https://youtube.com/@shjmun" target="_blank" class="social-icon" title="يوتيوب">
+                    <i class="fab fa-youtube"></i>
+                </a>
+                <a href="https://www.linkedin.com/company/shjmunicipality" target="_blank" class="social-icon" title="لينكد إن">
+                    <i class="fab fa-linkedin-in"></i>
+                </a>
+                <a href="https://www.snapchat.com/add/shjmunicipality" target="_blank" class="social-icon" title="سناب شات">
+                    <i class="fab fa-snapchat-ghost"></i>
+                </a>
+            </div>
+            <div class="copyright">
+                <p data-i18n="copyright">جميع الحقوق محفوظة مأوي الشارقة للقطط والكلاب © 2025</p>
+            </div>
+        </div>
+    </footer>
+    <!-- إضافة Modal للصور -->
+    <div id="imageModal" class="modal">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <button class="modal-nav prev-modal" onclick="changeImage(-1)">&#10094;</button>
+        <img class="modal-content" id="img01">
+        <button class="modal-nav next-modal" onclick="changeImage(1)">&#10095;</button>
+    </div>
+    <script>
+        let currentLang = localStorage.getItem('lang') || 'ar';
+        let translations = {};
+        let globalFilters = { type: '', source: '', gender: '', status: '' };
+        // إضافة متغيرات للـ Modal
+        let modal = document.getElementById('imageModal');
+        let modalImg = document.getElementById('img01');
+        let currentImageIndex = 0;
+        let currentImages = [];
+        // دالة تحميل الترجمة
+        async function loadTranslations(lang) {
+            try {
+                const response = await fetch(`../languages/${lang}_animal_cards.json`);
+                translations = await response.json();
+                applyTranslations();
+                updateLanguageToggle();
+            } catch (error) {
+                console.error('Error loading translations:', error);
+                loadDefaultTranslations();
+            }
+        }
+        // الترجمة الافتراضية
+        function loadDefaultTranslations() {
+            if (currentLang === 'ar') {
+                translations = {
+                    'page_title': 'حيوانات للتبني',
+                    'top_banner_text': 'مأوي الشارقة للقطط والكلاب - امنح حيوانًا أليفًا منزلاً دافئًا',
+                    'total_animals': 'إجمالي الحيوانات',
+                    'cats': 'القطط',
+                    'dogs': 'الكلاب',
+                    'all_types': 'كل الأنواع',
+                    'all_sources': 'كل المصادر',
+                    'stray': 'حيوانات شارع',
+                    'adoption': 'حيوانات للتبني',
+                    'all_genders': 'كل الأجناس',
+                    'male': 'ذكر',
+                    'female': 'أنثى',
+                    'all_statuses': 'كل الحالات',
+                    'ready_for_adoption': 'جاهز للتبني',
+                    'reserved': 'محجوز',
+                    'adopted': 'مُتبنى',
+                    'apply_filter': 'تطبيق الفلتر',
+                    'search_placeholder': 'ابحث بالاسم، الرمز، السلالة...',
+                    'loading': 'جارٍ تحميل الحيوانات...',
+                    'no_matching_animals': 'لا توجد حيوانات متطابقة مع معايير البحث',
+                    'no_animals_error': 'حدث خطأ في تحميل البيانات',
+                    'connection_error': 'خطأ في الاتصال بالخادم',
+                    'animal': 'حيوان',
+                    'copyright': 'جميع الحقوق محفوظة مأوي الشارقة للقطط والكلاب © 2025',
+                    'type': 'النوع',
+                    'source': 'المصدر',
+                    'status': 'الحالة',
+                    'gender': 'الجنس',
+                    'breed': 'السلالة',
+                    'color': 'اللون',
+                    'age': 'العمر التقديري',
+                    'registration_date': 'تاريخ التسجيل',
+                    'markings': 'العلامات المميزة',
+                    'available': 'متاح',
+                    'unavailable': 'غير متاح',
+                    'mixed': 'خليط',
+                    'unknown': 'غير معروف',
+                    'year': 'سنة',
+                    'less_than_year': 'أقل من سنة',
+                    'no_code': 'لا يوجد رمز',
+                    'no_image': 'لا توجد صورة',
+                    'cat': 'قط',
+                    'dog': 'كلب',
+                    'whatsapp_message': 'مرحباً، أنا مهتم بالحيوان',
+                    'more_info': 'هل يمكنني الحصول على مزيد من المعلومات؟',
+                    'email_subject': 'استفسار عن الحيوان',
+                    'email_body': 'مرحباً،\n\nأنا مهتم بالحيوان',
+                    'thanks': 'شكراً',
+                    'contact_center': 'مركز الاتصال: +971563299669',
+                    'email': 'البريد الإلكتروني: scads@epaa.shj.ae',
+                    'adopt_ready': 'جاهز للتبني',
+                    'stray_animals': 'حيوانات شارع',
+                    'black': 'أسود'
+                };
+            } else {
+                translations = {
+                    'page_title': 'Animals for Adoption',
+                    'top_banner_text': 'Sharjah Shelter for Cats and Dogs - Give a Pet a Warm Home',
+                    'total_animals': 'Total Animals',
+                    'cats': 'Cats',
+                    'dogs': 'Dogs',
+                    'all_types': 'All Types',
+                    'all_sources': 'All Sources',
+                    'stray': 'Stray Animals',
+                    'adoption': 'Animals for Adoption',
+                    'all_genders': 'All Genders',
+                    'male': 'Male',
+                    'female': 'Female',
+                    'all_statuses': 'All Statuses',
+                    'ready_for_adoption': 'Ready for Adoption',
+                    'reserved': 'Reserved',
+                    'adopted': 'Adopted',
+                    'apply_filter': 'Apply Filter',
+                    'search_placeholder': 'Search by name, code, breed...',
+                    'loading': 'Loading animals...',
+                    'no_matching_animals': 'No animals matching the search criteria',
+                    'no_animals_error': 'Error loading data',
+                    'connection_error': 'Server connection error',
+                    'animal': 'Animal',
+                    'copyright': 'All rights reserved Sharjah Shelter for Cats and Dogs © 2025',
+                    'type': 'Type',
+                    'source': 'Source',
+                    'status': 'Status',
+                    'gender': 'Gender',
+                    'breed': 'Breed',
+                    'color': 'Color',
+                    'age': 'Estimated Age',
+                    'registration_date': 'Registration Date',
+                    'markings': 'Distinctive Markings',
+                    'available': 'Available',
+                    'unavailable': 'Unavailable',
+                    'mixed': 'Mixed',
+                    'unknown': 'Unknown',
+                    'year': 'year',
+                    'less_than_year': 'Less than a year',
+                    'no_code': 'No Code',
+                    'no_image': 'No Image',
+                    'cat': 'Cat',
+                    'dog': 'Dog',
+                    'whatsapp_message': 'Hello, I am interested in the animal',
+                    'more_info': 'Can I get more information?',
+                    'email_subject': 'Inquiry about the Animal',
+                    'email_body': 'Hello,\n\nI am interested in the animal',
+                    'thanks': 'Thanks',
+                    'contact_center': 'Contact Center: +971563299669',
+                    'email': 'Email: scads@epaa.shj.ae',
+                    'adopt_ready': 'Ready for Adoption',
+                    'stray_animals': 'Stray Animals',
+                    'black': 'Black'
+                };
+            }
+            applyTranslations();
+        }
+        // تطبيق الترجمة
+        function applyTranslations() {
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[key]) {
+                    el.textContent = translations[key];
+                }
+            });
+            document.querySelectorAll('select option[data-i18n]').forEach(opt => {
+                const key = opt.getAttribute('data-i18n');
+                if (translations[key]) {
+                    opt.textContent = translations[key];
+                }
+            });
+            // تعيين placeholder للحقل البحث
+            const searchInput = document.getElementById('search-q');
+            if (searchInput) {
+                searchInput.placeholder = translations.search_placeholder || 'Search by name, code, breed...';
+            }
+        }
+        // تحديث نص زر اللغة
+        function updateLanguageToggle() {
+            const toggleBtn = document.getElementById('lang-toggle');
+            if (currentLang === 'ar') {
+                toggleBtn.textContent = 'EN';
+            } else {
+                toggleBtn.textContent = 'عربي';
+            }
+        }
+        // دالة تطبيق الفلتر العام
+        function applyGlobalFilter() {
+            globalFilters.type = document.getElementById('filter-type').value;
+            globalFilters.source = document.getElementById('filter-source').value;
+            globalFilters.gender = document.getElementById('filter-gender').value;
+            globalFilters.status = document.getElementById('filter-status').value;
+            // تحميل القطط إذا كان الفلتر يسمح
+            if (globalFilters.type === '' || globalFilters.type === 'Cats') {
+                loadAnimals('Cats');
+            } else {
+                document.getElementById('cats-container').innerHTML = '<div class="no-animals">No matching cats</div>';
+            }
+            // تحميل الكلاب إذا كان الفلتر يسمح
+            if (globalFilters.type === '' || globalFilters.type === 'Dogs') {
+                loadAnimals('Dogs');
+            } else {
+                document.getElementById('dogs-container').innerHTML = '<div class="no-animals">No matching dogs</div>';
+            }
+        }
+        // دالة تحميل الإحصائيات
+        async function loadStats() {
+            const statsSection = document.getElementById('stats-section');
+            try {
+                const response = await fetch('../api/get_stats.php');
+                const data = await response.json();
+                if (data.success) {
+                    document.getElementById('total-animals').textContent = data.total || 0;
+                    document.getElementById('cats-count').textContent = data.cats || 0;
+                    document.getElementById('dogs-count').textContent = data.dogs || 0;
+                    statsSection.style.display = 'grid';
+                }
+            } catch (error) {
+                console.error('Error loading stats:', error);
+                statsSection.style.display = 'none';
+            }
+        }
+        // دالة حساب العمر
+        function getAge(animal) {
+            if (animal.birth_date) {
+                const birth = new Date(animal.birth_date);
+                const today = new Date();
+                let age = today.getFullYear() - birth.getFullYear();
+                const monthDiff = today.getMonth() - birth.getMonth();
+                if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+                    age--;
+                }
+                return age > 0 ? age + ' ' + (translations.year || 'year') : (translations.less_than_year || 'Less than a year');
+            } else {
+                return animal.estimated_age || (translations.unknown || 'Unknown');
+            }
+        }
+        // دالة ترجمة حالة الحيوان
+        function getStatusText(status_label, adoption_status) {
+            if (currentLang === 'ar') {
+                return status_label || translations.ready_for_adoption || 'جاهز للتبني';
+            } else {
+                const statusMap = {
+                    'جاهز للتبني': 'Ready for Adoption',
+                    'محجوز': 'Reserved',
+                    'مُتبنى': 'Adopted'
+                };
+                return statusMap[status_label] || translations[adoption_status] || 'Ready for Adoption';
+            }
+        }
+        // دالة تحميل الحيوانات لقسم معين مع الفلاتر العامة (بدون pagination)
+        async function loadAnimals(animalType) {
+            let container;
+            if (animalType === 'Cats') {
+                container = document.getElementById('cats-container');
+            } else {
+                container = document.getElementById('dogs-container');
+            }
+            container.innerHTML = `<div class="loading">${translations.loading || 'Loading animals...'}</div>`;
+            let url = `../api/get_animals_cards.php?animal_type=${encodeURIComponent(animalType)}`;
+            if (globalFilters.source) url += `&animal_source=${encodeURIComponent(globalFilters.source)}`;
+            if (globalFilters.gender) url += `&gender=${encodeURIComponent(globalFilters.gender)}`;
+            if (globalFilters.status) url += `&status=${encodeURIComponent(globalFilters.status)}`;
+            const searchQ = document.getElementById('search-q').value.trim();
+            if (searchQ) url += `&q=${encodeURIComponent(searchQ)}`;
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                if (data.success) {
+                    displayAnimals(data.data, container);
+                } else {
+                    container.innerHTML = `<div class="no-animals">${translations.no_animals_error || 'Error loading data'}</div>`;
+                }
+            } catch (error) {
+                console.error('Error loading animals:', error);
+                container.innerHTML = `<div class="no-animals">${translations.connection_error || 'Server connection error'}</div>`;
+            }
+        }
+        // دالة عرض الحيوانات
+        function displayAnimals(animals, container) {
+            if (!animals || animals.length === 0) {
+                container.innerHTML = `<div class="no-animals">${translations.no_matching_animals || 'No animals matching the search criteria'}</div>`;
+                return;
+            }
+            container.innerHTML = '';
+            animals.forEach((animal, index) => {
+                const card = document.createElement('div');
+                card.className = 'animal-card';
+                card.style.animationDelay = `${index * 0.1}s`;
+                // إزالة النقر على البطاقة كاملة
+                const imagesSection = createImagesSection(animal);
+                const contentSection = createContentSection(animal);
+                card.appendChild(imagesSection);
+                card.appendChild(contentSection);
+                container.appendChild(card);
+            });
+        }
+        // إنشاء قسم الصور
+        function createImagesSection(animal) {
+            const imagesDiv = document.createElement('div');
+            imagesDiv.className = 'card-images';
+            const photos = animal.photos || animal.photo_paths || [];
+            if (photos.length > 0) {
+                const img = document.createElement('img');
+                img.src = `../${photos[0]}`;
+                img.alt = animal.animal_name || animal.animal_code;
+                img.loading = 'lazy';
+                img.onclick = (e) => openModal(e.target.src, photos); /* إضافة: فتح الـ Modal عند النقر */
+                img.onerror = function() {
+                    this.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjgwIiBoZWlnaHQ9IjIyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjhGOEY4Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPuS7pOeUqOWbvuWDjzwvdGV4dD48L3N2Zz4=';
+                };
+                imagesDiv.appendChild(img);
+                if (photos.length > 1) {
+                    const counter = document.createElement('div');
+                    counter.className = 'image-counter';
+                    counter.textContent = `1 / ${photos.length}`;
+                    imagesDiv.appendChild(counter);
+                    const navDiv = document.createElement('div');
+                    navDiv.className = 'image-nav';
+                    const prevBtn = document.createElement('button');
+                    prevBtn.className = 'nav-btn';
+                    prevBtn.innerHTML = '❮';
+                    prevBtn.onclick = (e) => navigateImage(e, -1);
+                    const nextBtn = document.createElement('button');
+                    nextBtn.className = 'nav-btn';
+                    nextBtn.innerHTML = '❯';
+                    nextBtn.onclick = (e) => navigateImage(e, 1);
+                    navDiv.appendChild(prevBtn);
+                    navDiv.appendChild(nextBtn);
+                    imagesDiv.appendChild(navDiv);
+                    imagesDiv.setAttribute('data-current-image', '0');
+                    imagesDiv.setAttribute('data-images', JSON.stringify(photos));
+                }
+            } else {
+                const noImage = document.createElement('div');
+                noImage.style.cssText = `
+                    width: 100%; height: 100%;
+                    background: var(--light-gray);
+                    display: flex; align-items: center;
+                    justify-content: center;
+                    color: #666; font-size: 1em;
+                `;
+                noImage.textContent = translations.no_image || 'No Image';
+                imagesDiv.appendChild(noImage);
+            }
+            return imagesDiv;
+        }
+        // التنقل بين الصور داخل البطاقة
+        function navigateImage(event, direction) {
+            const imagesDiv = event.target.closest('.card-images');
+            const currentIndex = parseInt(imagesDiv.getAttribute('data-current-image'));
+            const images = JSON.parse(imagesDiv.getAttribute('data-images'));
+            let newIndex = currentIndex + direction;
+            if (newIndex < 0) newIndex = images.length - 1;
+            if (newIndex >= images.length) newIndex = 0;
+            const img = imagesDiv.querySelector('img');
+            const counter = imagesDiv.querySelector('.image-counter');
+            img.src = `../${images[newIndex]}`;
+            imagesDiv.setAttribute('data-current-image', newIndex.toString());
+            if (counter) {
+                counter.textContent = `${newIndex + 1} / ${images.length}`;
+            }
+        }
+        // إضافة دوال الـ Modal
+        function openModal(src, photos) {
+            modal.style.display = 'block';
+            modalImg.src = src;
+            currentImages = photos.map(p => `../${p}`);
+            currentImageIndex = currentImages.indexOf(src);
+        }
+        function closeModal() {
+            modal.style.display = 'none';
+        }
+        function changeImage(direction) {
+            currentImageIndex += direction;
+            if (currentImageIndex >= currentImages.length) currentImageIndex = 0;
+            if (currentImageIndex < 0) currentImageIndex = currentImages.length - 1;
+            modalImg.src = currentImages[currentImageIndex];
+        }
+        // إغلاق الـ Modal عند النقر خارجه
+        modal.onclick = function(event) {
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+        // إنشاء قسم المحتوى
+        function createContentSection(animal) {
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'card-content';
+            const codeDiv = document.createElement('div');
+            codeDiv.className = 'animal-code';
+            codeDiv.textContent = animal.animal_code || translations.no_code || 'No Code';
+            contentDiv.appendChild(codeDiv);
+            if (animal.animal_name && animal.animal_name !== 'غير معروف' && animal.animal_name !== 'Unknown') {
+                const nameDiv = document.createElement('div');
+                nameDiv.className = 'animal-name';
+                nameDiv.textContent = animal.animal_name;
+                contentDiv.appendChild(nameDiv);
+            }
+            const detailsDiv = document.createElement('div');
+            detailsDiv.className = 'animal-details';
+            const details = [
+                { label: translations.type || 'Type', value: animal.animal_type === 'Cats' ? translations.cat : translations.dog },
+                { label: translations.source || 'Source', value: animal.animal_source === 'Stray' ? translations.stray_animals || 'Stray Animals' : translations.adoption },
+                {
+                    label: translations.status || 'Status',
+                    value: getStatusText(animal.status_label, animal.adoption_status),
+                    className: `status-${animal.adoption_status || 'available'}`
+                },
+                { label: translations.gender || 'Gender', value: getGenderText(animal.gender) },
+                { label: translations.breed || 'Breed', value: animal.breed || translations.unknown || 'Unknown' },
+                { label: translations.color || 'Color', value: getTranslatedColor(animal.color) },
+                { label: translations.age || 'Estimated Age', value: getAge(animal) },
+                { label: translations.registration_date || 'Registration Date', value: formatDate(animal.registration_date) }
+            ];
+            details.forEach(detail => {
+                if (detail.value && detail.value !== 'غير معروف' && detail.value !== 'Unknown') {
+                    const detailItem = document.createElement('div');
+                    detailItem.className = `detail-item ${detail.className || ''}`;
+                    const labelSpan = document.createElement('span');
+                    labelSpan.className = 'detail-label';
+                    labelSpan.textContent = detail.label;
+                    const valueSpan = document.createElement('span');
+                    valueSpan.className = 'detail-value';
+                    valueSpan.textContent = detail.value;
+                    detailItem.appendChild(labelSpan);
+                    detailItem.appendChild(valueSpan);
+                    detailsDiv.appendChild(detailItem);
+                }
+            });
+            if (animal.marking && animal.marking !== 'لا توجد' && animal.marking !== 'No Markings') {
+                const markingItem = document.createElement('div');
+                markingItem.className = 'detail-item full-width';
+                const markingLabel = document.createElement('span');
+                markingLabel.className = 'detail-label';
+                markingLabel.textContent = translations.markings || 'Distinctive Markings';
+                const markingValue = document.createElement('div');
+                markingValue.className = 'marking-text detail-value';
+                markingValue.textContent = animal.marking;
+                markingItem.appendChild(markingLabel);
+                markingItem.appendChild(markingValue);
+                detailsDiv.appendChild(markingItem);
+            }
+            contentDiv.appendChild(detailsDiv);
+            // إضافة: أزرار التبني/الحجز
+            const adoptionDiv = document.createElement('div');
+            adoptionDiv.className = 'adoption-buttons';
+            const status = animal.adoption_status || 'available';
+            let adoptBtn;
+            if (status === 'available') {
+                adoptBtn = document.createElement('a');
+                adoptBtn.className = 'adopt-btn';
+                adoptBtn.href = `add_adopter.html?animal_code=${encodeURIComponent(animal.animal_code || '')}`;
+                adoptBtn.textContent = translations.adopt_ready || 'Ready for Adoption';
+                adoptBtn.target = '_blank'; // فتح في تبويب جديد إذا لزم
+            } else if (status === 'reserved') {
+                adoptBtn = document.createElement('button');
+                adoptBtn.className = 'reserved-btn';
+                adoptBtn.textContent = translations.reserved || 'Reserved';
+                adoptBtn.disabled = true;
+            } else {
+                adoptBtn = document.createElement('button');
+                adoptBtn.className = 'adopted-btn';
+                adoptBtn.textContent = translations.adopted || 'Adopted';
+                adoptBtn.disabled = true;
+            }
+            adoptionDiv.appendChild(adoptBtn);
+            contentDiv.appendChild(adoptionDiv);
+            // إضافة: أزرار التواصل (واتساب وإيميل)
+            const contactDiv = document.createElement('div');
+            contactDiv.className = 'contact-buttons';
+            const whatsappBtn = document.createElement('a');
+            whatsappBtn.className = 'contact-btn whatsapp-btn';
+            whatsappBtn.href = '#';
+            whatsappBtn.onclick = (e) => { e.preventDefault(); contactViaWhatsApp(animal); };
+            whatsappBtn.title = 'WhatsApp';
+            whatsappBtn.innerHTML = '<i class="fab fa-whatsapp"></i>';
+            const emailBtn = document.createElement('a');
+            emailBtn.className = 'contact-btn email-btn';
+            emailBtn.href = '#';
+            emailBtn.onclick = (e) => { e.preventDefault(); contactViaEmail(animal); };
+            emailBtn.title = 'Email';
+            emailBtn.innerHTML = '<i class="fas fa-envelope"></i>';
+            contactDiv.appendChild(whatsappBtn);
+            contactDiv.appendChild(emailBtn);
+            contentDiv.appendChild(contactDiv);
+            return contentDiv;
+        }
+        // دالة ترجمة الألوان البسيطة
+        function getTranslatedColor(color) {
+            if (currentLang === 'ar') {
+                const colorMapAr = {
+                    'Black': 'أسود',
+                    'White': 'أبيض',
+                    'Gray': 'رمادي',
+                    'Brown': 'بني',
+                    'Orange': 'برتقالي',
+                    'Mixed': 'خليط',
+                    'Unknown': 'غير معروف'
+                };
+                return colorMapAr[color] || color;
+            } else {
+                const colorMapEn = {
+                    'أسود': 'Black',
+                    'White': 'White',
+                    'Gray': 'Gray',
+                    'Brown': 'Brown',
+                    'Orange': 'Orange',
+                    'Mixed': 'Mixed',
+                    'Unknown': 'Unknown'
+                };
+                return colorMapEn[color] || color;
+            }
+        }
+        // دوال التواصل (محفوظة للاستخدام المستقبلي، لكن غير مستخدمة حاليًا)
+        function contactViaWhatsApp(animal) {
+            const name = animal.animal_name || translations.unknown || 'Unknown';
+            const code = animal.animal_code || '';
+            const type = animal.animal_type === 'Cats' ? (translations.cat || 'Cat') : (translations.dog || 'Dog');
+            const gender = getGenderText(animal.gender);
+            const age = getAge(animal);
+            const breed = animal.breed || '';
+            const color = getTranslatedColor(animal.color);
+            const source = animal.animal_source === 'Stray' ? (translations.stray || 'Stray Animals') : (translations.adoption || 'Animals for Adoption');
+            const marking = animal.marking || '';
+            const message = `${translations.whatsapp_message || 'Hello, I am interested in the animal'}: ${name} (${code})\n` +
+                           `${translations.type || 'Type'}: ${type}\n` +
+                           `${translations.gender || 'Gender'}: ${gender}\n` +
+                           `${translations.age || 'Age'}: ${age}\n` +
+                           `${translations.breed || 'Breed'}: ${breed}\n` +
+                           `${translations.color || 'Color'}: ${color}\n` +
+                           `${translations.source || 'Source'}: ${source}\n` +
+                           `${translations.markings || 'Markings'}: ${marking}\n\n` +
+                           `${translations.more_info || 'Can I get more information?'}`;
+            const url = `https://wa.me/971563299669?text=${encodeURIComponent(message)}`;
+            window.open(url, '_blank');
+        }
+        function contactViaPhone() {
+            window.open('tel:+971563299669', '_self');
+        }
+        function contactViaEmail(animal) {
+            const name = animal.animal_name || translations.unknown || 'Unknown';
+            const code = animal.animal_code || '';
+            const type = animal.animal_type === 'Cats' ? (translations.cat || 'Cat') : (translations.dog || 'Dog');
+            const gender = getGenderText(animal.gender);
+            const age = getAge(animal);
+            const breed = animal.breed || '';
+            const color = getTranslatedColor(animal.color);
+            const source = animal.animal_source === 'Stray' ? (translations.stray || 'Stray Animals') : (translations.adoption || 'Animals for Adoption');
+            const marking = animal.marking || '';
+            const subject = `${translations.email_subject || 'Inquiry about the Animal'} ${name} (${code})`;
+            const body = `${translations.email_body || 'Hello,\n\nI am interested in the animal'}: ${name} (${code})\n` +
+                         `${translations.type || 'Type'}: ${type}\n` +
+                         `${translations.gender || 'Gender'}: ${gender}\n` +
+                         `${translations.age || 'Age'}: ${age}\n` +
+                         `${translations.breed || 'Breed'}: ${breed}\n` +
+                         `${translations.color || 'Color'}: ${color}\n` +
+                         `${translations.source || 'Source'}: ${source}\n` +
+                         `${translations.markings || 'Markings'}: ${marking}\n\n` +
+                         `${translations.more_info || 'Can I get more information?'}\n\n${translations.thanks || 'Thanks'}`;
+            window.open(`mailto:scads@epaa.shj.ae?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`, '_self');
+        }
+        // دالة مساعدة لتحويل النص الجنسي
+        function getGenderText(gender) {
+            if (currentLang === 'ar') {
+                const genderMapAr = {
+                    'Male': 'ذكر',
+                    'Female': 'أنثى',
+                    'Mixed': 'خليط',
+                    'Unknown': 'غير معروف'
+                };
+                return genderMapAr[gender] || gender;
+            } else {
+                const genderMapEn = {
+                    'ذكر': 'Male',
+                    'أنثى': 'Female',
+                    'Mixed': 'Mixed',
+                    'Unknown': 'Unknown'
+                };
+                return genderMapEn[gender] || gender;
+            }
+        }
+        // دالة مساعدة لتنسيق التاريخ
+        function formatDate(dateString) {
+            if (!dateString) return translations.unknown || 'Unknown';
+            const date = new Date(dateString);
+            return date.toLocaleDateString(currentLang === 'ar' ? 'ar-EG' : 'en-US');
+        }
+        // تبديل اللغة
+        document.getElementById('lang-toggle').addEventListener('click', async function() {
+            currentLang = currentLang === 'ar' ? 'en' : 'ar';
+            localStorage.setItem('lang', currentLang);
+            document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+            document.documentElement.lang = currentLang;
+            await loadTranslations(currentLang);
+            loadStats();
+            applyGlobalFilter();
+        });
+        // تحميل الحيوانات عند فتح الصفحة
+        document.addEventListener('DOMContentLoaded', async function() {
+            document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+            document.documentElement.lang = currentLang;
+            await loadTranslations(currentLang);
+            await loadStats();
+            applyGlobalFilter(); // استخدام الفلتر العام الافتراضي
+        });
+    </script>
+</body>
+</html>

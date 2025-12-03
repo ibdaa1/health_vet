@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-lang-key="title">التوقيع الإلكتروني للمالك</title>
+    <style>
+        :root {
+            --primary-green: #28a745;
+            --background-white: #ffffff;
+            --text-dark: #343a40;
+            --border-color: #ced4da;
+            --light-gray: #f8f9fa;
+        }
+        body {
+            font-family: 'Tahoma', sans-serif;
+            background-color: var(--light-gray);
+            color: var(--text-dark);
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: right;
+        }
+        body[dir="ltr"] {
+            font-family: 'Arial', sans-serif;
+            text-align: left;
+        }
+        .container {
+            width: 95vw;
+            max-width: 600px;
+            min-width: 300px;
+            background-color: var(--background-white);
+            padding: 30px 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.13);
+            margin: 20px;
+        }
+        h2 {
+            color: var(--primary-green);
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        #signatureCanvas {
+            border: 2px solid var(--border-color);
+            border-radius: 5px;
+            background-color: white;
+            width: 100%;
+            height: 200px;
+            cursor: crosshair;
+            touch-action: none;
+        }
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        button {
+            background-color: var(--primary-green);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #1e7e34;
+        }
+        button.clear {
+            background-color: #dc3545;
+        }
+        button.clear:hover {
+            background-color: #c82333;
+        }
+        #signaturePreview {
+            display: none;
+            margin-top: 20px;
+            text-align: center;
+        }
+        #signaturePreview img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+        }
+        .info {
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .language-toggle {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+        }
+        body[dir="ltr"] .language-toggle {
+            left: auto;
+            right: 10px;
+        }
+        .language-toggle button {
+            background: #fff;
+            border: 1px solid var(--border-color);
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px 10px;
+            }
+            .controls {
+                flex-direction: column;
+            }
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="language-toggle">
+        <button id="lang-toggle" data-lang-key="lang_toggle">EN</button>
+    </div>
+    <div class="container">
+        <h2 data-lang-key="signature_title">التوقيع الإلكتروني للمالك</h2>
+        <div class="info" data-lang-key="signature_info">ارسم توقيعك داخل المنطقة أدناه باستخدام الماوس أو اللمس.</div>
+        <canvas id="signatureCanvas"></canvas>
+        <div class="controls">
+            <button id="clearBtn" data-lang-key="clear_btn">مسح</button>
+            <button id="saveBtn" data-lang-key="save_btn">حفظ التوقيع</button>
+        </div>
+        <div id="signaturePreview"></div>
+        <div id="message"></div>
+    </div>
+    <script src="session_check.js"></script>
+    <script>
+        let currentLang = localStorage.getItem('lang') || 'ar';
+        let translations = {};
+        const urlParams = new URLSearchParams(window.location.search);
+        const animalId = urlParams.get('animal_id') || null;
+
+        // دالة تحميل الترجمة
+        async function loadTranslations(lang) {
+            try {
+                const res = await fetch(`../languages/${lang}.json?t=${Date.now()}`);
+                translations = await res.json();
+                applyTranslations();
+            } catch (e) {
+                console.error('Error loading translations:', e);
+            }
+        }
+
+        // دالة تطبيق الترجمات
+        function applyTranslations() {
+            document.querySelectorAll('[data-lang-key]').forEach(el => {
+                const key = el.getAttribute('data-lang-key');
+                if (translations[key]) {
+                    el.textContent = translations[key];
+                }
+            });
+        }
+
+        // إعداد الكانفاس
+        const canvas = document.getElementById('signatureCanvas');
+        const ctx = canvas.getContext('2d');
+        let isDrawing = false;
+        let emptyCanvasData = null;
+
+        // ضبط حجم الكانفاس
+        function resizeCanvas() {
+            canvas.width = canvas.offsetWidth;
+            canvas.height = 200;
+            // إعادة تعيين emptyCanvasData بعد الـ resize
+            emptyCanvasData = canvas.toDataURL();
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        // بدء الرسم
+        function startDrawing(e) {
+            isDrawing = true;
+            draw(e);
+        }
+
+        // الرسم
+        function draw(e) {
+            if (!isDrawing) return;
+            const rect = canvas.getBoundingClientRect();
+            const x = (e.clientX || e.touches[0].clientX) - rect.left;
+            const y = (e.clientY || e.touches[0].clientY) - rect.top;
+
+            ctx.lineWidth = 2;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = '#000';
+
+            ctx.lineTo(x, y);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+        }
+
+        // إنهاء الرسم
+        function stopDrawing() {
+            if (isDrawing) {
+                isDrawing = false;
+                ctx.beginPath();
+            }
+        }
+
+        // أحداث الماوس
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseout', stopDrawing);
+
+        // أحداث اللمس
+        canvas.addEventListener('touchstart', startDrawing);
+        canvas.addEventListener('touchmove', draw);
+        canvas.addEventListener('touchend', stopDrawing);
+
+        // مسح الكانفاس
+        document.getElementById('clearBtn').addEventListener('click', () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            document.getElementById('signaturePreview').style.display = 'none';
+        });
+
+        // حفظ التوقيع
+        document.getElementById('saveBtn').addEventListener('click', async () => {
+            const currentDataURL = canvas.toDataURL();
+            if (currentDataURL === emptyCanvasData) {
+                showMessage('يرجى رسم التوقيع أولاً.', 'error');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('action', 'upload_signature');
+            formData.append('animal_id', animalId);
+            formData.append('signature', currentDataURL);
+
+            try {
+                const res = await fetch('../api/upload_signature.php', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showMessage('تم حفظ التوقيع بنجاح!', 'success');
+                    // عرض المعاينة
+                    const preview = document.getElementById('signaturePreview');
+                    const img = document.createElement('img');
+                    img.src = data.signature_path;
+                    preview.innerHTML = '';
+                    preview.appendChild(img);
+                    preview.style.display = 'block';
+                    // حفظ في sessionStorage
+                    sessionStorage.setItem('signature_' + animalId, JSON.stringify({path: data.signature_path, timestamp: Date.now()}));
+                    console.log('Signature saved to sessionStorage:', data.signature_path);
+                    // إرسال رسالة إلى النافذة الأم (احتياطي)
+                    if (window.opener) {
+                        setTimeout(() => {
+                            window.opener.postMessage({
+                                type: 'signature_updated',
+                                animal_id: animalId,
+                                signature_path: data.signature_path
+                            }, '*');
+                        }, 100); // تأخير قصير لضمان الاستقبال
+                        console.log('postMessage sent with delay');
+                    }
+                    // إغلاق النافذة
+                    setTimeout(() => {
+                        window.close();
+                    }, 2000);
+                } else {
+                    showMessage(data.message || 'فشل في حفظ التوقيع.', 'error');
+                }
+            } catch (e) {
+                showMessage('خطأ في الاتصال بالسيرفر.', 'error');
+                console.error('Fetch error:', e);
+            }
+        });
+
+        function showMessage(msg, type) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.textContent = msg;
+            messageDiv.className = type;
+        }
+
+        // تحميل الموارد
+        async function loadResources() {
+            document.documentElement.lang = currentLang;
+            document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+            document.body.lang = currentLang;
+            document.body.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+            await loadTranslations(currentLang);
+
+            if (!animalId) {
+                showMessage('رقم ID مفقود.', 'error');
+            }
+        }
+
+        // زر تبديل اللغة
+        document.getElementById('lang-toggle').addEventListener('click', function() {
+            currentLang = currentLang === 'ar' ? 'en' : 'ar';
+            localStorage.setItem('lang', currentLang);
+            document.getElementById('lang-toggle').textContent = currentLang === 'ar' ? 'EN' : 'عربي';
+            loadResources();
+        });
+
+        window.onload = loadResources;
+    </script>
+</body>
+</html>

@@ -1,0 +1,1438 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-translate="pageTitle">عرض الغرف والإحصائيات</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<style>
+/* ----------------------------------
+   الهوية المؤسسية (الأخضر والبيج)
+   ---------------------------------- */
+:root {
+    --primary-green: #3B4D3A;   /* أخضر داكن مؤسسي */
+    --accent-beige: #C2A76D;    /* بيج/ذهبي مؤسسي */
+    --light-beige: #E8D9B5;     /* بيج فاتح */
+    --light-green: #E5EDE4;     /* أخضر فاتح جداً */
+    --white: #ffffff;
+    --dark-text: #2C3A2B;       /* نص داكن */
+    --gray-border: #D1D9C9;     /* حدود رمادية فاتحة */
+    --red-alert: #C45656;       /* أحمر للتحذير */
+    --blue-info: #3A6D9C;       /* أزرق للمعلومات */
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f9f9f9;
+    margin: 0;
+    padding: 20px;
+    color: var(--dark-text);
+}
+.container {
+    max-width: 1200px;
+    margin: auto;
+}
+
+/* رأس الصفحة */
+.header-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid var(--accent-beige);
+}
+h1 {
+    color: var(--primary-green);
+    margin: 0;
+    font-size: 0.8em; /* خط صغير جداً */
+    font-weight: normal;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.header-buttons {
+    display: flex;
+    gap: 8px; /* تقليل المسافة */
+}
+.header-btn {
+    text-decoration: none;
+    padding: 6px 8px; /* حجم أصغر */
+    background-color: transparent; /* بدون خلفية */
+    color: var(--dark-text);
+    border-radius: 0; /* بدون شكل دائري أو مربع */
+    font-weight: bold;
+    transition: color 0.3s, transform 0.2s;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2em; /* حجم أيقونة واضح */
+    box-shadow: none; /* بدون ظل */
+}
+.header-btn:hover {
+    color: var(--primary-green);
+    transform: scale(1.1); /* تأثير hover معبر */
+}
+.header-btn.primary {
+    color: var(--primary-green);
+}
+.header-btn.primary:hover {
+    color: #2D3B2C;
+}
+
+/* قسم الإحصائيات */
+.stats-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+.stat-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.1);
+    border-top: 4px solid var(--primary-green);
+    transition: transform 0.3s ease;
+}
+.stat-card:hover {
+    transform: translateY(-5px);
+}
+.stat-card.dogs {
+    border-top-color: var(--accent-beige);
+}
+.stat-card.animals {
+    border-top-color: var(--blue-info);
+}
+.stat-value {
+    font-size: 2.5em;
+    font-weight: bold;
+    color: var(--primary-green);
+    margin: 10px 0;
+}
+.stat-card.dogs .stat-value {
+    color: var(--accent-beige);
+}
+.stat-card.animals .stat-value {
+    color: var(--blue-info);
+}
+.stat-label {
+    font-size: 1.1em;
+    color: var(--dark-text);
+    font-weight: 600;
+}
+.stat-icon {
+    font-size: 2em;
+    color: var(--primary-green);
+    margin-bottom: 10px;
+}
+.stat-card.dogs .stat-icon {
+    color: var(--accent-beige);
+}
+.stat-card.animals .stat-icon {
+    color: var(--blue-info);
+}
+
+/* قسم الفلاتر */
+.filter-section {
+    margin-bottom: 20px;
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+label {
+    font-weight: bold;
+    color: var(--primary-green);
+}
+select {
+    padding: 8px 15px;
+    border-radius: 8px;
+    border: 1px solid var(--gray-border);
+    background: var(--white);
+    font-size: 15px;
+    color: var(--dark-text);
+    min-width: 150px;
+}
+
+/* شبكة الغرف */
+.building-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 25px;
+}
+.room-card {
+    border-radius: 12px;
+    padding: 20px;
+    text-align: right;
+    cursor: pointer;
+    min-height: 240px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    border: 1px solid var(--gray-border);
+    position: relative;
+    overflow: hidden;
+}
+.room-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100%;
+    height: 4px;
+}
+.room-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+
+/* ----------------------------------
+   تخصيص الألوان حسب النوع والحالة
+   ---------------------------------- */
+.room-card[data-type="Cats"]::before { background: var(--primary-green); }
+.room-card[data-type="Cats"] { 
+    background: linear-gradient(135deg, var(--white) 0%, var(--light-green) 100%);
+    border: 1px solid #C8D8C6;
+}
+.room-card[data-type="Dogs"]::before { background: var(--accent-beige); }
+.room-card[data-type="Dogs"] { 
+    background: linear-gradient(135deg, var(--white) 0%, #F5F1E8 100%);
+    border: 1px solid #E6DBC9;
+}
+.room-full, .room-card.full-capacity {
+    background: linear-gradient(135deg, #FFE5E5 0%, #F8D7D7 100%) !important;
+    border-color: var(--red-alert) !important;
+}
+.room-full::before, .room-card.full-capacity::before { background: var(--red-alert) !important; }
+
+/* تنسيقات العناصر الداخلية */
+.type-indicator {
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    display: inline-block;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.room-card[data-type="Cats"] .type-indicator { background: var(--primary-green); color: var(--white); }
+.room-card[data-type="Dogs"] .type-indicator { background: var(--accent-beige); color: var(--dark-text); }
+.room-full .type-indicator, .room-card.full-capacity .type-indicator { background: var(--red-alert) !important; color: var(--white) !important; }
+
+.header-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 15px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+.room-title {
+    font-weight: 700;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--primary-green);
+}
+.room-card[data-type="Dogs"] .room-title { color: #5C4A2B; }
+
+.capacity-info {
+    font-size: 13px;
+    font-weight: 600;
+    text-align: left;
+    background: rgba(0,0,0,0.05);
+    padding: 6px 10px;
+    border-radius: 6px;
+    min-width: 80px;
+}
+.room-full .capacity-info, .room-card.full-capacity .capacity-info { 
+    background: rgba(196, 86, 86, 0.15) !important; 
+    color: var(--red-alert);
+}
+
+/* قسم الحيوانات */
+.animals-section {
+    flex-grow: 1;
+    margin: 12px 0;
+    overflow-y: auto;
+    max-height: 120px;
+}
+.empty-room-message {
+    text-align: center; 
+    padding: 20px 0; 
+    color: #888; 
+    opacity: 0.7;
+}
+.animal-item {
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 6px;
+    padding: 8px 12px;
+    margin-bottom: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    border-right: 3px solid transparent;
+}
+.room-card[data-type="Cats"] .animal-item { 
+    border-right-color: var(--primary-green); 
+    background: rgba(59, 77, 58, 0.05); 
+}
+.room-card[data-type="Dogs"] .animal-item { 
+    border-right-color: var(--accent-beige); 
+    background: rgba(194, 167, 109, 0.08); 
+}
+
+/* أيقونات الحيوان */
+.animal-actions {
+    display: flex;
+    gap: 4px; /* مسافة أصغر */
+    margin-right: 10px;
+}
+.animal-action-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 10px; /* حجم أصغر جداً */
+    width: 20px; /* حجم صغير */
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1); /* ظل شيك */
+}
+.transfer-btn {
+    color: var(--blue-info);
+    background: rgba(58, 109, 156, 0.1);
+}
+.transfer-btn:hover {
+    background: rgba(58, 109, 156, 0.2);
+    transform: scale(1.2); /* تأثير معبر */
+}
+.delete-btn {
+    color: var(--red-alert);
+    background: rgba(196, 86, 86, 0.1);
+}
+.delete-btn:hover {
+    background: rgba(196, 86, 86, 0.2);
+    transform: scale(1.2);
+}
+.details-btn {
+    color: var(--primary-green);
+    background: rgba(59, 77, 58, 0.1);
+}
+.details-btn:hover {
+    background: rgba(59, 77, 58, 0.2);
+    transform: scale(1.2);
+}
+
+.animal-info {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+.animal-name {
+    font-weight: 600;
+}
+.animal-code {
+    font-size: 11px;
+    opacity: 0.7;
+}
+
+/* شريط الحالة */
+.status-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px;
+    border-radius: 8px;
+    margin: 10px 0;
+    font-weight: 700;
+    font-size: 14px;
+}
+.room-empty .status-bar { background: rgba(76, 175, 80, 0.15); color: #2E7D32; }
+.room-has-space .status-bar { background: rgba(255, 152, 0, 0.15); color: #EF6C00; }
+.room-full .status-bar, .room-card.full-capacity .status-bar { background: rgba(244, 67, 54, 0.15); color: var(--red-alert); }
+
+/* زر الإجراء */
+.action-link {
+    display: block;
+    text-align: center;
+    padding: 12px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: bold;
+    transition: all 0.3s;
+    margin-top: 15px;
+    position: relative;
+    overflow: hidden;
+}
+/* أزرار الإضافة/النقل */
+.action-add-transfer {
+    background: var(--primary-green);
+    color: var(--white);
+}
+.action-add-transfer:hover { 
+    background: #2D3B2C; 
+    transform: translateY(-2px); 
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2); 
+}
+.room-card[data-type="Dogs"] .action-add-transfer { 
+    background: var(--accent-beige); 
+    color: var(--dark-text); 
+}
+.room-card[data-type="Dogs"] .action-add-transfer:hover { 
+    background: #B89A5F; 
+}
+/* زر ممتلئ */
+.action-full {
+    background: #9E9E9E !important; 
+    cursor: not-allowed;
+    color: var(--white);
+}
+.action-full:hover {
+    box-shadow: none;
+    transform: none;
+}
+/* زر سجل الحركات */
+.action-history {
+    background: #f1f1f1; 
+    color: var(--dark-text);
+    border: 1px solid var(--gray-border);
+    margin-top: 5px;
+    font-size: 12px;
+    padding: 8px;
+}
+.action-history:hover {
+    background: #e0e0e0;
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.5);
+    animation: fadeIn 0.3s ease;
+}
+.modal-content {
+    background-color: #fefefe;
+    margin: 10% auto;
+    padding: 25px;
+    border: 1px solid #888;
+    width: 90%;
+    max-width: 500px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    position: relative;
+}
+.modal-header {
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    border-bottom: 1px solid var(--gray-border); 
+    padding-bottom: 15px; 
+    margin-bottom: 20px;
+}
+.modal-header h2 {
+    color: var(--primary-green); 
+    font-size: 18px; 
+    margin: 0;
+}
+.close-btn {
+    color: #aaa; 
+    font-size: 28px; 
+    font-weight: bold; 
+    cursor: pointer;
+}
+.close-btn:hover {
+    color: var(--red-alert);
+}
+.modal-footer {
+    text-align: center; 
+    margin-top: 15px; 
+    font-weight: bold;
+}
+@keyframes fadeIn { 
+    from { opacity: 0; transform: translateY(-20px); } 
+    to { opacity: 1; transform: translateY(0); } 
+}
+
+/* نقل حيوان Modal */
+.room-list {
+    max-height: 300px;
+    overflow-y: auto;
+    margin-top: 15px;
+    border: 1px solid var(--gray-border);
+    border-radius: 8px;
+}
+.room-option {
+    padding: 12px 15px;
+    border-bottom: 1px solid var(--gray-border);
+    cursor: pointer;
+    transition: background 0.2s;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.room-option:last-child {
+    border-bottom: none;
+}
+.room-option:hover {
+    background: var(--light-green);
+}
+.room-option.selected {
+    background: var(--primary-green);
+    color: white;
+}
+.room-capacity {
+    font-size: 0.9em;
+    opacity: 0.7;
+}
+
+/* زر تبديل اللغة */
+.language-toggle {
+    padding: 6px 8px;
+    background: transparent; /* بدون خلفية */
+    color: var(--dark-text);
+    border: none;
+    border-radius: 0; /* بدون شكل */
+    cursor: pointer;
+    font-size: 1em;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: color 0.3s, transform 0.2s;
+}
+.language-toggle:hover {
+    color: var(--primary-green);
+    transform: scale(1.1);
+}
+
+/* تحسينات للشاشات الصغيرة */
+@media (max-width: 768px) {
+    .header-controls {
+        flex-direction: column;
+        gap: 15px;
+        align-items: flex-start;
+    }
+    
+    .header-buttons {
+        width: 100%;
+        flex-wrap: wrap;
+    }
+    
+    .header-btn {
+        flex: 1;
+        min-width: 150px;
+        justify-content: center;
+    }
+    
+    .stats-section {
+        grid-template-columns: 1fr;
+    }
+    
+    .building-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .room-card {
+        min-height: 220px;
+        padding: 15px;
+    }
+    
+    .header-info {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .room-title {
+        font-size: 18px;
+    }
+    
+    .filter-section {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+    <!-- رأس الصفحة مع الأزرار -->
+    <div class="header-controls">
+        <h1 data-translate="shelterRoomsTitle">
+            <i class="fas fa-home" style="font-size: 1.2em;"></i>
+            <span>مأوي الشارقة للقطط والكلاب</span>
+        </h1>
+        <div class="header-buttons">
+            <a href="/health_vet/public/index.php" class="header-btn" title="الرئيسية">
+                <i class="fas fa-home"></i>
+            </a>
+            <a href="/health_vet/public/add_animals.html" class="header-btn" title="إضافة حيوان جديد">
+                <i class="fas fa-plus"></i>
+            </a>
+            <a href="/health_vet/public/animal_movements.html" class="header-btn" title="حركة الحيوان">
+                <i class="fas fa-exchange-alt"></i>
+            </a>
+            <a href="/health_vet/public/add_room.html" class="header-btn primary" title="إضافة غرفة جديدة">
+                <i class="fas fa-plus-circle"></i>
+            </a>
+            <button class="language-toggle" id="langToggle" title="تبديل اللغة">
+                <i class="fas fa-globe"></i> 
+                <span id="langText">EN</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- قسم الإحصائيات -->
+    <div class="stats-section">
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-door-open"></i></div>
+            <div class="stat-value" id="totalRooms">0</div>
+            <div class="stat-label" data-translate="totalRooms">إجمالي الغرف</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-cat"></i></div>
+            <div class="stat-value" id="catRooms">0</div>
+            <div class="stat-label" data-translate="catRooms">غرف القطط</div>
+        </div>
+        <div class="stat-card dogs">
+            <div class="stat-icon"><i class="fas fa-dog"></i></div>
+            <div class="stat-value" id="dogRooms">0</div>
+            <div class="stat-label" data-translate="dogRooms">غرف الكلاب</div>
+        </div>
+        <div class="stat-card animals">
+            <div class="stat-icon"><i class="fas fa-paw"></i></div>
+            <div class="stat-value" id="totalAnimals">0</div>
+            <div class="stat-label" data-translate="totalAnimals">إجمالي الحيوانات</div>
+        </div>
+    </div>
+
+    <!-- قسم الفلاتر -->
+    <div class="filter-section">
+        <label for="filterType" data-translate="filterByType">فلتر حسب النوع:</label>
+        <select id="filterType">
+            <option value="All" data-translate="all">الكل</option>
+            <option value="Cats" data-translate="cats">القطط</option>
+            <option value="Dogs" data-translate="dogs">الكلاب</option>
+        </select>
+    </div>
+
+    <!-- شبكة الغرف -->
+    <div id="building" class="building-grid"></div>
+</div>
+
+<!-- النموذج المنبثق لإضافة/نقل الحيوان -->
+<div id="movementModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 data-translate="movementModalTitle"><i class="fas fa-arrows-alt-h" style="margin-left: 10px;"></i> تسجيل حركة / نقل</h2>
+            <span class="close-btn">&times;</span>
+        </div>
+
+        <form id="movementForm">
+            <input type="hidden" id="currentEmpID" name="created_by"> 
+            <input type="hidden" name="updated_by" value="">
+            <input type="hidden" id="movementType" name="movement_type" value="Transfer">
+            <input type="hidden" id="targetRoomId" name="room_id">
+            
+            <p style="text-align: right; font-weight: bold;" data-translate="currentRoom">الغرفة الحالية: <span id="modalRoomName" style="color: var(--accent-beige);"></span></p>
+
+            <div style="margin-bottom: 15px;">
+                <label for="animalCodeSelect" style="display: block; margin-bottom: 8px;" data-translate="selectAnimal">اختر الحيوان:</label>
+                <select id="animalCodeSelect" name="animal_code" required style="width: 100%; padding: 10px; border: 1px solid var(--gray-border); border-radius: 6px; font-size: 15px; background: var(--light-green);"></select>
+                <small id="currentLocationInfo" style="display: block; text-align: right; color: #666; margin-top: 5px;"></small>
+            </div>
+            
+            <div style="margin-bottom: 15px;">
+                <label for="reasonSelect" style="display: block; margin-bottom: 8px;" data-translate="reason">السبب:</label>
+                <select id="reasonSelect" name="reason" required style="width: 100%; padding: 10px; border: 1px solid var(--gray-border); border-radius: 6px; font-size: 15px;">
+                    <option value="Transfer" data-translate="reasonTransfer">نقل داخلي</option>
+                    <option value="Cleaning" data-translate="reasonCleaning">تنظيف الغرفة</option>
+                    <option value="Treatment" data-translate="reasonTreatment">علاج/فحص طبي</option>
+                    <option value="InitialAdmission" data-translate="reasonInitialAdmission">قبول مبدئي (دخول)</option>
+                </select>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label for="notesInput" style="display: block; margin-bottom: 8px;" data-translate="notesOptional">ملاحظات (اختياري):</label>
+                <textarea id="notesInput" name="notes" rows="2" style="width: 100%; padding: 10px; border: 1px solid var(--gray-border); border-radius: 6px; font-size: 15px;"></textarea>
+            </div>
+
+            <button type="submit" style="
+                width: 100%; 
+                padding: 12px; 
+                background: var(--primary-green); 
+                color: white; 
+                border: none; 
+                border-radius: 8px; 
+                cursor: pointer; 
+                font-weight: bold;
+                transition: background 0.3s;">
+                <i class="fas fa-save" style="margin-left: 5px;"></i> <span data-translate="saveMovement">تسجيل النقل/الإضافة</span>
+            </button>
+        </form>
+        <div id="modalMessage" class="modal-footer"></div>
+    </div>
+</div>
+
+<!-- النموذج المنبثق لنقل الحيوان -->
+<div id="transferModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 data-translate="transferModalTitle"><i class="fas fa-exchange-alt" style="margin-left: 10px;"></i> نقل الحيوان</h2>
+            <span class="close-btn">&times;</span>
+        </div>
+        
+        <div style="margin-bottom: 15px;">
+            <p data-translate="transferAnimal">الحيوان: <strong id="transferAnimalName"></strong> (<span id="transferAnimalCode"></span>)</p>
+            <p data-translate="currentLocation">الموقع الحالي: <span id="transferCurrentRoom"></span></p>
+        </div>
+        
+        <div>
+            <p style="font-weight: bold; margin-bottom: 10px;" data-translate="selectNewRoom">اختر الغرفة الجديدة:</p>
+            <div id="availableRoomsList" class="room-list">
+                <!-- سيتم ملء قائمة الغرف المتاحة هنا -->
+            </div>
+        </div>
+        
+        <div style="margin-top: 20px; display: flex; gap: 10px;">
+            <button id="confirmTransfer" style="
+                flex: 1; 
+                padding: 10px; 
+                background: var(--primary-green); 
+                color: white; 
+                border: none; 
+                border-radius: 6px; 
+                cursor: pointer; 
+                font-weight: bold;" data-translate="confirmTransfer">
+                <i class="fas fa-check" style="margin-left: 5px;"></i> تأكيد النقل
+            </button>
+            <button id="cancelTransfer" style="
+                flex: 1; 
+                padding: 10px; 
+                background: #6c757d; 
+                color: white; 
+                border: none; 
+                border-radius: 6px; 
+                cursor: pointer; 
+                font-weight: bold;" data-translate="cancel">
+                <i class="fas fa-times" style="margin-left: 5px;"></i> إلغاء
+            </button>
+        </div>
+    </div>
+</div>
+<script src="session_check.js"></script>
+<script>
+// المتغيرات العامة
+const buildingDiv = document.getElementById('building');
+const filterSelect = document.getElementById('filterType');
+const movementModal = document.getElementById('movementModal');
+const transferModal = document.getElementById('transferModal');
+const closeBtns = document.querySelectorAll('.close-btn');
+const movementForm = document.getElementById('movementForm');
+const animalCodeSelect = document.getElementById('animalCodeSelect');
+const modalRoomName = document.getElementById('modalRoomName');
+const targetRoomId = document.getElementById('targetRoomId');
+const currentLocationInfo = document.getElementById('currentLocationInfo');
+const modalMessage = document.getElementById('modalMessage');
+const currentEmpIDInput = document.getElementById('currentEmpID');
+const langToggle = document.getElementById('langToggle');
+const langText = document.getElementById('langText');
+const transferAnimalName = document.getElementById('transferAnimalName');
+const transferAnimalCode = document.getElementById('transferAnimalCode');
+const transferCurrentRoom = document.getElementById('transferCurrentRoom');
+const availableRoomsList = document.getElementById('availableRoomsList');
+const confirmTransfer = document.getElementById('confirmTransfer');
+const cancelTransfer = document.getElementById('cancelTransfer');
+
+// عناصر الإحصائيات
+const totalRoomsElem = document.getElementById('totalRooms');
+const catRoomsElem = document.getElementById('catRooms');
+const dogRoomsElem = document.getElementById('dogRooms');
+const totalAnimalsElem = document.getElementById('totalAnimals');
+
+let ALL_ANIMALS_STATUS = [];
+let ALL_ROOMS = [];
+let USER_EMPID = 0;
+let TRANSLATIONS = {};
+let CURRENT_LANG = 'ar';
+let currentAnimalForTransfer = null;
+let selectedTransferRoom = null;
+
+// ---------------------------------------------
+// وظائف الترجمة
+// ---------------------------------------------
+async function loadTranslations(lang) {
+    try {
+        const res = await fetch(`/health_vet/languages/${lang}_animal_building.json`);
+        TRANSLATIONS = await res.json();
+        CURRENT_LANG = lang;
+        applyTranslations();
+        document.documentElement.setAttribute('lang', lang);
+        document.documentElement.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+        // إعادة تحميل البناء لترجمة البطاقات الديناميكية
+        if (ALL_ROOMS.length > 0 && ALL_ANIMALS_STATUS.length > 0) {
+            loadBuilding(filterSelect.value);
+        }
+        // تحديث نص اللغة
+        updateLangToggle();
+    } catch (error) {
+        console.error('Error loading translations:', error);
+        // استخدام البيانات الافتراضية
+        TRANSLATIONS = {
+            "pageTitle": "Room and Statistics Display",
+            "shelterRoomsTitle": "🏡 Sharjah Shelter for Cats and Dogs",
+            "home": "Home",
+            "addNewAnimal": "Add New Animal",
+            "animalMovement": "Animal Movement",
+            "addNewRoom": "Add New Room",
+            "totalRooms": "Total Rooms",
+            "catRooms": "Cat Rooms",
+            "dogRooms": "Dog Rooms",
+            "totalAnimals": "Total Animals",
+            "filterByType": "Filter by Type:",
+            "all": "All",
+            "cats": "Cats",
+            "dogs": "Dogs",
+            "roomCats": "Cat Room",
+            "roomDogs": "Dog Room",
+            "statusEmpty": "Empty Room",
+            "statusHasSpace": "{count} Seats Available",
+            "statusFull": "Fully Occupied",
+            "addAnimalOrTransfer": "Add Animal / Transfer",
+            "roomIsFull": "Full (Cannot Add)",
+            "roomIsCompletelyFullCannotAdd": "The room is completely full, cannot add new animals.",
+            "loadingData": "Loading...",
+            "mustBeLoggedIn": "Must be logged in",
+            "saveMovement": "Record Transfer/Addition",
+            "reasonTransfer": "Internal Transfer",
+            "reasonCleaning": "Room Cleaning",
+            "reasonTreatment": "Treatment/Medical Check",
+            "reasonInitialAdmission": "Initial Admission (Entry)",
+            "currentRoom": "Current Room:",
+            "selectAnimal": "Select Animal:",
+            "selectAnimalPlaceholder": "Select Animal",
+            "notesOptional": "Notes (Optional):",
+            "movementModalTitle": "Record Movement / Transfer",
+            "alreadyInThisRoom": "The animal is already in this room.",
+            "willBeTransferedFrom": "Will be recorded as transfer from: {roomName}.",
+            "willBeAdmitted": "Will be recorded as new entry to the shelter.",
+            "statusInCurrentRoom": "Currently here",
+            "statusInOtherRoom": "Currently in another room",
+            "statusOutShelter": "Out of Shelter",
+            "unnamed": "Unnamed",
+            "connectionError": "Connection Error",
+            "dataLoadingError": "Error loading data",
+            "userNotAuthenticated": "User not authenticated",
+            "failedToLoadAnimalStatus": "Failed to load animal status",
+            "errorLoadingAnimalStatus": "Error loading animal status",
+            "noAnimalsOfType": "No animals of type {type}",
+            "unknownRoom": "Unknown",
+            "submitting": "Submitting...",
+            "serverConnectionError": "Server connection error",
+            "errorLoadingData": "Error loading data",
+            "unknownServerError": "Unknown server error",
+            "noRoomsFound": "No Rooms Found",
+            "noRoomsFilterMatch": "No rooms registered or no rooms match this filter.",
+            "roomIsCompletelyEmpty": "This room is completely empty",
+            "viewRoomHistory": "Movement History",
+            "transferModalTitle": "Transfer Animal",
+            "transferAnimal": "Animal:",
+            "currentLocation": "Current Location:",
+            "selectNewRoom": "Select New Room:",
+            "confirmTransfer": "Confirm Transfer",
+            "cancel": "Cancel",
+            "noAvailableRooms": "No available rooms for transfer",
+            "selectRoomForTransfer": "Please select a room for transfer",
+            "transferSuccess": "Animal transferred successfully",
+            "transferFailed": "Transfer failed: {message}",
+            "serverError": "Server Error",
+            "confirmDelete": "Are you sure to delete animal \"{animalName}\" (final exit record)?",
+            "deleteSuccess": "Animal deleted successfully",
+            "deleteFailed": "Delete failed: {message}"
+        };
+    }
+}
+
+function translate(key, replacements = {}) {
+    let text = TRANSLATIONS[key] || key;
+    Object.keys(replacements).forEach(rep => {
+        text = text.replace(new RegExp(`{${rep}}`, 'g'), replacements[rep]);
+    });
+    return text;
+}
+
+function applyTranslations() {
+    document.querySelectorAll('[data-translate]').forEach(element => {
+        const key = element.getAttribute('data-translate');
+        const translation = translate(key);
+        
+        if (element.tagName === 'INPUT' && element.type === 'submit') {
+            element.value = translation;
+        } else if (element.tagName === 'OPTION') {
+            element.textContent = translation;
+        } else {
+            element.textContent = translation;
+        }
+    });
+}
+
+function updateLangToggle() {
+    langText.textContent = CURRENT_LANG === 'ar' ? 'EN' : 'AR';
+}
+
+// ---------------------------------------------
+// جلب بيانات المستخدم (EmpID)
+// ---------------------------------------------
+async function loadUserData() {
+    try {
+        const res = await fetch('/health_vet/api/user_data.php');
+        const json = await res.json();
+        if (json.success && json.user_data) {
+            USER_EMPID = json.user_data.EmpID || 0;
+            currentEmpIDInput.value = USER_EMPID;
+        } else {
+            console.warn(translate("userNotAuthenticated"));
+        }
+    } catch (err) {
+        console.error("Error loading user data:", err);
+    }
+}
+
+// ---------------------------------------------
+// جلب قائمة الحيوانات وآخر موقع لها
+// ---------------------------------------------
+async function loadAnimalStatusList() {
+    try {
+        const res = await fetch('/health_vet/api/animal_movements.php?action=animal_status_list');
+        const json = await res.json();
+        if (json.success) {
+            ALL_ANIMALS_STATUS = json.data;
+        } else {
+            console.error(translate("failedToLoadAnimalStatus"), json.message);
+        }
+    } catch (err) {
+        console.error(translate("errorLoadingAnimalStatus"), err);
+    }
+}
+
+// ---------------------------------------------
+// جلب جميع الغرف
+// ---------------------------------------------
+async function loadAllRooms() {
+    try {
+        const res = await fetch('/health_vet/api/animal_movements.php?action=all_rooms');
+        const json = await res.json();
+        if (json.success) {
+            ALL_ROOMS = json.data;
+            updateStats();
+        } else {
+            console.error("Failed to load rooms:", json.message);
+        }
+    } catch (err) {
+        console.error("Error loading rooms:", err);
+    }
+}
+
+// ---------------------------------------------
+// تحديث الإحصائيات
+// ---------------------------------------------
+function updateStats() {
+    const catRooms = ALL_ROOMS.filter(room => room.room_type === 'Cats').length;
+    const dogRooms = ALL_ROOMS.filter(room => room.room_type === 'Dogs').length;
+    
+    totalRoomsElem.textContent = ALL_ROOMS.length;
+    catRoomsElem.textContent = catRooms;
+    dogRoomsElem.textContent = dogRooms;
+    
+    // حساب إجمالي الحيوانات
+    let totalAnimals = 0;
+    document.querySelectorAll('.room-card').forEach(card => {
+        const animalItems = card.querySelectorAll('.animal-item');
+        totalAnimals += animalItems.length;
+    });
+    totalAnimalsElem.textContent = totalAnimals;
+}
+
+// ---------------------------------------------
+// تهيئة النموذج السريع Modal
+// ---------------------------------------------
+async function openMovementModal(roomId, roomName, roomType) {
+    if (USER_EMPID === 0) {
+        alert(translate('mustBeLoggedIn'));
+        return;
+    }
+    
+    movementForm.reset();
+    modalMessage.innerHTML = '';
+    currentLocationInfo.innerHTML = '';
+    
+    targetRoomId.value = roomId;
+    modalRoomName.textContent = roomName;
+
+    // تصفية الحيوانات حسب نوع الغرفة (Cats/Dogs)
+    animalCodeSelect.innerHTML = `<option value="" disabled selected>-- ${translate("selectAnimalPlaceholder")} --</option>`;
+    const filteredAnimals = ALL_ANIMALS_STATUS.filter(a => a.animal_type === roomType);
+
+    if (filteredAnimals.length === 0) {
+        alert(translate('noAnimalsOfType', {type: roomType}));
+        return;
+    }
+
+    filteredAnimals.forEach(animal => {
+        const option = document.createElement('option');
+        option.value = animal.animal_code;
+        
+        let statusText;
+        if (animal.is_in_room && animal.current_room_id == roomId) {
+            statusText = ` (${translate('statusInCurrentRoom')} - 🟢)`;
+        } else if (animal.is_in_room) {
+            let roomName = animal.current_room_name || translate('unknownRoom');
+            statusText = ` (${translate('statusInOtherRoom')}: ${roomName} - 🟡)`;
+        } else {
+            statusText = ` (${translate('statusOutShelter')} - 🔴)`;
+        }
+        
+        option.textContent = `${animal.animal_name || translate('unnamed')} [${animal.animal_code}]${statusText}`;
+        option.setAttribute('data-current-room-id', animal.current_room_id || 0);
+        animalCodeSelect.appendChild(option);
+    });
+    
+    movementModal.style.display = 'block';
+}
+
+// ---------------------------------------------
+// معالجة اختيار الحيوان في النموذج
+// ---------------------------------------------
+animalCodeSelect.addEventListener('change', (e) => {
+    const selectedCode = e.target.value;
+    const room_id = parseInt(targetRoomId.value);
+    const animal = ALL_ANIMALS_STATUS.find(a => a.animal_code === selectedCode);
+    
+    currentLocationInfo.innerHTML = '';
+    
+    if (animal) {
+        // تحديث نوع الحركة في الحقل المخفي
+        if (animal.is_in_room && animal.current_room_id === room_id) {
+            document.getElementById('movementType').value = 'Transfer';
+            currentLocationInfo.innerHTML = `<i class="fas fa-check-circle" style="color: #2E7D32;"></i> ${translate('alreadyInThisRoom')}`;
+        } else if (animal.is_in_room) {
+            document.getElementById('movementType').value = 'Transfer';
+            let roomName = animal.current_room_name || translate('unknownRoom');
+            currentLocationInfo.innerHTML = `<i class="fas fa-exchange-alt" style="color: #EF6C00;"></i> ${translate('willBeTransferedFrom', {roomName})}`;
+        } else {
+            document.getElementById('movementType').value = 'In';
+            currentLocationInfo.innerHTML = `<i class="fas fa-sign-in-alt" style="color: var(--primary-green);"></i> ${translate('willBeAdmitted')}`;
+        }
+    }
+});
+
+// ---------------------------------------------
+// معالجة إرسال النموذج
+// ---------------------------------------------
+movementForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    modalMessage.innerHTML = '... ' + translate('submitting');
+    
+    const formData = new FormData(movementForm);
+    
+    if (USER_EMPID === 0 || !currentEmpIDInput.value) {
+        modalMessage.innerHTML = `<i class="fas fa-exclamation-triangle" style="color: var(--red-alert); margin-left: 5px;"></i> ${translate('mustBeLoggedIn')}`;
+        return;
+    }
+    
+    formData.set('created_by', currentEmpIDInput.value); 
+    
+    try {
+        const res = await fetch('/health_vet/api/animal_movements.php', {
+            method: 'POST',
+            body: new URLSearchParams(formData)
+        });
+        const json = await res.json();
+
+        if (json.success) {
+            modalMessage.innerHTML = `<i class="fas fa-check-circle" style="color: #2E7D32; margin-left: 5px;"></i> ${json.message}`;
+            setTimeout(() => {
+                movementModal.style.display = 'none';
+                loadAnimalStatusList().then(() => loadBuilding(filterSelect.value));
+            }, 1000);
+        } else {
+            modalMessage.innerHTML = `<i class="fas fa-times-circle" style="color: var(--red-alert); margin-left: 5px;"></i> ${json.message}`;
+        }
+    } catch (err) {
+        modalMessage.innerHTML = `<i class="fas fa-exclamation-triangle" style="color: var(--red-alert); margin-left: 5px;"></i> ${translate('serverConnectionError')}`;
+        console.error("Error submitting form:", err);
+    }
+});
+
+// ---------------------------------------------
+// فتح نافذة نقل الحيوان
+// ---------------------------------------------
+function openTransferModal(animalCode, animalName, currentRoomName) {
+    currentAnimalForTransfer = {
+        code: animalCode,
+        name: animalName,
+        currentRoom: currentRoomName
+    };
+    
+    transferAnimalName.textContent = animalName || translate('unnamed');
+    transferAnimalCode.textContent = animalCode;
+    transferCurrentRoom.textContent = currentRoomName || translate('unknownRoom');
+    
+    // الحصول على نوع الحيوان
+    const animal = ALL_ANIMALS_STATUS.find(a => a.animal_code === animalCode);
+    const animalType = animal ? animal.animal_type : 'Cats';
+    
+    // عرض الغرف المتاحة لنفس النوع
+    availableRoomsList.innerHTML = '';
+    selectedTransferRoom = null;
+    
+    const availableRooms = ALL_ROOMS.filter(room => 
+        room.room_type === animalType && 
+        room.room_name !== currentRoomName
+    );
+    
+    if (availableRooms.length === 0) {
+        availableRoomsList.innerHTML = `<p style="text-align: center; padding: 20px; color: #666;">${translate('noAvailableRooms')}</p>`;
+    } else {
+        availableRooms.forEach(room => {
+            const roomOption = document.createElement('div');
+            roomOption.className = 'room-option';
+            roomOption.innerHTML = `
+                <div>
+                    <strong>${room.room_name}</strong>
+                    <div class="room-capacity">${room.room_type === 'Cats' ? translate('roomCats') : translate('roomDogs')}</div>
+                </div>
+                <div>
+                    <i class="fas fa-arrow-left"></i>
+                </div>
+            `;
+            
+            roomOption.addEventListener('click', () => {
+                document.querySelectorAll('.room-option').forEach(opt => opt.classList.remove('selected'));
+                roomOption.classList.add('selected');
+                selectedTransferRoom = room;
+            });
+            
+            availableRoomsList.appendChild(roomOption);
+        });
+    }
+    
+    transferModal.style.display = 'block';
+}
+
+// ---------------------------------------------
+// تأكيد نقل الحيوان
+// ---------------------------------------------
+confirmTransfer.addEventListener('click', async () => {
+    if (!selectedTransferRoom || !currentAnimalForTransfer) {
+        alert(translate('selectRoomForTransfer'));
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('animal_code', currentAnimalForTransfer.code);
+    formData.append('room_id', selectedTransferRoom.id);
+    formData.append('movement_type', 'Transfer');
+    formData.append('reason', 'Transfer');
+    formData.append('notes', translate('notesTransfer', {from: currentAnimalForTransfer.currentRoom, to: selectedTransferRoom.room_name}));
+    formData.append('created_by', USER_EMPID);
+    formData.append('updated_by', USER_EMPID);
+    formData.append('movement_date', new Date().toISOString().slice(0, 19).replace('T', ' '));
+    
+    try {
+        const res = await fetch('/health_vet/api/animal_movements.php', {
+            method: 'POST',
+            body: formData
+        });
+        const json = await res.json();
+
+        if (json.success) {
+            alert(translate('transferSuccess'));
+            transferModal.style.display = 'none';
+            loadAnimalStatusList().then(() => loadBuilding(filterSelect.value));
+        } else {
+            alert(translate('transferFailed', {message: json.message}));
+        }
+    } catch (err) {
+        alert(translate('serverError'));
+        console.error("Error transferring animal:", err);
+    }
+});
+
+// ---------------------------------------------
+// حذف الحيوان (تسجيل خروج)
+// ---------------------------------------------
+async function deleteAnimal(animalCode, animalName) {
+    if (!confirm(translate('confirmDelete', {animalName}))) {
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('animal_code', animalCode);
+    formData.append('room_id', '0');
+    formData.append('movement_type', 'Out');
+    formData.append('reason', 'Adoption');
+    formData.append('notes', translate('deleteNotes'));
+    formData.append('created_by', USER_EMPID);
+    formData.append('updated_by', USER_EMPID);
+    formData.append('movement_date', new Date().toISOString().slice(0, 19).replace('T', ' '));
+    
+    try {
+        const res = await fetch('/health_vet/api/animal_movements.php', {
+            method: 'POST',
+            body: formData
+        });
+        const json = await res.json();
+
+        if (json.success) {
+            alert(translate('deleteSuccess'));
+            loadAnimalStatusList().then(() => loadBuilding(filterSelect.value));
+        } else {
+            alert(translate('deleteFailed', {message: json.message}));
+        }
+    } catch (err) {
+        alert(translate('serverError'));
+        console.error("Error deleting animal:", err);
+    }
+}
+
+// ---------------------------------------------
+// فتح صفحة تفاصيل الحيوان
+// ---------------------------------------------
+function openAnimalDetails(animalCode) {
+    window.open(`/health_vet/public/animal_details.html?animal_code=${animalCode}`, '_blank');
+}
+
+// ---------------------------------------------
+// إغلاق النماذج المنبثقة
+// ---------------------------------------------
+closeBtns.forEach(btn => {
+    btn.onclick = function() {
+        movementModal.style.display = 'none';
+        transferModal.style.display = 'none';
+    }
+});
+
+window.onclick = function(event) {
+    if (event.target == movementModal) {
+        movementModal.style.display = 'none';
+    }
+    if (event.target == transferModal) {
+        transferModal.style.display = 'none';
+    }
+}
+
+cancelTransfer.onclick = function() {
+    transferModal.style.display = 'none';
+}
+
+// ---------------------------------------------
+// وظيفة loadBuilding وعرض الغرف
+// ---------------------------------------------
+function getRoomStatusClass(current, capacity) {
+    if (current === 0) return 'room-empty';
+    if (current < capacity) return 'room-has-space';
+    return 'room-full full-capacity';
+}
+
+function getStatusIcon(current, capacity) {
+    if (current === 0) return '<i class="fas fa-check-circle status-icon"></i>';
+    if (current < capacity) return '<i class="fas fa-info-circle status-icon"></i>';
+    return '<i class="fas fa-exclamation-triangle status-icon"></i>';
+}
+
+function getStatusText(current, capacity) {
+    if (current === 0) return translate('statusEmpty');
+    if (current < capacity) return translate('statusHasSpace', {count: capacity - current});
+    return translate('statusFull');
+}
+
+function getRoomIconHtml(type) {
+    return type === 'Cats' ? '<i class="fas fa-cat"></i>' : 
+           type === 'Dogs' ? '<i class="fas fa-dog"></i>' : 
+           '<i class="fas fa-paw"></i>';
+}
+
+async function loadBuilding(type='All'){
+    buildingDiv.innerHTML = `<div style="text-align:center; padding: 50px; color: #666;"><i class="fas fa-spinner fa-spin"></i> ${translate('loadingData')}...</div>`;
+    try {
+        const res = await fetch(`/health_vet/api/rooms_building.php?action=list&type=${type}`);
+        if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        const json = await res.json();
+
+        buildingDiv.innerHTML = '';
+
+        if(!json.success){
+            buildingDiv.innerHTML = `<div style="color: var(--red-alert); text-align:center; padding: 50px; background: #FFEBEE; border-radius: 10px; border: 1px solid var(--red-alert);">
+                 <i class="fas fa-exclamation-circle" style="font-size: 40px; margin-bottom: 15px;"></i>
+                 <h3>${translate('errorLoadingData')}</h3>
+                 <p>${json.message || translate('unknownServerError')}</p>
+             </div>`;
+             return;
+        }
+
+        if(!json.data || json.data.length === 0){
+            buildingDiv.innerHTML = `<div style="text-align:center; padding: 50px; color: var(--dark-text); background: var(--light-beige); border-radius: 10px;">
+                 <i class="fas fa-door-open" style="font-size: 40px; margin-bottom: 15px; opacity: 0.5;"></i>
+                 <h3>${translate('noRoomsFound')}</h3>
+                 <p>${translate('noRoomsFilterMatch')}</p>
+             </div>`;
+             return;
+        }
+
+        json.data.forEach(room => {
+            const div = document.createElement('div');
+            const currentAnimalsCount = room.animals ? room.animals.length : 0;
+            const capacity = room.capacity && room.capacity > 0 ? room.capacity : 5; 
+            const isRoomFull = currentAnimalsCount >= capacity;
+            
+            div.setAttribute('data-type', room.type); 
+            div.className = 'room-card ' + getRoomStatusClass(currentAnimalsCount, capacity);
+
+            let animalsHtml = '';
+            if (currentAnimalsCount > 0) {
+                animalsHtml = room.animals.map(a => {
+                    // الحصول على اسم الغرفة الحالية للحيوان
+                    const animalInfo = ALL_ANIMALS_STATUS.find(animal => animal.animal_code === a.code);
+                    const currentRoomName = animalInfo ? (animalInfo.current_room_name || translate('unknownRoom')) : translate('unknownRoom');
+                    
+                    return `
+                    <div class="animal-item">
+                        <div class="animal-actions">
+                            <button class="animal-action-btn transfer-btn" title="${translate('transferAnimal')}" onclick="event.stopPropagation(); openTransferModal('${a.code}', '${a.name}', '${currentRoomName}')">
+                                <i class="fas fa-exchange-alt"></i>
+                            </button>
+                            <button class="animal-action-btn delete-btn" title="${translate('deleteAnimal')}" onclick="event.stopPropagation(); deleteAnimal('${a.code}', '${a.name}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                            <button class="animal-action-btn details-btn" title="${translate('animalDetails')}" onclick="event.stopPropagation(); openAnimalDetails('${a.code}')">
+                                <i class="fas fa-info-circle"></i>
+                            </button>
+                        </div>
+                        <div class="animal-info">
+                            <span class="animal-name">${a.name || translate('unnamed')}</span>
+                            <span class="animal-code">#${a.code}</span>
+                        </div>
+                    </div>
+                    `;
+                }).join('');
+            } else {
+                animalsHtml = `<div class="empty-room-message">
+                    <i class="fas fa-wind" style="font-size: 24px; margin-bottom: 8px;"></i>
+                    <div>${translate('roomIsCompletelyEmpty')}</div>
+                </div>`;
+            }
+
+            const statusIcon = getStatusIcon(currentAnimalsCount, capacity);
+            const statusText = getStatusText(currentAnimalsCount, capacity);
+            const roomIconHtml = getRoomIconHtml(room.type);
+            const typeIndicator = room.type === 'Cats' ? translate('roomCats') : translate('roomDogs');
+            
+            div.innerHTML = `
+                <span class="type-indicator">${typeIndicator}</span>
+                <div class="header-info">
+                    <div class="room-title">
+                        <span class="room-icon">${roomIconHtml}</span>
+                        ${room.name}
+                    </div>
+                    <div class="capacity-info">
+                        ${currentAnimalsCount}/${capacity}
+                    </div>
+                </div>
+                <div class="animals-section">${animalsHtml}</div>
+                <div class="status-bar">
+                    ${statusIcon}
+                    ${statusText}
+                </div>
+            `;
+            
+            // زر الإضافة/النقل
+            const actionLink = document.createElement('a');
+            actionLink.href = '#';
+            actionLink.className = isRoomFull ? 'action-link action-full' : 'action-link action-add-transfer';
+            actionLink.innerHTML = isRoomFull ? 
+                `<i class="fas fa-ban" style="margin-left: 5px;"></i> ${translate('roomIsFull')}` : 
+                `<i class="fas fa-plus-circle" style="margin-left: 5px;"></i> ${translate('addAnimalOrTransfer')}`;
+            
+            if (isRoomFull) {
+                actionLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    alert(translate('roomIsCompletelyFullCannotAdd'));
+                });
+            } else {
+                actionLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    openMovementModal(room.id, room.name, room.type);
+                });
+            }
+            
+            div.appendChild(actionLink);
+            
+            buildingDiv.appendChild(div);
+        });
+        
+        updateStats();
+    } catch (err) {
+        console.error("Error loading building data:", err);
+        buildingDiv.innerHTML = `<div style="color: var(--red-alert); text-align:center; padding: 50px; background: #FFEBEE; border-radius: 10px; border: 1px solid var(--red-alert);">
+            <i class="fas fa-wifi-slash" style="font-size: 40px; margin-bottom: 15px;"></i>
+            <h3>${translate('connectionError')}</h3>
+            <p>${translate('dataLoadingError')}: ${err.message}</p>
+        </div>`;
+    }
+}
+
+// ---------------------------------------------
+// تحميل البيانات عند بداية الصفحة
+// ---------------------------------------------
+document.addEventListener('DOMContentLoaded', () => {
+    updateLangToggle();
+    loadTranslations(CURRENT_LANG).then(() => {
+        loadUserData().then(() => {
+            loadAllRooms().then(() => {
+                loadAnimalStatusList().then(() => {
+                    loadBuilding(filterSelect.value);
+                });
+            });
+        });
+    });
+});
+
+// تغيير الفلتر
+filterSelect.addEventListener('change', () => {
+    loadBuilding(filterSelect.value);
+});
+
+// تبديل اللغة
+langToggle.addEventListener('click', () => {
+    const newLang = CURRENT_LANG === 'ar' ? 'en' : 'ar';
+    loadTranslations(newLang);
+});
+</script>
+
+</body>
+</html>

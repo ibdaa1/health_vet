@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="pageTitle">نموذج استبيان قبل التبني</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
+    <style>
+        /* الألوان المؤسسية - الهوية المؤسسية المحدثة */
+        :root {
+            --primary-color: #384F30; /* أخضر داكن / زيتوني غامق - Dark/Olive Green (للنصوص الكبيرة والأساسي) */
+            --secondary-color: #AA9556; /* ذهبي / بيج داكن - Gold/Dark Beige (للعناصر الرسومية والنصوص الأصغر) */
+            --border-color: #333; /* لون الإطارات والخط القياسي: أسود */
+            --success-color: #28a745; /* أخضر نجاح */
+            --danger-color: #dc3545; /* أحمر خطأ/رفض */
+            --warning-color: #ffc107; /* أصفر تحذير */
+            --info-color: #17a2b8; /* أزرق معلومات */
+            --bg-light: #f8f9fa; /* أبيض فاتح - Light White للخلفية */
+        }
+        /* جعل لون النص الافتراضي أسود مع دعم عالي للتباين (WCAG) - Chic design */
+        body {
+            color: #000;
+            direction: rtl; /* الافتراضي عربي */
+            text-align: right;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* خطوط عالمية حكومية */
+            line-height: 1.4; /* Reduced line spacing for chic look */
+            background-color: var(--bg-light); /* خلفية أبيض فاتح */
+        }
+        /* العناوين والأساطير (اللون الأساسي: أخضر زيتوني غامق) */
+        .main-text, legend {
+            color: var(--primary-color) !important;
+            font-weight: bold;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.1); /* Subtle shadow for chic effect */
+        }
+        /* أزرار الإجراء الأساسية - ألوان مؤسسية مع hover effects */
+        .btn-primary, .btn-primary:focus {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white; /* نص أبيض للتباين */
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Chic shadow */
+        }
+        .btn-primary:hover {
+            background-color: #2e4127; /* أغمق قليلاً */
+            border-color: #2e4127;
+            transform: translateY(-1px); /* Subtle lift on hover */
+        }
+        .btn-secondary, .btn-secondary:focus {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+            color: white; /* نص أبيض */
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .btn-secondary:hover {
+            background-color: #8f7d46; /* أغمق قليلاً */
+            border-color: #8f7d46;
+            transform: translateY(-1px);
+        }
+        .btn-success { /* لزر الموافقة */
+            background-color: var(--success-color);
+            border-color: var(--success-color);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .btn-success:hover {
+            background-color: #218838;
+            border-color: #1e7e34;
+            transform: translateY(-1px);
+        }
+        .btn-danger { /* لزر الحذف أو الرفض */
+            background-color: var(--danger-color);
+            border-color: var(--danger-color);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .btn-danger:hover {
+            background-color: #c82333;
+            border-color: #bd2130;
+            transform: translateY(-1px);
+        }
+        h2 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem; /* Reduced margin */
+        }
+        /* لون الخط لجميع الحقول والمربعات الفرعية أسود مع تباين عالي (التغيير: النصوص الأصغر أصبحت أسود بدلاً من بيج) */
+        .form-label, .form-check-label {
+            color: #000; /* تغيير إلى أسود */
+            font-weight: 500;
+            line-height: 1.3; /* Reduced for chic spacing */
+        }
+        /* إطارات حقول الإدخال والـ Select والـ Textarea باللون الأسود/الداكن مع responsive - Chic borders */
+        .form-control, .form-select, .form-check-input {
+            border: 1px solid var(--border-color) !important;
+            color: #000;
+            border-radius: 6px; /* Slightly rounded for modern look */
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.05); /* Subtle inner shadow */
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out; /* Smooth transition */
+            background-color: white; /* خلفية بيضاء */
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color); /* أخضر زيتوني للتركيز */
+            box-shadow: 0 0 0 0.2rem rgba(56, 79, 48, 0.25); /* Focus ring بالأخضر */
+        }
+        /* إطارات مجموعات الحقول - Chic fieldsets */
+        fieldset {
+             border-color: var(--border-color) !important;
+             border-radius: 8px; /* Rounded corners */
+             box-shadow: 0 2px 8px rgba(0,0,0,0.08); /* Subtle shadow */
+             padding: 1rem; /* Reduced padding */
+             margin-bottom: 1rem; /* Reduced margin */
+             background-color: white; /* خلفية بيضاء */
+        }
+        legend {
+            padding: 0 0.5rem; /* Reduced padding */
+            color: var(--primary-color); /* أخضر للعناوين */
+        }
+        /* منطقة التوقيع - Chic canvas */
+        .signature-pad-container {
+            border: 2px solid var(--secondary-color); /* ذهبي للعناصر الرسومية */
+            border-radius: 8px;
+            cursor: crosshair;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            background-color: white;
+        }
+        .signature-pad-container canvas {
+            display: block;
+            border-radius: 6px;
+        }
+        /* اتجاهات النص - Enhanced RTL/LTR */
+        body.rtl {
+            direction: rtl;
+            text-align: right;
+            line-height: 1.4;
+        }
+        body.rtl .form-check-input {
+            margin-right: -1.5em;
+            margin-left: 0;
+        }
+        body.rtl .form-check {
+            padding-right: 2.5em; /* Adjust for RTL */
+            padding-left: 0;
+        }
+        body.rtl .form-label {
+            text-align: right;
+        }
+        body.ltr {
+            direction: ltr;
+            text-align: left;
+            line-height: 1.4;
+        }
+        body.ltr .form-check-input {
+            margin-left: -1.5em;
+            margin-right: 0;
+        }
+        body.ltr .form-check {
+            padding-left: 2.5em;
+            padding-right: 0;
+        }
+        body.ltr .form-label {
+            text-align: left;
+        }
+        /* منطقة التقرير بعد الإرسال أو التحميل - Chic styling */
+        #report-section {
+            display: none;
+            margin-top: 1rem; /* Reduced */
+            padding: 1rem;
+            border: 1px solid var(--secondary-color); /* ذهبي */
+            border-radius: 8px;
+            background-color: white; /* أبيض */
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        /* عرض اسم المعتمد - Chic info box (نقله أسفل) */
+        #approver-info {
+            display: none;
+            margin-top: 0.5rem; /* Reduced */
+            padding: 0.75rem;
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 6px;
+            font-weight: bold;
+            color: #155724;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            text-align: center; /* لجعلها أسفل بشكل أفضل */
+        }
+        /* حالة الاعتماد - Enhanced with chic colors */
+        .approval-status {
+            margin-top: 0.5rem; /* Reduced */
+            padding: 0.75rem;
+            border-radius: 6px;
+            font-weight: bold;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid var(--secondary-color); /* ذهبي */
+        }
+        .status-approved {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status-rejected {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        /* تحسينات Responsive للشاشات الصغيرة - Chic mobile */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0.5rem; /* Reduced */
+            }
+            h2 {
+                font-size: 1.5rem;
+            }
+            .signature-pad-container canvas {
+                width: 100% !important;
+                height: auto !important;
+            }
+            .row > .col-md-6,
+            .row > .col-md-4,
+            .row > .col-md-8 {
+                margin-bottom: 0.75rem; /* Reduced */
+            }
+            fieldset {
+                padding: 0.75rem; /* Reduced */
+            }
+        }
+        /* تحسينات للوضوح على الشاشات الكبيرة */
+        @media (min-width: 1200px) {
+            .container {
+                max-width: 900px; /* Slightly narrower for chic centering */
+            }
+        }
+        /* Reduced spacing for form rows */
+        .row {
+            margin-bottom: 0.5rem; /* Reduced */
+        }
+        .mb-3 {
+            margin-bottom: 0.75rem !important; /* Reduced */
+        }
+        .form-check {
+            margin-bottom: 0.5rem; /* Reduced */
+        }
+        /* أسلوب الأزرار كأيقونات شيكة جداً (بدون نص، حجم صغير مع hover effects، غير دائرية) */
+        .btn-icon {
+            width: auto;
+            min-width: 40px;
+            height: 40px;
+            border-radius: 6px; /* مستطيلة مدورة الزوايا بدلاً من دائرية */
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem; /* حجم الأيقونة */
+            padding: 0 0.5rem;
+            border: none;
+            transition: all 0.2s ease;
+        }
+        .btn-icon:hover {
+            transform: scale(1.05) translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .btn-icon-primary { background-color: var(--primary-color); color: white; }
+        .btn-icon-secondary { background-color: var(--secondary-color); color: white; }
+        .btn-icon-success { background-color: var(--success-color); color: white; }
+        .btn-icon-danger { background-color: var(--danger-color); color: white; }
+    </style>
+</head>
+<body class="rtl">
+    <div class="container mt-3"> <!-- Reduced mt-5 to mt-3 -->
+        <div class="d-flex justify-content-between align-items-center mb-3"> <!-- Reduced mb-4 to mb-3 -->
+             <h2 class="main-text" data-i18n="formHeader">نموذج استبيان قبل التبني</h2>
+             <button id="lang-toggle" class="btn-icon btn-icon-secondary" data-current-lang="ar" title="تبديل اللغة">
+                <i class="bi bi-globe"></i>
+             </button>
+        </div>
+        <div id="alert-message" class="alert d-none" role="alert"></div>
+        <fieldset class="mb-3 p-2 border rounded"> <!-- Reduced padding and margin -->
+            <legend class="fw-bold main-text" data-i18n="searchSection">البحث في الطلبات</legend>
+            <form id="searchForm" class="row g-2"> <!-- Reduced g-3 to g-2 -->
+                <div class="col-md-8">
+                    <input type="text" class="form-control" id="searchTerm" placeholder="البحث بالاسم أو الهاتف أو رقم الهوية..." data-i18n-placeholder="searchPlaceholder">
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="btn-icon btn-icon-secondary w-100" data-i18n="searchButton" title="بحث">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </div>
+            </form>
+            <div id="searchResults" class="mt-2"> <!-- Reduced mt-3 to mt-2 -->
+                </div>
+        </fieldset>
+        <form id="adoptionForm">
+            <input type="hidden" id="app_id" name="id">
+            <input type="hidden" id="action_type" name="action" value="create">
+            <fieldset class="mb-3 p-2 border rounded"> <!-- Reduced -->
+                <legend class="fw-bold main-text" data-i18n="personalInfo">المعلومات الشخصية</legend>
+                <div class="row">
+                    <div class="col-md-6 mb-2"> <!-- Reduced mb-3 to mb-2 -->
+                        <label for="full_name" class="form-label" data-i18n="fullName">الاسم الكامل</label>
+                        <input type="text" class="form-control" id="full_name" name="full_name" required>
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <label for="nationality" class="form-label" data-i18n="nationality">الجنسية</label>
+                        <input type="text" class="form-control" id="nationality" name="nationality">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4 mb-2">
+                        <label for="age" class="form-label" data-i18n="age">العمر</label>
+                        <input type="number" class="form-control" id="age" name="age" min="18">
+                    </div>
+                    <div class="col-md-4 mb-2">
+                        <label for="emirates_id" class="form-label" data-i18n="emiratesId">رقم الهوية</label>
+                        <input type="text" class="form-control" id="emirates_id" name="emirates_id">
+                    </div>
+                    <div class="col-md-4 mb-2">
+                        <label for="email" class="form-label" data-i18n="email">البريد الإلكتروني</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                    </div>
+                </div>
+                <div class="mb-2"> <!-- Reduced -->
+                    <label for="phone" class="form-label" data-i18n="phone">رقم الهاتف</label>
+                    <input type="tel" class="form-control" id="phone" name="phone">
+                </div>
+            </fieldset>
+            <fieldset class="mb-3 p-2 border rounded">
+                <legend class="fw-bold main-text" data-i18n="housingInfo">بيانات السكن</legend>
+                <div class="mb-2">
+                    <label for="housing_area" class="form-label" data-i18n="housingArea">ماهي منطقة السكن؟</label>
+                    <input type="text" class="form-control" id="housing_area" name="housing_area">
+                </div>
+                <div class="mb-2">
+                    <label for="housing_type" class="form-label" data-i18n="housingType">ما هو نوع السكن</label>
+                    <select class="form-select" id="housing_type" name="housing_type">
+                        <option value="" data-i18n="select">اختر...</option>
+                        <option value="Villa" data-i18n="villa">فيلا</option>
+                        <option value="Apartment" data-i18n="apartment">شقة</option>
+                    </select>
+                </div>
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" value="1" id="is_house_owner" name="is_house_owner">
+                    <label class="form-check-label" for="is_house_owner" data-i18n="isHouseOwner">هل أنت صاحب المسكن</label>
+                </div>
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" value="1" id="landlord_allows_pets" name="landlord_allows_pets">
+                    <label class="form-check-label" for="landlord_allows_pets" data-i18n="landlordAllowsPets">إذا كان المسكن مستأجر هل سيسمح مالك العقار بتربيتك للقط / الكلب؟</label>
+                </div>
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" value="1" id="has_pet_space" name="has_pet_space">
+                    <label class="form-check-label" for="has_pet_space" data-i18n="hasPetSpace">هل لديك مكان مناسب لرعاية الحيوان في المسكن؟</label>
+                </div>
+            </fieldset>
+            <fieldset class="mb-3 p-2 border rounded">
+                <legend class="fw-bold main-text" data-i18n="familyAndPets">العائلة والحيوانات الأخرى</legend>
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" value="1" id="has_children" name="has_children">
+                    <label class="form-check-label" for="has_children" data-i18n="hasChildren">هل لديك أطفال في المنزل؟</label>
+                </div>
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" value="1" id="has_allergy" name="has_allergy">
+                    <label class="form-check-label" for="has_allergy" data-i18n="hasAllergy">هل يوجد أشخاص لديهم حساسية من الحيوانات داخل المنزل؟</label>
+                </div>
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" value="1" id="has_other_animals" name="has_other_animals">
+                    <label class="form-check-label" for="has_other_animals" data-i18n="hasOtherAnimals">هل توجد حيوانات أخرى داخل المنزل؟</label>
+                </div>
+                <div class="mb-2" id="other_animals_details_group" style="display:none;">
+                    <label for="other_animals_details" class="form-label" data-i18n="otherAnimalsDetails">في حال نعم، ما هو نوع الحيوان؟ وهل تم تعقيمه؟</label>
+                    <textarea class="form-control" id="other_animals_details" name="other_animals_details" rows="3"></textarea>
+                </div>
+            </fieldset>
+            <fieldset class="mb-3 p-2 border rounded">
+                <legend class="fw-bold main-text" data-i18n="careAndCommitment">الالتزامات والمسؤوليات</legend>
+                <div class="mb-2">
+                    <label for="main_caretaker" class="form-label" data-i18n="mainCaretaker">من سيكون المسؤول الأساسي عن رعاية الحيوان؟</label>
+                    <input type="text" class="form-control" id="main_caretaker" name="main_caretaker">
+                </div>
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" value="1" id="pet_outside" name="pet_outside">
+                    <label class="form-check-label" for="pet_outside" data-i18n="petOutside">هل سيسمح للحيوان التجول خارج المنزل؟</label>
+                </div>
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" value="1" id="has_alternate_caretaker" name="has_alternate_caretaker">
+                    <label class="form-check-label" for="has_alternate_caretaker" data-i18n="hasAlternateCaretaker">هل يوجد شخص آخر قادر على رعاية الحيوان في حال عدم تواجدك أو سفرك؟</label>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-2">
+                        <label for="financial_ability" class="form-label" data-i18n="financialAbility">هل لديك المقدرة المالية لتوفير احتياجات الحيوان (طعام،الرعاية الصحية ومستلزمات أخرى)؟</label>
+                        <select class="form-select" id="financial_ability" name="financial_ability">
+                            <option value="" data-i18n="select">اختر...</option>
+                            <option value="yes" data-i18n="yes">نعم</option>
+                            <option value="No" data-i18n="No">لا</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <label for="animal_care_knowledge" class="form-label" data-i18n="careKnowledge">ما مدى معرفتك الأساسية فيما يتعلق برعاية الحيوانات (التغذية،السلوك، الرعاية الصحية وأخرى)</label>
+                        <select class="form-select" id="animal_care_knowledge" name="animal_care_knowledge">
+                            <option value="" data-i18n="select">اختر...</option>
+                            <option value="Excellent" data-i18n="excellent">ممتاز</option>
+                            <option value="Average" data-i18n="average">متوسط</option>
+                            <option value="Weak" data-i18n="weak">ضعيف</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" value="1" id="vet_commitment" name="vet_commitment">
+                    <label class="form-check-label" for="vet_commitment" data-i18n="vetCommitment">هل ستلتزم بتوفير الرعاية البيطرية للازمة بما في ذالك التطعيمات، الوقاية من الطفييات والفحوصات الدورية؟</label>
+                </div>
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" value="1" id="long_term_commitment" name="long_term_commitment">
+                    <label class="form-check-label" for="long_term_commitment" data-i18n="longTermCommitment">هل تقر بقدرتك على الاستمرار بالتبني وعدم التخلي عن الحيوان؟</label>
+                </div>
+                
+                <!-- زر فتح الاتفاقية -->
+<button id="openDeclaration" 
+        style="background:#28a745;color:#fff;padding:8px 16px;
+               border:none;border-radius:6px;cursor:pointer;font-size:14px;">
+    التعهد
+</button>
+
+<script>
+document.getElementById("openDeclaration").addEventListener("click", function() {
+    window.open(
+        "Declarations.html",   // مسار الملف
+        "DeclarationsWindow",                    // اسم النافذة
+        "width=900,height=700,scrollbars=yes,resizable=yes,top=50,left=50"
+    );
+});
+</script>
+               <!-- زر فتح الاتفاقية -->
+                
+                
+                
+                
+                
+                
+                <div class="mb-2">
+                    <label for="signature" class="form-label" data-i18n="signature">توقيع المتقدم (استخدم اللوحة)</label>
+                    <div id="savedSignatureArea" class="mb-1 p-1 border rounded" style="display:none; border-color: var(--border-color) !important;"> <!-- Reduced -->
+                         <p class="form-label mb-0" style="color:var(--primary-color);" data-i18n="savedSignature">التوقيع المحفوظ:</p> <!-- Reduced mb-1 to mb-0 -->
+                        <img id="savedSignatureImage" src="" alt="Saved Signature" style="max-width: 100%; height: auto; border: 1px solid var(--border-color);"/>
+                    </div>
+                    <div class="signature-pad-container">
+                        <canvas id="signatureCanvas" width="400" height="150" class="border"></canvas>
+                    </div>
+                    <button type="button" class="btn-icon btn-icon-danger mt-1" id="clearSignature" data-i18n="clearSignature" title="مسح التوقيع"> <!-- Reduced mt-2 to mt-1 -->
+                        <i class="bi bi-eraser"></i>
+                    </button>
+                    <input type="hidden" id="signature_path" name="signature">
+                </div>
+            </fieldset>
+            <button type="submit" class="btn-icon btn-icon-primary me-2" id="submitButton" data-i18n="submitButton" title="إرسال الطلب"> <!-- Added me-2 for spacing -->
+                <i class="bi bi-send"></i>
+            </button>
+            <button type="button" class="btn-icon btn-icon-secondary d-none me-2" id="updateButton" data-i18n="updateButton" title="تحديث الطلب">
+                <i class="bi bi-pencil"></i>
+            </button>
+            <button type="button" class="btn-icon btn-icon-danger d-none me-2" id="deleteButton" data-i18n="deleteButton" title="حذف الطلب">
+                <i class="bi bi-trash"></i>
+            </button>
+            <button type="button" class="btn-icon btn-icon-success d-none me-2" id="approveButton" data-i18n="approveButton" title="الموافقة على الطلب">
+                <i class="bi bi-check-circle"></i>
+            </button>
+            <!-- منطقة حالة الاعتماد - معدلة -->
+            <div id="approval-status" class="approval-status status-pending d-none">
+                <strong data-i18n="approvalStatus">حالة الاعتماد:</strong> <span id="status-text">معلق</span>
+                <span id="approver-display" style="display: none;"></span>
+            </div>
+            <!-- نقل #approver-info أسفل حالة الاعتماد -->
+            <div id="approver-info">
+                <p><strong>المعتمد: <span id="approver-name"></span></strong></p>
+            </div>
+        </form>
+        <!-- منطقة عرض زر التقرير بعد الإرسال أو التحميل الناجح -->
+        <div id="report-section">
+            <h5 class="main-text" data-i18n="successMessage">الطلب تم إرساله/التعديل بنجاح!</h5>
+            <p data-i18n="appIdLabel">رقم الطلب: <span id="current-app-id"></span></p>
+            <button id="open-report-btn" class="btn-icon btn-icon-secondary" data-i18n="openReport" title="فتح التقرير">
+                <i class="bi bi-file-earmark-text"></i>
+            </button>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', async function() {
+            const API_URL = '/health_vet/api/add_adoption_applications.php';
+            const USER_DATA_URL = '/health_vet/api/user_data.php'; // API لبيانات المستخدم
+            const UPLOAD_URL = '/health_vet/api/upload_adoption_signature.php';
+            const form = document.getElementById('adoptionForm');
+            const searchForm = document.getElementById('searchForm');
+            const searchResultsDiv = document.getElementById('searchResults');
+            const alertMessage = document.getElementById('alert-message');
+            const langToggleBtn = document.getElementById('lang-toggle');
+            const signatureCanvas = document.getElementById('signatureCanvas');
+            const signaturePathInput = document.getElementById('signature_path');
+            const savedSignatureArea = document.getElementById('savedSignatureArea');
+            const savedSignatureImage = document.getElementById('savedSignatureImage');
+            const signaturePad = new SignaturePad(signatureCanvas, { backgroundColor: 'rgb(255, 255, 255)' });
+            const hasOtherAnimals = document.getElementById('has_other_animals');
+            const otherAnimalsDetailsGroup = document.getElementById('other_animals_details_group');
+            const reportSection = document.getElementById('report-section');
+            const currentAppIdSpan = document.getElementById('current-app-id');
+            const openReportBtn = document.getElementById('open-report-btn');
+            const approveButton = document.getElementById('approveButton');
+            const updateButton = document.getElementById('updateButton');
+            const approverInfo = document.getElementById('approver-info');
+            const approverNameSpan = document.getElementById('approver-name');
+            const approvalStatus = document.getElementById('approval-status');
+            const statusText = document.getElementById('status-text');
+            const approverDisplay = document.getElementById('approver-display');
+            let currentLang = langToggleBtn.getAttribute('data-current-lang');
+            let currentAppId = null;
+            let isDrawingNewSignature = false;
+            let isAdmin = false;
+            let currentUser = null; // لتخزين بيانات المستخدم (الاسم، EmpID، isAdmin)
+            let userMap = {}; // خريطة للأسماء بناءً على ID للـ approved_by
+            // =========================================================
+            // 0. تحميل بيانات المستخدم من الجلسة (للاسم والصلاحيات) + تحميل خريطة المستخدمين
+            // =========================================================
+            async function loadUserData() {
+                try {
+                    const response = await axios.get(USER_DATA_URL);
+                    if (response.data.success && response.data.user_data) {
+                        currentUser = {
+                            name: response.data.user_data.EmpName || 'غير معروف',
+                            id: response.data.user_data.EmpID,
+                            isAdmin: response.data.permissions.isAdmin || false
+                        };
+                        isAdmin = currentUser.isAdmin;
+                        // تحميل خريطة الأسماء للـ approved_by (افتراضيًا من API إضافي أو من user_data)
+                        // افتراض: إضافة user_list في response.data إذا كان admin
+                        if (isAdmin && response.data.user_list) {
+                            response.data.user_list.forEach(user => {
+                                userMap[user.EmpID] = user.EmpName;
+                            });
+                        }
+                        // إخفاء زر الموافقة إذا لم يكن أدمن
+                        if (!isAdmin) {
+                            approveButton.style.display = 'none';
+                        } else {
+                            // عرض اسم المعتمد (الأدمن) في منطقة المعلومات
+                            approverNameSpan.textContent = currentUser.name;
+                            approverInfo.style.display = 'block';
+                        }
+                        console.log('User loaded:', currentUser); // Log للتشخيص
+                    } else {
+                        // إعادة توجيه إلى تسجيل الدخول إذا لم يكن مصرحًا
+                        window.location.href = '/health_vet/login.php';
+                    }
+                } catch (error) {
+                    console.error('Error loading user data:', error);
+                    showAlert('خطأ في تحميل بيانات المستخدم. يرجى تسجيل الدخول مرة أخرى.', 'danger');
+                    // تعليق إعادة التوجيه لتجنب الإغلاق الفوري
+                    // window.location.href = '/health_vet/login.php';
+                }
+            }
+            // استدعاء تحميل بيانات المستخدم أولاً
+            await loadUserData();
+            // =========================================================
+            // 1. منطق تبديل اللغات (Globalization) - Rely only on JSON files
+            // =========================================================
+            async function loadTranslations(lang) {
+                let translations = {}; // Empty object - rely only on JSON
+                try {
+                    const response = await fetch(`/health_vet/languages/${lang}_add_adoption_applications.json`);
+                    if (response.ok) {
+                        translations = await response.json(); // Load only from JSON
+                    } else {
+                        console.warn('Translation file not found for ' + lang + ', using empty translations.');
+                        translations = {}; // Fallback to empty if file missing
+                    }
+                } catch (error) {
+                    console.error('Error loading translations:', error);
+                    translations = {}; // Empty on error
+                }
+                // تطبيق الترجمات
+                document.querySelectorAll('[data-i18n]').forEach(element => {
+                    const key = element.getAttribute('data-i18n');
+                    if (translations[key]) {
+                        element.textContent = translations[key];
+                    }
+                });
+                document.querySelectorAll('[data-i18n-placeholder]').forEach(element => {
+                    const key = element.getAttribute('data-i18n-placeholder');
+                    if (translations[key]) {
+                        element.placeholder = translations[key];
+                    }
+                });
+                document.querySelectorAll('option[data-i18n]').forEach(option => {
+                    const key = option.getAttribute('data-i18n');
+                    if (translations[key]) {
+                        option.textContent = translations[key];
+                    }
+                });
+                // ترجمة العناصر الإضافية
+                if (translations['openReport']) openReportBtn.title = translations['openReport']; // استخدام title بدلاً من text للأيقونات
+                if (translations['successMessage']) reportSection.querySelector('h5').textContent = translations['successMessage'];
+                if (translations['appIdLabel']) {
+                    const p = reportSection.querySelector('p');
+                    if (p) p.innerHTML = translations['appIdLabel'] + '<span id="current-app-id"></span>';
+                }
+                if (translations['approveButton']) approveButton.title = translations['approveButton'];
+                if (translations['approvalStatus']) approvalStatus.querySelector('strong').textContent = translations['approvalStatus'];
+                if (translations['statusPending']) statusText.textContent = translations['statusPending'];
+                if (translations['statusApproved']) statusText.textContent = translations['statusApproved'];
+                if (translations['statusRejected']) statusText.textContent = translations['statusRejected'];
+                // تحديث اتجاه النص - Ensure fields align properly
+                document.body.className = (lang === 'ar' ? 'rtl' : 'ltr');
+                // Force field alignment
+                const fields = document.querySelectorAll('.form-label, .form-control, .form-select, .form-check-label');
+                fields.forEach(field => {
+                    if (lang === 'ar') {
+                        field.style.direction = 'rtl';
+                        field.style.textAlign = 'right';
+                    } else {
+                        field.style.direction = 'ltr';
+                        field.style.textAlign = 'left';
+                    }
+                });
+            }
+            langToggleBtn.addEventListener('click', () => {
+                currentLang = currentLang === 'ar' ? 'en' : 'ar';
+                langToggleBtn.setAttribute('data-current-lang', currentLang);
+                loadTranslations(currentLang);
+            });
+            loadTranslations(currentLang);
+            // =========================================================
+            // 2. دالة عرض التنبيهات
+            // =========================================================
+            function showAlert(message, type = 'success') {
+                alertMessage.textContent = message;
+                alertMessage.className = `alert alert-${type}`;
+                alertMessage.classList.remove('d-none');
+                setTimeout(() => alertMessage.classList.add('d-none'), 7000);
+            }
+            // =========================================================
+            // 3. منطق التوقيع والتحميل
+            // =========================================================
+            document.getElementById('clearSignature').addEventListener('click', () => {
+                signaturePad.clear();
+                signaturePathInput.value = '';
+                savedSignatureArea.style.display = 'none';
+                isDrawingNewSignature = false;
+            });
+            signaturePad.addEventListener('beginStroke', () => {
+                isDrawingNewSignature = true;
+            });
+            async function uploadSignature() {
+                if (signaturePad.isEmpty()) return null;
+                const dataURL = signaturePad.toDataURL('image/png');
+                const blob = await fetch(dataURL).then(res => res.blob());
+                const formData = new FormData();
+                formData.append('signature', blob, `signature_${Date.now()}.png`);
+                try {
+                    const uploadResponse = await axios.post(UPLOAD_URL, formData, {
+                        headers: { 'Content-Type': 'multipart/form-data' }
+                    });
+                    if (uploadResponse.data.success) {
+                        return uploadResponse.data.path;
+                    } else {
+                        throw new Error(uploadResponse.data.message || 'Signature upload failed.');
+                    }
+                } catch (error) {
+                    console.error('Upload Error:', error);
+                    showAlert(`خطأ في رفع التوقيع: ${error.message}`, 'danger');
+                    return null;
+                }
+            }
+            // =========================================================
+            // 4. منطق إظهار/إخفاء تفاصيل الحيوانات الأخرى
+            // =========================================================
+            hasOtherAnimals.addEventListener('change', function() {
+                if (this.checked) {
+                    otherAnimalsDetailsGroup.style.display = 'block';
+                } else {
+                    otherAnimalsDetailsGroup.style.display = 'none';
+                    document.getElementById('other_animals_details').value = '';
+                }
+            });
+            // =========================================================
+            // 5. معالجة إرسال النموذج (Create & Update) - استخدام POST للكل
+            // =========================================================
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const actionType = document.getElementById('action_type').value;
+                let finalSignaturePath = signaturePathInput.value;
+                // 1. معالجة التوقيع: إذا كانت العملية إنشاء أو تم الرسم من جديد
+                if (actionType === 'create' || isDrawingNewSignature) {
+                     finalSignaturePath = await uploadSignature();
+                     isDrawingNewSignature = false;
+                }
+                if (!finalSignaturePath) {
+                    showAlert('التوقيع مطلوب أو فشل في الرفع.', 'danger');
+                    return;
+                }
+                signaturePathInput.value = finalSignaturePath;
+                const formData = new FormData(form);
+                const data = {};
+                // 2. بناء كائن JSON
+                formData.forEach((value, key) => {
+                    const element = form.elements[key];
+                    if (element && element.type === 'checkbox') {
+                         data[key] = element.checked ? 1 : 0;
+                    } else if (key === 'age') {
+                        data[key] = value ? parseInt(value) : null;
+                    } else {
+                        data[key] = value === '' ? null : value;
+                    }
+                });
+                data['signature'] = finalSignaturePath; // تغيير إلى 'signature' للتوافق مع PHP
+                data['action'] = actionType;
+                // 3. إرسال الطلب عبر POST دائمًا (مع _method للـ update)
+                try {
+                    const postData = { ...data };
+                    if (actionType === 'update') {
+                        postData['_method'] = 'PUT'; // Override للـ PHP
+                    }
+                    console.log('Sending POST for', actionType, postData); // Log للتشخيص
+                    const response = await axios.post(API_URL, postData); // POST للكل
+                    if (response.data.success) {
+                        showAlert(response.data.message || 'تم إكمال العملية بنجاح!', 'success');
+                        currentAppId = response.data.id || document.getElementById('app_id').value;
+                        currentAppIdSpan.textContent = currentAppId;
+                        reportSection.style.display = 'block'; // إظهار قسم التقرير مع الزر
+                        resetForm();
+                    } else {
+                        showAlert(response.data.message || 'فشل في العملية.', 'danger');
+                    }
+                } catch (error) {
+                    console.error('AJAX Error Details:', error); // Log كامل للتشخيص
+                    const errorMessage = error.response ? (error.response.data.message || error.response.statusText) : error.message;
+                    showAlert(`خطأ: ${errorMessage}`, 'danger');
+                }
+            });
+            // =========================================================
+            // ربط زر التعديل لإطلاق submit
+            // =========================================================
+            updateButton.addEventListener('click', () => {
+                document.getElementById('action_type').value = 'update';
+                form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+                console.log('Update button clicked, dispatching submit'); // Log للتشخيص
+            });
+            // =========================================================
+            // 6. منطق البحث (Search) - مع تحسين فلترة رقم الهاتف (إزالة كل الرموز غير الرقمية والبحث الجزئي)
+            // =========================================================
+            searchForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                let searchTerm = document.getElementById('searchTerm').value.trim();
+                if (!searchTerm) return;
+                // تحسين تنظيف رقم الهاتف: إزالة المسافات والرموز غير الرقمية، والبحث بالأرقام فقط إذا كان رقم هاتف
+                const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/; // تحقق إذا كان رقم هاتف
+                if (phoneRegex.test(searchTerm.replace(/[^\d]/g, ''))) {
+                    searchTerm = searchTerm.replace(/[^\d]/g, ''); // تنظيف كامل للأرقام
+                }
+                try {
+                    const response = await axios.get(API_URL, {
+                        params: { action: 'search', q: searchTerm }
+                    });
+                    if (response.data.success && response.data.data.length > 0) {
+                        displaySearchResults(response.data.data);
+                        showAlert(`تم العثور على ${response.data.count} نتيجة.`, 'info');
+                    } else {
+                        searchResultsDiv.innerHTML = `<p class="alert alert-warning">${response.data.message || 'لا توجد نتائج.'}</p>`;
+                    }
+                } catch (error) {
+                    console.error('Search Error Details:', error);
+                    showAlert('خطأ أثناء البحث.', 'danger');
+                }
+            });
+            function displaySearchResults(results) {
+                let html = '<ul class="list-group">';
+                results.forEach(app => {
+                    html += `
+                        <li class="list-group-item d-flex justify-content-between align-items-center" style="color:#000; background-color: #f8f9fa;">
+                            ID: ${app.id} | ${app.full_name} (${app.phone || app.emirates_id || 'غير متوفر'})
+                            <button class="btn btn-sm btn-secondary load-app" data-id="${app.id}">تحميل للتعديل</button>
+                        </li>
+                    `;
+                });
+                html += '</ul>';
+                searchResultsDiv.innerHTML = html;
+                document.querySelectorAll('.load-app').forEach(button => {
+                    button.addEventListener('click', (e) => loadApplication(e.target.getAttribute('data-id')));
+                });
+            }
+            // =========================================================
+            // 7. تحميل التطبيق للتعديل/الحذف/الموافقة (مع عرض التوقيع وحالة الاعتماد المحدثة)
+            // =========================================================
+            async function loadApplication(id) {
+                try {
+                     const response = await axios.get(API_URL, {
+                        params: { action: 'get_details', id: id }
+                    });
+                    if (response.data.success && response.data.data) {
+                        const appData = response.data.data;
+                        // تعبئة النموذج
+                        for (const key in appData) {
+                            const element = document.getElementById(key);
+                            if (element) {
+                                if (element.type === 'checkbox') {
+                                    element.checked = appData[key] == 1;
+                                } else {
+                                    element.value = appData[key] || '';
+                                }
+                            }
+                        }
+                        // تحديث حالة النموذج إلى تعديل
+                        document.getElementById('app_id').value = appData.id;
+                        document.getElementById('action_type').value = 'update';
+                        document.getElementById('submitButton').classList.add('d-none');
+                        document.getElementById('updateButton').classList.remove('d-none');
+                        document.getElementById('deleteButton').classList.remove('d-none');
+                        // إظهار زر الموافقة فقط إذا كان Admin وغير معتمد
+                        if (isAdmin && !appData.approved_by) {
+                            approveButton.classList.remove('d-none');
+                        } else if (appData.approved_by) {
+                            approveButton.classList.add('d-none');
+                        }
+                        showAlert(`تم تحميل طلب ID ${id} للتعديل.`, 'info');
+                        // 🟢 عرض التوقيع المحفوظ
+                        signaturePad.clear();
+                        signaturePathInput.value = appData.signature;
+                        if (appData.signature) {
+                            savedSignatureImage.src = appData.signature; // اسم الحقل في القاعدة هو 'signature'
+                            savedSignatureArea.style.display = 'block';
+                        } else {
+                            savedSignatureArea.style.display = 'none';
+                            savedSignatureImage.src = '';
+                        }
+                        // إظهار/إخفاء تفاصيل الحيوانات الأخرى بناءً على البيانات
+                        if (appData.has_other_animals == 1) {
+                            otherAnimalsDetailsGroup.style.display = 'block';
+                        } else {
+                            otherAnimalsDetailsGroup.style.display = 'none';
+                        }
+                        // إظهار حالة الاعتماد المحدثة بناءً على approved_by
+                        updateApprovalStatus(appData.approved_by);
+                        // إظهار قسم التقرير
+                        currentAppId = id;
+                        currentAppIdSpan.textContent = currentAppId;
+                        reportSection.style.display = 'block';
+                    } else {
+                        showAlert('تفاصيل الطلب غير موجودة.', 'danger');
+                    }
+                } catch (error) {
+                    console.error('Load Error Details:', error);
+                    showAlert('خطأ في تحميل تفاصيل الطلب.', 'danger');
+                }
+            }
+            // دالة تحديث حالة الاعتماد - معدلة للألوان والنصوص والاسم
+            function updateApprovalStatus(approvedById) {
+                approvalStatus.classList.remove('d-none');
+                if (approvedById) {
+                    // حالة معتمد: أخضر، "معتمد بواسطة [الاسم]"
+                    approvalStatus.classList.remove('status-pending', 'status-rejected');
+                    approvalStatus.classList.add('status-approved');
+                    const approverName = userMap[approvedById] || 'غير معروف'; // جلب الاسم من الخريطة
+                    statusText.textContent = 'معتمد بواسطة'; // Default, will be overridden by translation
+                    approverDisplay.style.display = 'inline';
+                    approverDisplay.innerHTML = ` ${approverName}`;
+                    approverNameSpan.textContent = approverName;
+                    approverInfo.style.display = 'block';
+                } else {
+                    // حالة غير معتمد: أحمر، "غير معتمد"
+                    approvalStatus.classList.remove('status-approved', 'status-pending');
+                    approvalStatus.classList.add('status-rejected');
+                    statusText.textContent = 'غير معتمد'; // Default
+                    approverDisplay.style.display = 'none';
+                    approverInfo.style.display = 'none';
+                }
+            }
+            // =========================================================
+            // 8. منطق الحذف (Delete) - POST مع _method
+            // =========================================================
+            document.getElementById('deleteButton').addEventListener('click', async () => {
+                const id = document.getElementById('app_id').value;
+                if (!id || !confirm(`هل أنت متأكد من حذف طلب ID ${id}؟`)) return;
+                try {
+                    const postData = { action: 'delete', id: id, _method: 'DELETE' }; // POST مع override
+                    console.log('Sending DELETE POST:', postData); // Log للتشخيص
+                    const response = await axios.post(API_URL, postData);
+                    if (response.data.success) {
+                        showAlert(response.data.message || 'تم حذف الطلب.', 'success');
+                        resetForm();
+                    } else {
+                        showAlert(response.data.message || 'فشل في الحذف.', 'danger');
+                    }
+                } catch (error) {
+                    console.error('Delete Error Details:', error); // Log كامل
+                    const errorMessage = error.response ? (error.response.data.message || error.response.statusText) : error.message;
+                    showAlert('خطأ أثناء الحذف: ' + errorMessage, 'danger');
+                }
+            });
+            // =========================================================
+            // 9. منطق الموافقة (Approve) - POST مع عرض الاسم في التأكيد
+            // =========================================================
+            approveButton.addEventListener('click', async () => {
+                const id = currentAppId;
+                if (!id) {
+                    showAlert('لا يوجد طلب للموافقة.', 'warning');
+                    return;
+                }
+                // التحقق من صلاحية الأدمن في الواجهة الأمامية
+                if (!currentUser || !currentUser.isAdmin) {
+                    showAlert('غير مصرح لك بالموافقة على الطلبات.', 'danger');
+                    return;
+                }
+                // عرض اسم المعتمد (الأدمن) في رسالة التأكيد
+                const confirmMsg = `هل أنت متأكد من الموافقة على طلب ID ${id}؟\nسيتم تسجيل الموافقة بواسطة: ${currentUser.name} (رقم: ${currentUser.id})`;
+                if (!confirm(confirmMsg)) return;
+                try {
+                    const postData = { action: 'approve', id: id }; // POST بسيط
+                    console.log('Sending APPROVE POST:', postData); // Log للتشخيص
+                    const response = await axios.post(API_URL, postData);
+                    if (response.data.success) {
+                        showAlert(response.data.message || 'تم الموافقة بنجاح بواسطة ' + currentUser.name + '!', 'success');
+                        // إخفاء زر الموافقة بعد النجاح
+                        approveButton.classList.add('d-none');
+                        // تحديث عرض حالة الاعتماد
+                        updateApprovalStatus(currentUser.id);
+                        approverNameSpan.textContent = currentUser.name;
+                    } else {
+                        showAlert(response.data.message || 'فشل في الموافقة.', 'danger');
+                    }
+                } catch (error) {
+                    console.error('Approve Error Details:', error);
+                    const errorMessage = error.response ? (error.response.data.message || error.response.statusText) : error.message;
+                    showAlert('خطأ في الموافقة: ' + errorMessage, 'danger');
+                }
+            });
+            // =========================================================
+            // 10. فتح التقرير عبر الزر - إضافة تحقق لتجنب الإغلاق الفوري
+            // =========================================================
+            openReportBtn.addEventListener('click', () => {
+                if (currentAppId) {
+                    const reportUrl = `/health_vet/public/applications_report.html?id=${currentAppId}`;
+                    console.log('Opening report:', reportUrl); // Log للتشخيص
+                    const newWindow = window.open(reportUrl, '_blank', 'noopener,noreferrer');
+                    if (!newWindow || newWindow.closed || typeof newWindow.closed == 'undefined') {
+                        showAlert('تم حظر النوافذ الجديدة. يرجى السماح بالنوافذ المنبثقة.', 'warning');
+                    }
+                } else {
+                    showAlert('لا يوجد رقم طلب لفتح التقرير.', 'warning');
+                }
+            });
+            // =========================================================
+            // 11. إعادة تعيين النموذج
+            // =========================================================
+            function resetForm() {
+                form.reset();
+                signaturePad.clear();
+                savedSignatureArea.style.display = 'none';
+                savedSignatureImage.src = '';
+                document.getElementById('app_id').value = '';
+                document.getElementById('action_type').value = 'create';
+                document.getElementById('submitButton').classList.remove('d-none');
+                document.getElementById('updateButton').classList.add('d-none');
+                document.getElementById('deleteButton').classList.add('d-none');
+                approveButton.classList.add('d-none');
+                otherAnimalsDetailsGroup.style.display = 'none';
+                searchResultsDiv.innerHTML = '';
+                reportSection.style.display = 'none';
+                approvalStatus.classList.add('d-none');
+                currentAppId = null;
+                isDrawingNewSignature = false;
+            }
+            // =========================================================
+            // 12. التحميل التلقائي عند وجود معرف في URL (دعم التحميل المباشر مثل add_applications.html?id=4)
+            // =========================================================
+            function checkUrlForId() {
+                const urlParams = new URLSearchParams(window.location.search);
+                const urlId = urlParams.get('id');
+                if (urlId) {
+                    console.log('Auto-loading application ID from URL:', urlId);
+                    loadApplication(urlId);
+                }
+            }
+            // استدعاء التحميل التلقائي بعد تحميل الترجمات
+            checkUrlForId();
+        });
+    </script>
+</body>
+</html>

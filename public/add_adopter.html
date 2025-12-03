@@ -1,0 +1,1460 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-translate="page_title">تسجيل/عرض تبني حيوان</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+    <style>
+        :root {
+            --main-green: #198754;
+            --olive-tone: #6c757d;
+            --light-beige: #f8ffef;
+            --header-bg: #e9ecef;
+            --text-color: #343a40;
+            --font-size-base: 0.9rem;
+        }
+    
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: white;
+            color: var(--text-color);
+            font-size: var(--font-size-base);
+        }
+    
+        .card-container { max-width: 1000px; margin: 30px auto; padding: 0 10px; }
+    
+        .main-card {
+            border: 1px solid var(--main-green);
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+        .card-header-custom {
+            background-color: white;
+            border-bottom: 3px solid var(--main-green);
+            padding: 15px 20px 0 20px;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+        }
+        .top-controls {
+            background-color: var(--header-bg);
+            padding: 5px 15px;
+            margin: 0 -20px 10px -20px;
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+    
+        .section-title {
+            color: var(--main-green);
+            border-bottom: 2px dashed var(--light-beige);
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+        .form-label { font-weight: 600; color: var(--olive-tone); font-size: 0.85rem; margin-bottom: 5px; }
+        .form-control, .btn { font-size: 0.9rem; }
+    
+        [dir="rtl"] .form-control, [dir="rtl"] textarea { text-align: right; }
+        [dir="ltr"] .form-control, [dir="ltr"] textarea { text-align: left; }
+    
+        /* تحسينات التوقيع */
+        .signature-container {
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            background: #f8f9fa;
+            margin-bottom: 15px;
+        }
+    
+        .signature-canvas {
+            border: 2px dashed #6c757d;
+            background: #fff;
+            border-radius: 8px;
+            cursor: crosshair;
+            touch-action: none;
+            width: 100% !important;
+            height: 200px !important;
+            display: block;
+        }
+        .signature-instructions {
+            background: #e9ecef;
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            font-size: 0.85rem;
+            color: var(--olive-tone);
+            text-align: center;
+        }
+        .signature-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+        .file-preview {
+            max-width: 100%;
+            height: 100px;
+            border: 1px dashed var(--olive-tone);
+            margin-top: 10px;
+            background-color: var(--light-beige);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 5px;
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+        }
+        .file-preview img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        .file-preview small {
+            position: absolute;
+            color: var(--olive-tone);
+            padding: 10px;
+            text-align: center;
+        }
+        .search-result-card {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: #f8f9fa;
+        }
+        .animal-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        #animalSuggestions {
+            z-index: 1050;
+        }
+        /* QR Modal Styles */
+        .qr-modal {
+            display: none;
+            position: fixed;
+            z-index: 1050;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.8);
+            justify-content: center;
+            align-items: center;
+        }
+        .qr-modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 90%;
+            max-width: 400px;
+            border-radius: 10px;
+            text-align: center;
+            direction: rtl;
+        }
+        .qr-modal video {
+            width: 100%;
+            max-width: 300px;
+            height: auto;
+            border-radius: 5px;
+        }
+        .qr-camera-select {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ced4da;
+        }
+        .qr-modal button {
+            margin: 5px;
+            padding: 10px 20px;
+            background-color: var(--main-green);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .qr-result {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        /* Combo Box Styles */
+        .combo-container {
+            position: relative;
+        }
+        .combo-input {
+            width: 100%;
+        }
+        .combo-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #ced4da;
+            border-top: none;
+            border-radius: 0 0 0.375rem 0.375rem;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1050;
+            display: none;
+        }
+        .combo-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #f8f9fa;
+        }
+        .combo-item:hover {
+            background-color: #f8f9fa;
+        }
+        .combo-item:last-child {
+            border-bottom: none;
+        }
+        /* تحسينات الأزرار لتكون أيقونات شيك ومعبرة */
+        .btn-icon-only {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        .btn-icon-only:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .top-controls .btn {
+            border-radius: 20px;
+            padding: 8px 12px;
+            font-size: 0.85rem;
+            min-width: 45px;
+        }
+        .top-controls .btn i {
+            margin-right: 0;
+            width: 16px;
+        }
+        .d-flex .btn, .signature-controls .btn {
+            border-radius: 25px;
+            padding: 10px 15px;
+            font-weight: 500;
+        }
+        .btn-success { background: linear-gradient(135deg, var(--main-green), #20c997); border: none; }
+        .btn-success:hover { background: linear-gradient(135deg, #20c997, var(--main-green)); }
+        .btn-secondary { background: linear-gradient(135deg, #6c757d, #5a6268); border: none; }
+        .btn-secondary:hover { background: linear-gradient(135deg, #5a6268, #6c757d); }
+        .btn-dark { background: linear-gradient(135deg, #343a40, #212529); border: none; }
+        .btn-dark:hover { background: linear-gradient(135deg, #212529, #343a40); }
+        .btn-outline-danger { border-color: #dc3545; color: #dc3545; }
+        .btn-outline-danger:hover { background: #dc3545; color: white; }
+        .btn-outline-info { border-color: #17a2b8; color: #17a2b8; }
+        .btn-outline-info:hover { background: #17a2b8; color: white; }
+        .btn-warning { background: linear-gradient(135deg, #ffc107, #e0a800); border: none; color: #212529; }
+        .btn-warning:hover { background: linear-gradient(135deg, #e0a800, #ffc107); }
+        .btn-info { background: linear-gradient(135deg, #0dcaf0, #0d6efd); border: none; color: white; }
+        .btn-info:hover { background: linear-gradient(135deg, #0d6efd, #0dcaf0); }
+        .btn-danger { background: linear-gradient(135deg, #dc3545, #c82333); border: none; }
+        .btn-danger:hover { background: linear-gradient(135deg, #c82333, #dc3545); }
+        @media (max-width: 768px) {
+            .top-controls { flex-direction: column; align-items: stretch; }
+            .d-md-flex { flex-direction: column; }
+            .card-container { margin: 10px auto; padding: 0 5px; }
+            .card-body { padding: 10px; }
+            .card-header-custom { padding: 10px 15px 0 15px; }
+            .top-controls { margin: 0 -15px 10px -15px; }
+            #searchResults { padding: 0 5px; }
+            .search-result-card { padding: 10px; }
+        
+            /* تحسينات التوقيع للهواتف */
+            .signature-canvas {
+                height: 150px !important;
+            }
+            .signature-controls {
+                flex-direction: column;
+            }
+            .signature-controls .btn {
+                flex: 1;
+            }
+            .top-controls .btn { min-width: auto; }
+            /* ضمان عرض أفقي للأزرار السفلية على الهواتف */
+            .bottom-buttons {
+                flex-direction: row !important;
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+            .bottom-buttons .btn {
+                flex: 0 0 auto;
+                min-width: 45px;
+            }
+        }
+        @media (max-width: 480px) {
+            .signature-canvas {
+                height: 120px !important;
+            }
+            .bottom-buttons .btn {
+                width: 40px;
+                height: 40px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container card-container">
+        <div class="card main-card">
+        
+            <div class="card-header-custom">
+                 <div class="top-controls d-flex justify-content-end mb-3">
+                    <button class="btn btn-sm btn-dark btn-icon-only" onclick="toggleLanguage()" id="languageToggle" title="تبديل اللغة">
+                        <i class="fas fa-globe"></i>
+                    </button>
+                    <button class="btn btn-sm btn-secondary btn-icon-only" onclick="window.location.href='/health_vet/public/index.php';" title="الرئيسية">
+                        <i class="fas fa-house"></i>
+                    </button>
+                    <button class="btn btn-sm btn-success btn-icon-only" onclick="resetFormState(true)" id="addNewButton" title="إضافة سجل جديد">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+            
+                <div class="d-flex justify-content-center align-items-center mb-3">
+                    <h3 class="text-center m-0" style="color: var(--main-green);" data-translate="main_title">نظام إدارة عمليات التبني</h3>
+                </div>
+            </div>
+        
+            <div class="card-body">
+                <div class="mb-4 p-3 border rounded" style="background-color: var(--light-beige);">
+                    <p class="section-title text-center m-0" data-translate="search_section_title">عرض سجل تبني موجود</p>
+                    <div class="row g-3 align-items-end">
+                        <div class="col-lg-8">
+                            <label for="search_code" class="form-label" data-translate="search_animal_code">بحث برمز الحيوان أو رقم التبني</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="search_code" data-translate="search_code_placeholder" placeholder="">
+                                <button class="btn" style="background-color: var(--olive-tone); color: white;" type="button" onclick="searchAdoption()" data-translate="search_button" title="بحث">
+                                    <i class="fas fa-magnifying-glass"></i>
+                                </button>
+                                <button class="btn" style="background-color: var(--main-green); color: white;" type="button" onclick="openQRScannerForSearch()" title="مسح QR">
+                                    <i class="fas fa-qrcode"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 d-grid gap-2">
+                            <button class="btn btn-outline-secondary btn-icon-only" type="button" onclick="clearFilters()" aria-hidden="true">
+  <i class="fas fa-broom"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div id="searchResults" class="mt-3"></div>
+                </div>
+                <div class="p-3">
+                    <p class="section-title text-center" data-translate="registration_section_title">تسجيل تبني جديد</p>
+                    <form id="adoptionForm" enctype="multipart/form-data">
+                        <input type="hidden" id="adoption_id" name="adoption_id" value="">
+                    
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="animal_code" class="form-label" data-translate="animal_code_label">رمز الحيوان <span class="text-danger">*</span></label>
+                                    <div class="combo-container">
+                                        <div class="input-group">
+                                            <input type="text" class="form-control combo-input" id="animal_code" name="animal_code" required data-translate="animal_code_placeholder" placeholder="">
+                                            <button class="btn" style="background-color: var(--main-green); color: white;" type="button" onclick="openQRScanner()" title="مسح QR">
+                                                <i class="fas fa-qrcode"></i>
+                                            </button>
+                                        </div>
+                                        <div id="animalSuggestions" class="combo-dropdown"></div>
+                                    </div>
+                                    <div id="animalInfo" class="mt-2" style="display:none;"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="operation_type" class="form-label" data-translate="operation_type_label">نوع العملية <span class="text-danger">*</span></label>
+                                    <select class="form-control" id="operation_type" name="operation_type" required>
+                                        <option value="reserved" selected data-translate="reserved_option">reserved</option>
+                                        <option value="adopted" data-translate="adopted_option">adopted</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="adoption_date" class="form-label" data-translate="adoption_date_label">تاريخ التبني <span class="text-danger">*</span></label>
+                                    <input type="date" class="form-control" id="adoption_date" name="adoption_date" value="" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="receipt_number" class="form-label" data-translate="receipt_number_label">رقم الإيصال</label>
+                                    <input type="text" class="form-control" id="receipt_number" name="receipt_number" data-translate="receipt_number_placeholder" placeholder="">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="adopter_name" class="form-label" data-translate="adopter_name_label">اسم المتبني <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="adopter_name" name="adopter_name" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="adopter_national_id" class="form-label" data-translate="national_id_label">رقم الهوية الوطنية <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="adopter_national_id" name="adopter_national_id" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="adopter_phone" class="form-label" data-translate="phone_label">رقم الهاتف <span class="text-danger">*</span></label>
+                                    <input type="tel" class="form-control" id="adopter_phone" name="adopter_phone" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="adopter_email" class="form-label" data-translate="email_label">البريد الإلكتروني</label>
+                                    <input type="email" class="form-control" id="adopter_email" name="adopter_email">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="adopter_national_id_photo" class="form-label" data-translate="id_photo_label">صورة الهوية الوطنية</label>
+                                    <input type="file" class="form-control d-none" id="adopter_national_id_photo" name="adopter_national_id_photo" accept="image/*" capture="camera" onchange="previewFile('adopter_national_id_photo_preview', this.files)">
+                                
+                                    <div class="file-preview" id="adopter_national_id_photo_preview" onclick="document.getElementById('adopter_national_id_photo').click()">
+                                        <small class="text-muted" data-translate="id_photo_placeholder"><i class="fas fa-camera"></i> صورة الهوية (انقر للتحميل)</small>
+                                    </div>
+                                    <small class="text-muted d-block mt-1" id="current_id_photo_info" style="display:none;"></small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <!-- Empty col for balance -->
+                            </div>
+                        </div>
+                        <!-- قسم التوقيع المحسن -->
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="signature-container">
+                                    <label class="form-label mb-3" data-translate="signature_label">
+                                        <i class="fas fa-signature me-1"></i>التوقيع (اسحب بإصبعك أو استخدم القلم)
+                                    </label>
+                                    <div class="signature-instructions" data-translate="signature_instructions">
+                                        <i class="fas fa-hand-point-up me-1"></i>
+                                        استخدم إصبعك أو قلم الشاشة للرسم في المنطقة أدناه
+                                    </div>
+                                    <canvas id="signatureCanvas" class="signature-canvas"></canvas>
+                                    <div class="signature-controls">
+                                        <button type="button" class="btn btn-outline-danger btn-sm btn-icon-only" onclick="clearSignature()" title="مسح التوقيع">
+                                            <i class="fas fa-eraser"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-outline-info btn-sm btn-icon-only" onclick="showSignatureTips()" title="نصائح للتوقيع">
+                                            <i class="fas fa-lightbulb"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-outline-success btn-sm btn-icon-only" onclick="changePenColor('black')" title="أسود">
+                                            <i class="fas fa-pen-nib"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-outline-success btn-sm btn-icon-only" onclick="changePenColor('blue')" title="أزرق">
+                                            <i class="fas fa-pen-fancy"></i>
+                                        </button>
+                                    </div>
+                                    <input type="hidden" id="adopter_signature_base64" name="adopter_signature_base64">
+                                    <small class="text-muted d-block mt-1" id="current_signature_info" style="display:none;"></small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="description" class="form-label" data-translate="description_label">وصف التبني</label>
+                            <textarea class="form-control" id="description" name="description" rows="2"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="notes" class="form-label" data-translate="notes_label">ملاحظات</label>
+                            <textarea class="form-control" id="notes" name="notes" rows="2"></textarea>
+                        </div>
+                        <div class="d-flex flex-wrap justify-content-start gap-2 mt-4 bottom-buttons">
+                            <button type="submit" class="btn btn-lg btn-icon-only btn-success" id="submitButton" title="تسجيل التبني" data-permission="canAdd"><i class="fas fa-check-circle"></i></button>
+                            <button type="button" class="btn btn-lg btn-warning btn-icon-only text-white" onclick="enableEditing()" id="editButton" style="display:none;" title="تعديل السجل" data-permission="canEdit"><i class="fas fa-pen-to-square"></i></button>
+                            <button type="button" class="btn btn-lg btn-info btn-icon-only text-white" onclick="openReport(currentAdoptionId)" id="printReportButton" style="display:none;" title="طباعة التقرير"><i class="fas fa-print"></i></button>
+                            <button type="button" class="btn btn-lg btn-danger btn-icon-only" onclick="deleteAdoption()" id="deleteButton" style="display:none;" title="حذف السجل" data-permission="canDelete"><i class="fas fa-trash-can"></i></button>
+                            <button type="button" class="btn btn-lg btn-success btn-icon-only" onclick="resetFormState(true)" id="addNewAfterEditButton" style="display:none;" title="إضافة سجل جديد"><i class="fas fa-plus"></i></button>
+                            <!-- نقل زر التعهد هنا مع الأزرار -->
+                            <button type="button" class="btn btn-lg btn-success btn-icon-only" id="openDeclaration" title="التعهد">
+                                <i class="fas fa-file-contract"></i>
+                            </button>
+                        </div>
+                    </form>
+                    <div id="message" class="mt-3"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- QR Scanner Modal -->
+    <div id="qrModal" class="qr-modal">
+        <div class="qr-modal-content">
+            <h3 data-translate="qr_scan_title">مسح رمز QR</h3>
+            <select id="qrCameraSelect" class="qr-camera-select">
+<option value="environment">Rear Camera</option>
+<option value="user">Front Camera</option>
+            </select>
+            <video id="qrVideo" autoplay playsinline></video>
+            <div id="qrResult" class="qr-result" style="display:none;"></div>
+            <button id="qrCloseBtn" data-translate="close" class="btn btn-outline-secondary btn-icon-only" title="إغلاق"><i class="fas fa-times"></i></button>
+        </div>
+    </div>
+                         
+    <script src="session_check.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
+    <script>
+        // *** المتغيرات العالمية ***
+        let signaturePad;
+        const canvas = document.getElementById('signatureCanvas');
+        const apiUrl = '../api/add_adopter.php';
+        const animalsApiUrl = '/health_vet/api/get_animals.php'; // API لجلب الحيوانات
+        const userDataUrl = '/health_vet/api/user_data.php';
+        let currentAnimalId = null;
+        let currentAdoptionId = null;
+        let currentOperationType = null;
+        let language = 'ar';
+        let translations = {};
+        let userPermissions = { canAdd: false, canEdit: false, canDelete: false };
+        let allAnimals = []; // قائمة جميع الحيوانات من API
+        // QR Scanner Variables
+        let qrVideo = null;
+        let qrCanvas = null;
+        let qrContext = null;
+        let qrStream = null;
+        let qrScanning = false;
+        let qrTargetInput = null; // لتحديد الحقل المستهدف للـ QR
+     
+        // === وظيفة جديدة: تحميل سجل التبني من معلمة URL ===
+        function loadAdoptionFromURL() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const adoptionId = urlParams.get('id');
+         
+            if (adoptionId) {
+                console.log(`تم العثور على معلمة ID في الرابط: ${adoptionId}`);
+                loadAdoptionDetails(adoptionId);
+            } else {
+                console.log('لا توجد معلمة ID في الرابط');
+            }
+        }
+     
+        // === وظيفة جديدة: تحديث URL لإضافة أو إزالة معلمة ID ===
+        function updateURL(adoptionId = null) {
+            const url = new URL(window.location);
+         
+            if (adoptionId) {
+                url.searchParams.set('id', adoptionId);
+            } else {
+                url.searchParams.delete('id');
+            }
+         
+            window.history.replaceState({}, '', url);
+        }
+        // === 1. وظائف اللغة والترجمة ===
+        async function loadTranslations(lang) {
+            const translationPath = `/health_vet/languages/${lang}_add_adopter.json`;
+            console.log(`جاري تحميل الترجمة من: ${translationPath}`);
+        
+            try {
+                const response = await fetch(translationPath);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                translations = await response.json();
+                console.log(`تم تحميل ${lang} بنجاح`);
+                applyTranslations(lang);
+                localStorage.setItem('appLang', lang);
+            } catch (error) {
+                console.error(`فشل تحميل ${lang}:`, error);
+                if (lang === 'en') {
+                    console.log('Fallback إلى العربية بسبب فشل تحميل الإنجليزية');
+                    language = 'ar';
+                    await loadTranslations('ar');
+                    return;
+                }
+            
+                translations = {
+                    "page_title": "تسجيل/عرض تبني حيوان",
+                    "main_title": "نظام إدارة عمليات التبني",
+                    "search_section_title": "عرض سجل تبني موجود",
+                    "search_animal_code": "بحث برمز الحيوان أو رقم التبني",
+                    "search_code_placeholder": "أدخل الرمز أو الرقم",
+                    "search_button": "بحث",
+                    "clear_filters": "إلغاء الفلاتر",
+                    "registration_section_title": "تسجيل تبني جديد",
+                    "animal_code_label": "رمز الحيوان",
+                    "animal_code_placeholder": "اكتب أو اختر رمز الحيوان...",
+                    "operation_type_label": "نوع العملية",
+                    "reserved_option": "محجوز",
+                    "adopted_option": "مُتبنى",
+                    "adoption_date_label": "تاريخ التبني",
+                    "receipt_number_label": "رقم الإيصال",
+                    "receipt_number_placeholder": "أدخل رقم الإيصال (اختياري)",
+                    "adopter_name_label": "اسم المتبني",
+                    "national_id_label": "رقم الهوية الوطنية",
+                    "phone_label": "رقم الهاتف",
+                    "email_label": "البريد الإلكتروني",
+                    "id_photo_label": "صورة الهوية الوطنية",
+                    "id_photo_placeholder": "<i class='fas fa-camera'></i> صورة الهوية (انقر للتحميل)",
+                    "signature_label": "التوقيع (اسحب بإصبعك أو استخدم القلم)",
+                    "signature_instructions": "<i class='fas fa-hand-point-up me-1'></i> استخدم إصبعك أو قلم الشاشة للرسم في المنطقة أدناه",
+                    "description_label": "وصف التبني",
+                    "notes_label": "ملاحظات",
+                    "register_adoption_button": "تسجيل التبني",
+                    "edit_record_button": "تعديل السجل",
+                    "print_report_button": "طباعة التقرير",
+                    "delete_button": "حذف السجل",
+                    "animal_not_available": "الحيوان غير متاح للتبني.",
+                    "animal_not_found": "رمز الحيوان غير صحيح أو غير موجود.",
+                    "animal_available": "الحيوان متاح للتبني",
+                    "search_results": "نتائج البحث:",
+                    "records_found": "سجل(سجلات) تم العثور عليها",
+                    "view_button": "عرض التفاصيل",
+                    "view_id_photo": "عرض صورة الهوية الحالية",
+                    "view_signature": "عرض التوقيع الحالي",
+                    "loaded_record": "تم تحميل سجل التبني بنجاح.",
+                    "save_changes": "حفظ التعديلات",
+                    "saving": "جاري الحفظ...",
+                    "editing_mode": "وضع التعديل مُفعّل. لا تنسَ الضغط على زر الحفظ.",
+                    "confirm_delete": "هل أنت متأكد من حذف سجل التبني رقم",
+                    "delete_success": "تم حذف السجل بنجاح.",
+                    "delete_error": "حدث خطأ أثناء الحذف.",
+                    "no_record_to_delete": "لا يوجد سجل تبني محدد للحذف.",
+                    "connection_error": "خطأ في الاتصال. تحقق من الإنترنت أو الخادم.",
+                    "no_report_id": "لا يوجد رقم تبني لإنشاء التقرير.",
+                    "add_new_record": "إضافة سجل جديد",
+                    "animal_code_required": "رمز الحيوان مطلوب ويجب التحقق منه.",
+                    "qr_scan_title": "مسح رمز QR",
+                    "close": "إغلاق",
+                    "animal_type": "النوع",
+                    "breed_label": "السلالة",
+                    "gender_label": "الجنس",
+                    "color_label": "اللون",
+                    "adoption_number": "رقم التبني",
+                    "no_records_found": "لم يتم العثور على سجلات تطابق البحث.",
+                    "enter_search_term": "أدخل رمز الحيوان أو رقم التبني للبحث.",
+                    "signature_loaded": "تم تحميل التوقيع في المساحة أعلاه."
+                };
+                language = 'ar';
+                applyTranslations('ar');
+                console.log('تم استخدام الـ fallback العربي');
+            }
+        }
+     
+        function applyTranslations(lang) {
+            document.documentElement.lang = lang;
+            document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+        
+            document.querySelectorAll('.form-control, textarea').forEach(el => {
+                el.style.textAlign = lang === 'ar' ? 'right' : 'left';
+            });
+         
+            document.querySelectorAll('[data-translate]').forEach(element => {
+                const key = element.getAttribute('data-translate');
+                if (translations[key]) {
+                    if (element.tagName !== 'INPUT' && element.tagName !== 'TEXTAREA') {
+                        const iconHtml = element.querySelector('i') ? element.querySelector('i').outerHTML : '';
+                        element.innerHTML = iconHtml + (iconHtml && lang === 'ar' ? ' ' : '') + translations[key];
+                    } else if (element.hasAttribute('placeholder')) {
+                        const placeholderKey = key + '_placeholder';
+                        element.placeholder = translations[placeholderKey] || translations[key] || '';
+                    } else if (element.tagName === 'OPTION') {
+                        element.textContent = translations[key];
+                    }
+                }
+            });
+        
+            const placeholderMappings = {
+                'search_code': 'search_code_placeholder',
+                'animal_code': 'animal_code_placeholder',
+                'receipt_number': 'receipt_number_placeholder',
+                'signature_instructions': 'signature_instructions',
+                'id_photo_placeholder': 'id_photo_placeholder'
+            };
+            Object.entries(placeholderMappings).forEach(([id, key]) => {
+                const el = document.getElementById(id) || document.querySelector(`[data-translate="${id}"]`);
+                if (el && translations[key]) {
+                    if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+                        el.placeholder = translations[key];
+                    } else {
+                        el.innerHTML = translations[key];
+                    }
+                }
+            });
+        
+            document.getElementById('languageToggle').title = lang === 'ar' ? 'Switch to English' : 'تبديل إلى العربية';
+        
+            if (signaturePad) signaturePad.clear();
+        }
+     
+        function toggleLanguage() {
+            language = language === 'ar' ? 'en' : 'ar';
+            localStorage.setItem('appLang', language);
+            loadTranslations(language);
+        }
+        // === 2. وظائف التوقيع المحسنة ===
+        function initializeSignaturePad() {
+            const container = canvas.parentElement;
+            canvas.width = container.clientWidth - 40;
+            canvas.height = 200;
+        
+            signaturePad = new SignaturePad(canvas, {
+                backgroundColor: 'rgb(255, 255, 255)',
+                penColor: 'rgb(0, 0, 0)',
+                minWidth: 1.5,
+                maxWidth: 3,
+                throttle: 5,
+                minDistance: 1,
+                velocityFilterWeight: 0.7,
+                onBegin: () => {
+                    console.log('بدأ التوقيع');
+                },
+                onEnd: () => {
+                    console.log('انتهى التوقيع');
+                }
+            });
+         
+            function handleTouch(event) {
+                if (event.touches.length === 1) {
+                    event.preventDefault();
+                }
+            }
+            canvas.addEventListener('touchstart', handleTouch, { passive: false });
+            canvas.addEventListener('touchmove', handleTouch, { passive: false });
+         
+            canvas.addEventListener('pointerdown', (e) => {
+                if (e.pointerType === 'pen') {
+                    console.log('تم استخدام القلم');
+                }
+            });
+         
+            window.addEventListener('resize', () => {
+                const container = canvas.parentElement;
+                const originalData = signaturePad.toData();
+            
+                canvas.width = container.clientWidth - 40;
+                canvas.height = 200;
+            
+                signaturePad.clear();
+                if (originalData.length > 0) {
+                    signaturePad.fromData(originalData);
+                }
+            });
+        }
+     
+        function clearSignature() {
+            if (signaturePad) {
+                signaturePad.clear();
+                document.getElementById('adopter_signature_base64').value = '';
+                document.getElementById('current_signature_info').style.display = 'none';
+            }
+        }
+     
+        function showSignatureTips() {
+            alert('نصائح للتوقيع:\n\n• استخدم إصبعك للرسم على الشاشة\n• استخدم قلم الشاشة للدقة الأعلى\n• يمكنك المسح وإعادة المحاولة\n• تأكد من وضوح التوقيع قبل الحفظ');
+        }
+     
+        function changePenColor(color) {
+            if (signaturePad) {
+                signaturePad.penColor = color;
+                document.querySelectorAll('.signature-controls .btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                event.target.classList.add('active');
+            }
+        }
+     
+        function previewFile(previewId, files) {
+            const preview = document.getElementById(previewId);
+            preview.innerHTML = '';
+            if (files.length > 0) {
+                const file = files[0];
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    preview.appendChild(img);
+                };
+                reader.readAsDataURL(file);
+                document.getElementById('current_id_photo_info').style.display = 'none';
+            } else {
+                 preview.innerHTML = `<small class="text-muted" data-translate="id_photo_placeholder"><i class="fas fa-camera"></i> ${translations.id_photo_placeholder || 'صورة الهوية (انقر للتحميل)'}</small>`;
+            }
+        }
+        // === 3. وظائف الحيوان والتحقق (مع QR و Combo) ===
+        async function loadAllAnimals() {
+            try {
+                const response = await fetch(animalsApiUrl);
+                const result = await response.json();
+                if (result.success) {
+                    allAnimals = result.animals || [];
+                } else {
+                    allAnimals = [];
+                }
+            } catch (error) {
+                console.error('Error loading animals:', error);
+                allAnimals = [];
+            }
+        }
+     
+        function searchAnimalSuggestions(value) {
+            const suggestionsDiv = document.getElementById('animalSuggestions');
+            const filtered = allAnimals.filter(animal =>
+                animal.animal_code.toLowerCase().includes(value.toLowerCase()) ||
+                animal.animal_name.toLowerCase().includes(value.toLowerCase())
+            ).slice(0, 10);
+            if (filtered.length === 0) {
+                suggestionsDiv.style.display = 'none';
+                return;
+            }
+            suggestionsDiv.innerHTML = filtered.map(animal => `
+                <div class="combo-item" onclick="selectAnimal(${animal.id}, '${animal.animal_code}', '${animal.animal_name}')">
+                    ${animal.animal_code} - ${animal.animal_name} (${animal.animal_type})
+                </div>
+            `).join('');
+            suggestionsDiv.style.display = 'block';
+        }
+     
+        function selectAnimal(id, code, name) {
+            document.getElementById('animal_code').value = code;
+            document.getElementById('animalSuggestions').style.display = 'none';
+            currentAnimalId = id;
+            checkAnimalCode(code);
+        }
+     
+        async function checkAnimalCode(code) {
+            const trimmedCode = code.trim();
+            document.getElementById('animalInfo').style.display = 'none';
+            currentAnimalId = null;
+            if (!trimmedCode) return;
+            const formData = new FormData();
+            formData.append('action', 'search_by_code');
+            formData.append('code', trimmedCode);
+            try {
+                const response = await fetch(apiUrl, { method: 'POST', body: formData });
+                const result = await response.json();
+                const info = document.getElementById('animalInfo');
+                if (result.success && result.data.length > 0) {
+                    const animal = result.data[0];
+                    const isAvailable = await checkAvailability(trimmedCode, false);
+                
+                    currentAnimalId = animal.id;
+                    const photoUrl = animal.photo ? animal.photo : '/health_vet/public/default_animal.png';
+                
+                    info.innerHTML = `
+                        <div class="search-result-card">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <img src="/health_vet/${photoUrl}" alt="${animal.animal_name}" class="animal-image" onerror="this.src='/health_vet/public/default_animal.png'">
+                                </div>
+                                <div class="col-md-8">
+                                    <h6 class="mb-2">${animal.animal_name}</h6>
+                                    <p class="mb-1"><strong>${translations.animal_code_label || 'رمز الحيوان'}:</strong> ${animal.animal_code}</p>
+                                    <p class="mb-1"><strong>${translations.animal_type || 'النوع'}:</strong> ${animal.animal_type}</p>
+                                    <p class="mb-1"><strong>${translations.breed_label || 'السلالة'}:</strong> ${animal.breed || 'غير محدد'}</p>
+                                    <p class="mb-1"><strong>${translations.gender_label || 'الجنس'}:</strong> ${animal.gender}</p>
+                                    <p class="mb-1"><strong>${translations.color_label || 'اللون'}:</strong> ${animal.color || 'غير محدد'}</p>
+                                    <div class="alert ${isAvailable ? 'alert-success' : 'alert-danger'} py-1 px-2 mt-2 mb-0">
+                                        ${isAvailable ? (translations.animal_available || 'الحيوان متاح للتبني') : (translations.animal_not_available || 'الحيوان غير متاح للتبني.')}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    info.style.display = 'block';
+                
+                    if (!isAvailable) {
+                         currentAnimalId = null;
+                    }
+                
+                } else {
+                    info.innerHTML = `
+                         <div class="search-result-card">
+                             <div class="alert alert-warning py-1 px-2 mb-0">${translations.animal_not_found || 'رمز الحيوان غير صحيح أو غير موجود.'}</div>
+                         </div>
+                    `;
+                    info.style.display = 'block';
+                    currentAnimalId = null;
+                }
+            } catch (error) {
+                console.error('Error in animal code check:', error);
+            }
+        }
+    
+        async function checkAvailability(code, showAlert = false) {
+            const formData = new FormData();
+            formData.append('action', 'check_animal_available');
+            formData.append('animal_code', code);
+            try {
+                const response = await fetch(apiUrl, { method: 'POST', body: formData });
+                const result = await response.json();
+                if (!result.success) {
+                    if (showAlert) alert(result.message || (translations.animal_not_available || 'الحيوان غير متاح.'));
+                    return false;
+                }
+                return true;
+            } catch (error) {
+                console.error('Error checking availability:', error);
+                if (showAlert) alert(translations.connection_error || 'خطأ في التحقق من التوافر.');
+                return false;
+            }
+        }
+     
+        // === QR Scanner Functions ===
+        function openQRScanner(targetInputId = null) {
+            qrTargetInput = targetInputId ? document.getElementById(targetInputId) : document.getElementById('animal_code');
+            const modal = document.getElementById('qrModal');
+            modal.style.display = 'flex';
+            startQRScan();
+        }
+     
+        function openQRScannerForSearch() {
+            qrTargetInput = document.getElementById('search_code');
+            const modal = document.getElementById('qrModal');
+            modal.style.display = 'flex';
+            startQRScan();
+        }
+     
+        document.getElementById('qrCloseBtn').addEventListener('click', closeQRScanner);
+     
+        function closeQRScanner() {
+            const modal = document.getElementById('qrModal');
+            modal.style.display = 'none';
+            stopQRScan();
+            qrTargetInput = null;
+        }
+     
+        document.getElementById('qrCameraSelect').addEventListener('change', (e) => {
+            const facingMode = e.target.value;
+            startQRScan(facingMode);
+        });
+     
+        async function startQRScan(facingMode = 'environment') {
+            try {
+                stopQRScan();
+                qrVideo = document.getElementById('qrVideo');
+                qrCanvas = document.createElement('canvas');
+                qrContext = qrCanvas.getContext('2d');
+                const constraints = {
+                    video: { facingMode: { exact: facingMode } }
+                };
+                qrStream = await navigator.mediaDevices.getUserMedia(constraints);
+                qrVideo.srcObject = qrStream;
+                qrVideo.play();
+                qrScanning = true;
+                scanQR();
+            } catch (err) {
+                console.error('Error accessing camera:', err);
+                if (facingMode === 'environment') {
+                    startQRScan('user');
+                } else {
+                    alert('فشل في الوصول إلى الكاميرا. يرجى التحقق من الإذن.');
+                }
+            }
+        }
+     
+        function stopQRScan() {
+            if (qrStream) {
+                qrStream.getTracks().forEach(track => track.stop());
+                qrStream = null;
+            }
+            qrScanning = false;
+        }
+     
+        function scanQR() {
+            if (!qrScanning) return;
+            qrContext.drawImage(qrVideo, 0, 0, qrCanvas.width, qrCanvas.height);
+            const imageData = qrContext.getImageData(0, 0, qrCanvas.width, qrCanvas.height);
+            const code = jsQR(imageData.data, imageData.width, imageData.height);
+            if (code) {
+                const qrResult = document.getElementById('qrResult');
+                qrResult.textContent = `تم العثور على: ${code.data}`;
+                qrResult.style.display = 'block';
+                if (qrTargetInput) {
+                    qrTargetInput.value = code.data;
+                    if (qrTargetInput.id === 'search_code') {
+                        searchAdoption();
+                    } else if (qrTargetInput.id === 'animal_code') {
+                        checkAnimalCode(code.data);
+                    }
+                }
+                closeQRScanner();
+                return;
+            }
+            requestAnimationFrame(scanQR);
+        }
+        // === 4. وظائف البحث وعرض التبني ===
+        async function searchAdoption() {
+            const code = document.getElementById('search_code').value.trim();
+            if (!code) {
+                alert(translations.enter_search_term || 'أدخل رمز الحيوان أو رقم التبني للبحث.');
+                return;
+            }
+        
+            const formData = new FormData();
+            formData.append('action', 'search_adoption');
+            formData.append('term', code);
+        
+            try {
+                const response = await fetch(apiUrl, { method: 'POST', body: formData });
+                const result = await response.json();
+                const searchResultsDiv = document.getElementById('searchResults');
+                searchResultsDiv.innerHTML = '';
+                if (result.success && result.data.length > 0) {
+                     searchResultsDiv.innerHTML = `
+                         <div class="alert alert-primary py-1 px-2" style="font-size: 0.85rem;">
+                             <strong>${translations.search_results || 'نتائج البحث:'}</strong> ${result.data.length} ${translations.records_found || 'سجل(سجلات) تم العثور عليها'}.
+                         </div>
+                         <div class="row">
+                             ${result.data.map(adoption => `
+                                 <div class="col-md-6 mb-3">
+                                     <div class="search-result-card">
+                                         <h6 class="mb-2">${translations.adoption_number || 'رقم التبني'}: <strong>${adoption.adoption_id}</strong></h6>
+                                         <p class="mb-1"><strong>${translations.animal_code_label || 'رمز الحيوان'}:</strong> ${adoption.animal_code}</p>
+                                         <p class="mb-1"><strong>${translations.adopter_name_label || 'اسم المتبني'}:</strong> ${adoption.adopter_name}</p>
+                                         <p class="mb-1"><strong>${translations.adoption_date_label || 'تاريخ التبني'}:</strong> ${adoption.adoption_date}</p>
+                                         <div class="d-grid mt-3">
+                                             <button class="btn btn-sm btn-success btn-icon-only" onclick="loadAdoptionDetails(${adoption.adoption_id})" title="عرض التفاصيل">
+                                                 <i class="fas fa-eye"></i>
+                                             </button>
+                                         </div>
+                                     </div>
+                                 </div>
+                             `).join('')}
+                         </div>
+                    `;
+                } else {
+                    searchResultsDiv.innerHTML = `<div class="alert alert-warning py-1 px-2" style="font-size: 0.85rem;">${result.message || (translations.no_records_found || 'لم يتم العثور على سجلات تطابق البحث.')}</div>`;
+                }
+            } catch (error) {
+                 console.error('Error in adoption search:', error);
+                document.getElementById('searchResults').innerHTML = `<div class="alert alert-danger py-1 px-2">${translations.connection_error || 'حدث خطأ في الاتصال.'}</div>`;
+            }
+        }
+     
+        function clearFilters() {
+            document.getElementById('search_code').value = '';
+            document.getElementById('searchResults').innerHTML = '';
+        }
+     
+        async function loadAdoptionDetails(adoptionId) {
+            currentAdoptionId = adoptionId;
+            const formData = new FormData();
+            formData.append('action', 'get_adoption');
+            formData.append('adoption_id', adoptionId);
+        
+            try {
+                const response = await fetch(apiUrl, { method: 'POST', body: formData });
+                const result = await response.json();
+            
+                if (result.success) {
+                    const data = result.adoption;
+                
+                    // تعبئة البيانات
+                    document.getElementById('adoption_id').value = data.adoption_id;
+                    document.getElementById('animal_code').value = data.animal_code;
+                    document.getElementById('operation_type').value = data.Operation_type || 'reserved';
+                    document.getElementById('adoption_date').value = data.adoption_date;
+                    document.getElementById('receipt_number').value = data.receipt_number || '';
+                    document.getElementById('adopter_name').value = data.adopter_name;
+                    document.getElementById('adopter_national_id').value = data.adopter_national_id;
+                    document.getElementById('adopter_phone').value = data.adopter_phone;
+                    document.getElementById('adopter_email').value = data.adopter_email;
+                    document.getElementById('description').value = data.description || '';
+                    document.getElementById('notes').value = data.notes || '';
+                
+                    currentOperationType = data.Operation_type || 'reserved';
+                
+                    // تحديث URL ليعكس سجل التبني الحالي
+                    updateURL(adoptionId);
+                
+                    // مسح وعرض التوقيع
+                    clearSignature();
+                    const signatureInfo = document.getElementById('current_signature_info');
+                    if (data.adopter_signature) {
+                         fetch(`/health_vet/${data.adopter_signature}`)
+                             .then(res => res.blob())
+                             .then(blob => {
+                                 const reader = new FileReader();
+                                 reader.onload = () => {
+                                     if (signaturePad) {
+                                         signaturePad.fromDataURL(reader.result);
+                                     }
+                                 };
+                                 reader.readAsDataURL(blob);
+                             })
+                             .catch(err => console.error('Error loading signature:', err));
+                         signatureInfo.style.display = 'block';
+                         signatureInfo.innerHTML = `<a href="#" onclick="event.preventDefault(); alert('${translations.signature_loaded || 'تم تحميل التوقيع في المساحة أعلاه.'}');" style="color: var(--main-green);"><i class="fas fa-file-signature"></i> ${translations.view_signature || 'عرض التوقيع الحالي'}</a>`;
+                    } else {
+                         signatureInfo.style.display = 'none';
+                    }
+                 
+                    // عرض صور الهوية
+                    const idPhotoPreview = document.getElementById('adopter_national_id_photo_preview');
+                    if (data.adopter_national_id_photo) {
+                         idPhotoPreview.innerHTML = `<img src="/health_vet/${data.adopter_national_id_photo}" alt="ID Photo">`;
+                         document.getElementById('current_id_photo_info').style.display = 'block';
+                         document.getElementById('current_id_photo_info').innerHTML = `<a href="/health_vet/${data.adopter_national_id_photo}" target="_blank" style="color: var(--olive-tone);"><i class="fas fa-camera"></i> ${translations.view_id_photo || 'عرض صورة الهوية الحالية'}</a>`;
+                    } else {
+                         idPhotoPreview.innerHTML = `<small class="text-muted" data-translate="id_photo_placeholder"><i class="fas fa-camera"></i> ${translations.id_photo_placeholder || 'صورة الهوية (انقر للتحميل)'}</small>`;
+                         document.getElementById('current_id_photo_info').style.display = 'none';
+                    }
+                 
+                    // تعطيل الحقول للعرض (مع إصلاح للـ canvas)
+                    const formElements = document.getElementById('adoptionForm').querySelectorAll('input, textarea, select');
+                    formElements.forEach(el => {
+                        if (el.id !== 'adopter_national_id_photo') el.disabled = true;
+                    });
+                    document.getElementById('adopter_national_id_photo').disabled = true;
+                    document.getElementById('adopter_national_id_photo_preview').onclick = null; // إزالة onclick للعرض
+                    document.getElementById('submitButton').style.display = 'none';
+                
+                    // إظهار أزرار التحكم بناءً على الصلاحيات (مع log)
+                    console.log('تحميل سجل: الصلاحيات الحالية:', userPermissions);
+                    document.getElementById('editButton').style.display = userPermissions.canEdit ? 'block' : 'none';
+                    document.getElementById('printReportButton').style.display = 'block';
+                    document.getElementById('deleteButton').style.display = userPermissions.canDelete ? 'block' : 'none';
+                    document.getElementById('addNewAfterEditButton').style.display = 'block';
+                    document.getElementById('printReportButton').onclick = () => openReport(currentAdoptionId);
+                    document.getElementById('message').innerHTML = `<div class="alert alert-info py-1 px-2" style="font-size: 0.85rem;">${translations.loaded_record || 'تم تحميل سجل التبني بنجاح.'} ID: ${data.adoption_id}</div>`;
+                } else {
+                    document.getElementById('message').innerHTML = `<div class="alert alert-danger py-1 px-2" style="font-size: 0.85rem;">${result.message}</div>`;
+                    resetFormState(false);
+                }
+            } catch (error) {
+                console.error('Error loading adoption details:', error);
+                document.getElementById('message').innerHTML = `<div class="alert alert-danger py-1 px-2" style="font-size: 0.85rem;">${translations.connection_error || 'حدث خطأ في الاتصال.'}</div>`;
+            }
+        }
+    
+        function enableEditing() {
+             console.log('تم الضغط على زر التعديل، الصلاحيات:', userPermissions);
+             if (!userPermissions.canEdit) {
+                 alert('ليس لديك صلاحية التعديل. الصلاحيات الحالية: ' + JSON.stringify(userPermissions));
+                 return;
+             }
+         
+            // تفعيل جميع الحقول (إصلاح: تضمين canvas و file input)
+            const formElements = document.getElementById('adoptionForm').querySelectorAll('input, textarea, select');
+            formElements.forEach(el => el.disabled = false);
+            
+            // تفعيل خاص للتوقيع (إعادة تهيئة إذا لزم)
+            if (signaturePad) {
+                canvas.disabled = false; // للموبايل
+                canvas.style.pointerEvents = 'auto'; // إعادة تفعيل الرسم
+            }
+            initializeSignaturePad(); // إعادة تهيئة لضمان الرسم
+            
+            document.getElementById('adopter_national_id_photo').disabled = false;
+            document.getElementById('adopter_national_id_photo_preview').onclick = () => document.getElementById('adopter_national_id_photo').click(); // إعادة onclick
+            
+            document.getElementById('submitButton').style.display = 'block';
+            document.getElementById('submitButton').title = translations.save_changes || 'حفظ التعديلات';
+            document.getElementById('submitButton').innerHTML = `<i class="fas fa-floppy-disk"></i>`;
+            document.getElementById('submitButton').onclick = (e) => submitEdit(e);
+            document.getElementById('editButton').style.display = 'none';
+            document.getElementById('deleteButton').style.display = userPermissions.canDelete ? 'block' : 'none';
+            document.getElementById('printReportButton').style.display = 'block';
+            document.getElementById('addNewAfterEditButton').style.display = 'block';
+            document.getElementById('message').innerHTML = `<div class="alert alert-warning py-1 px-2" style="font-size: 0.85rem;">${translations.editing_mode || 'وضع التعديل مُفعّل. لا تنسَ الضغط على زر الحفظ.'}</div>`;
+            
+            console.log('تم تفعيل وضع التعديل بنجاح');
+        }
+        // === 5. وظائف الإرسال (نسخة واحدة مُصلحة لكل دالة) ===
+        // مساعدة: تحويل dataURL إلى Blob
+        function dataURLToBlob(dataURL) {
+            const parts = dataURL.split(',');
+            const mime = parts[0].match(/:(.*?);/)[1];
+            const binary = atob(parts[1]);
+            const array = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++) array[i] = binary.charCodeAt(i);
+            return new Blob([array], { type: mime });
+        }
+        async function submitEdit(e) {
+             e.preventDefault();
+             console.log('بدء submitEdit، adoption_id:', currentAdoptionId);
+             if (!userPermissions.canEdit) {
+                 alert('ليس لديك صلاحية التعديل.');
+                 return;
+             }
+            // تحقق من التوقيع وتحويله إلى Blob
+            let signatureBlob = null;
+            if (!signaturePad.isEmpty()) {
+                const base64Data = signaturePad.toDataURL('image/jpeg', 0.7);
+                signatureBlob = dataURLToBlob(base64Data);
+            }
+            const formData = new FormData(document.getElementById('adoptionForm'));
+            formData.set('action', 'update');
+            formData.append('adoption_id', currentAdoptionId);
+            
+            if (signatureBlob) {
+                formData.set('adopter_signature_file', signatureBlob, 'signature.jpg');
+            }
+            
+            console.log('FormData جاهزة للإرسال، الحقول:', Array.from(formData.entries()).map(([k, v]) => k));
+        
+            const submitBtn = document.getElementById('submitButton');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> ${translations.saving || 'جاري الحفظ...'}`;
+            try {
+                const response = await fetch(apiUrl, { method: 'POST', body: formData, credentials: 'include' });
+                const result = await response.json();
+                console.log('استجابة submitEdit:', result);
+            
+                const messageDiv = document.getElementById('message');
+                messageDiv.innerHTML = `<div class="alert ${result.success ? 'alert-success' : 'alert-danger'}">${result.message}</div>`;
+            
+                if (result.success) {
+                    loadAdoptionDetails(currentAdoptionId);
+                }
+            } catch (error) {
+                console.error('Error in update submission:', error);
+                document.getElementById('message').innerHTML = `<div class="alert alert-danger">${translations.connection_error || 'حدث خطأ في الاتصال. تحقق من الإنترنت أو الخادم.'}</div>`;
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = `<i class="fas fa-floppy-disk"></i>`;
+            }
+        }
+     
+        async function submitNew(e) {
+            e.preventDefault();
+            if (!userPermissions.canAdd) {
+                alert('ليس لديك صلاحية الإضافة.');
+                return;
+            }
+            // تحقق من Animal ID
+            if (!currentAnimalId) {
+                await checkAnimalCode(document.getElementById('animal_code').value);
+                if (!currentAnimalId) {
+                    alert(translations.animal_code_required || 'رمز الحيوان مطلوب ويجب التحقق منه.');
+                    return;
+                }
+            }
+            // تأكد من وجود التوقيع على اللوحة
+            if (signaturePad.isEmpty()) {
+                alert('التوقيع مطلوب.');
+                return;
+            }
+            // ضع التوقيع صراحةً في الحقل المخفي قبل إنشاء FormData
+            // استخدم JPEG لتقليل الحجم أو PNG إذا رغبت بالشفافية
+            const base64Data = signaturePad.toDataURL('image/jpeg', 0.7); // أصغر من PNG عادة
+            const blob = dataURLToBlob(base64Data);
+            // بناء FormData
+            const formData = new FormData(document.getElementById('adoptionForm'));
+            formData.set('action', 'add'); // استخدم set لتجنّب مفاتيح مكررة
+            formData.delete('adoption_id'); // تأكيد الحذف
+            formData.set('adopter_signature_file', blob, 'signature.jpg'); // إرسال كـ Blob
+            // debug: عرض الحقول الموجودة
+            console.log('SubmitNew - signature blob size:', blob.size);
+            console.log('FormData entries:', Array.from(formData.entries()).map(([k, v]) => ({ key: k, value: (typeof v === 'string' ? (v.length > 60 ? v.substring(0,60)+'...' : v) : v) })));
+            const submitBtn = document.getElementById('submitButton');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>`;
+            try {
+                const response = await fetch(apiUrl, { method: 'POST', body: formData, credentials: 'include' });
+                const result = await response.json();
+                const messageDiv = document.getElementById('message');
+                if (result.success) {
+                    // تحديث الصفحة كاملة لمسح النموذج
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1000);
+                    messageDiv.innerHTML = `<div class="alert alert-success">${result.message}</div>`;
+                } else {
+                    messageDiv.innerHTML = `<div class="alert alert-danger">${result.message}</div>`;
+                }
+            } catch (error) {
+                console.error('Error in new submission:', error);
+                document.getElementById('message').innerHTML = `<div class="alert alert-danger">${translations.connection_error || 'حدث خطأ في الاتصال.'}</div>`;
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = `<i class="fas fa-check-circle"></i>`;
+            }
+        }
+    
+        function resetFormState(isSuccess) {
+            if (!isSuccess) {
+                document.getElementById('adoptionForm').reset();
+            }
+            document.getElementById('adoption_id').value = '';
+            document.getElementById('animalInfo').style.display = 'none';
+            document.getElementById('current_id_photo_info').style.display = 'none';
+            document.getElementById('current_signature_info').style.display = 'none';
+            document.getElementById('animalSuggestions').style.display = 'none';
+        
+            document.getElementById('adopter_national_id_photo').disabled = false;
+            document.getElementById('adopter_national_id_photo_preview').setAttribute('onclick', "document.getElementById('adopter_national_id_photo').click()");
+            document.getElementById('adopter_national_id_photo_preview').innerHTML = `<small class="text-muted" data-translate="id_photo_placeholder"><i class="fas fa-camera"></i> ${translations.id_photo_placeholder || 'صورة الهوية (انقر للتحميل)'}</small>`;
+            document.getElementById('submitButton').style.display = userPermissions.canAdd ? 'block' : 'none';
+            document.getElementById('submitButton').title = translations.register_adoption_button || 'تسجيل التبني';
+            document.getElementById('submitButton').innerHTML = `<i class="fas fa-check-circle"></i>`;
+            document.getElementById('submitButton').onclick = submitNew;
+        
+            document.getElementById('animal_code').value = '';
+            document.getElementById('animal_code').disabled = false;
+            document.getElementById('operation_type').value = 'reserved';
+        
+            document.getElementById('editButton').style.display = 'none';
+            document.getElementById('printReportButton').style.display = 'none';
+            document.getElementById('deleteButton').style.display = 'none';
+            document.getElementById('addNewAfterEditButton').style.display = 'none';
+        
+            document.getElementById('adoptionForm').querySelectorAll('input, textarea, select, button').forEach(el => {
+                el.disabled = false;
+            });
+            clearSignature();
+            currentAnimalId = null;
+            currentAdoptionId = null;
+            currentOperationType = null;
+            document.getElementById('adoption_date').value = new Date().toISOString().substring(0, 10);
+        
+            // إزالة معلمة ID من URL عند إعادة تعيين النموذج
+            updateURL();
+        
+            if (!isSuccess) {
+                document.getElementById('message').innerHTML = '';
+            }
+        }
+        // === 6. وظيفة الحذف والتقرير والتهيئة ===
+        async function deleteAdoption() {
+             if (!userPermissions.canDelete) {
+                 alert('ليس لديك صلاحية الحذف.');
+                 return;
+             }
+         
+            if (!currentAdoptionId) {
+                alert(translations.no_record_to_delete || 'لا يوجد سجل تبني محدد للحذف.');
+                return;
+            }
+            if (!confirm(`${translations.confirm_delete || 'هل أنت متأكد من حذف سجل التبني رقم'} ${currentAdoptionId}؟`)) {
+                return;
+            }
+        
+            const formData = new FormData();
+            formData.append('action', 'delete_adoption');
+            formData.append('adoption_id', currentAdoptionId);
+        
+            try {
+                const response = await fetch(apiUrl, { method: 'POST', body: formData });
+                const result = await response.json();
+            
+                if (result.success) {
+                    alert(result.message || (translations.delete_success || 'تم حذف السجل بنجاح.'));
+                    resetFormState(false);
+                    document.getElementById('searchResults').innerHTML = '';
+                } else {
+                    alert(result.message || (translations.delete_error || 'حدث خطأ أثناء الحذف.'));
+                }
+            } catch (error) {
+                console.error('Error in deletion:', error);
+                alert(translations.connection_error || 'حدث خطأ في الاتصال.');
+            }
+        }
+    
+        function openReport(adoptionId) {
+             if (adoptionId && currentOperationType) {
+                 const reportUrl = currentOperationType === 'adopted' ? 'add_adopter_report.html' : 'add_reserved_report.html';
+                 window.open(`/health_vet/public/${reportUrl}?adoption_id=${adoptionId}`, '_blank');
+             } else {
+                 alert(translations.no_report_id || 'لا يوجد رقم تبني لإنشاء التقرير.');
+             }
+        }
+          // === 7. وظيفة تحميل الصلاحيات (محسنة) ===
+        async function loadUserPermissions() {
+             try {
+                 console.log('جاري تحميل الصلاحيات من:', userDataUrl);
+                 const response = await fetch(userDataUrl, { credentials: 'include' });
+                 if (!response.ok) {
+                     throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                 }
+                 const result = await response.json();
+                 console.log('صلاحيات محملة:', result);
+                 if (result.success && result.permissions) {
+                     userPermissions = result.permissions;
+                     document.getElementById('submitButton').style.display = userPermissions.canAdd ? 'block' : 'none';
+                     document.getElementById('deleteButton').style.display = 'none';
+                     document.getElementById('editButton').style.display = 'none';
+                     document.getElementById('addNewButton').style.display = 'block';
+                     console.log('User Permissions Loaded:', userPermissions);
+                 } else {
+                     throw new Error(result.message || 'فشل في جلب الصلاحيات');
+                 }
+             } catch (error) {
+                 console.error('Error fetching user data:', error);
+                 // fallback: افترض صلاحيات Admin للتصحيح (احذف في الإنتاج)
+                 userPermissions = { canAdd: true, canEdit: true, canDelete: true };
+                 console.warn('استخدام fallback صلاحيات للتصحيح');
+                 document.getElementById('submitButton').style.display = 'block';
+             }
+         }
+        // إضافة مستمع للنموذج
+        document.addEventListener('DOMContentLoaded', function() {
+            // قراءة رمز الحيوان من URL وملء الحقل
+            const urlParams = new URLSearchParams(window.location.search);
+            const animalCode = urlParams.get('animal_code');
+            if (animalCode && document.getElementById('animal_code')) {
+                document.getElementById('animal_code').value = decodeURIComponent(animalCode);
+                // تحميل تفاصيل الحيوان تلقائياً
+                checkAnimalCode(decodeURIComponent(animalCode));
+            }
+            // تحميل الترجمات فورًا لتجنب التأخير
+            language = localStorage.getItem('appLang') || 'ar';
+            loadTranslations(language);
+        
+            document.getElementById('adoptionForm').addEventListener('submit', function(e) {
+                if (currentAdoptionId) {
+                    submitEdit(e);
+                } else {
+                    submitNew(e);
+                }
+            });
+         
+            // إغلاق الـ dropdown عند النقر خارجها
+            document.getElementById('animal_code').addEventListener('input', (e) => {
+                searchAnimalSuggestions(e.target.value);
+            });
+            document.getElementById('animal_code').addEventListener('blur', () => {
+                setTimeout(() => {
+                    document.getElementById('animalSuggestions').style.display = 'none';
+                }, 200);
+            });
+        });
+     
+        window.onload = function() {
+            loadUserPermissions().then(() => {
+                loadAllAnimals(); // تحميل قائمة الحيوانات
+                initializeSignaturePad(); // تهيئة التوقيع بعد تحميل الصفحة
+                document.getElementById('adoption_date').value = new Date().toISOString().substring(0, 10);
+             
+                // تحميل سجل التبني من معلمة URL إذا وجدت
+                loadAdoptionFromURL();
+            });
+        };
+        // === سكريبت زر التعهد (نُقل الزر، لذا نُحدث السكريبت هنا) ===
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById("openDeclaration").addEventListener("click", function() {
+                window.open(
+                    "Declarations.html", // مسار الملف
+                    "DeclarationsWindow", // اسم النافذة
+                    "width=900,height=700,scrollbars=yes,resizable=yes,top=50,left=50"
+                );
+            });
+        });
+    </script>
+</body>
+</html>

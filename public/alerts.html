@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>تنبيهات المخزون — HealthVet</title>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root{--brand:#2b5d34;--muted:#666;--bg:#f6f8f6;font-family:"Tajawal",system-ui,Arial,sans-serif}
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:#222;font-family:inherit;padding:18px}
+    .container{max-width:1200px;margin:0 auto}
+    header{display:flex;gap:12px;align-items:center;margin-bottom:18px}
+    .logo{width:48px;height:48px;border-radius:8px;background:linear-gradient(135deg,var(--brand),#184427);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700}
+    h1{margin:0;font-size:1.15rem}
+    .controls{margin-left:auto;display:flex;gap:8px;align-items:center}
+    .input{padding:8px;border-radius:8px;border:1px solid #e6e6e6;background:#fff}
+    .button{padding:8px 10px;border-radius:8px;border:none;background:var(--brand);color:#fff;cursor:pointer}
+    .card{background:#fff;padding:12px;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.06);margin-bottom:12px}
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:8px;border-bottom:1px solid #f0f0f0;text-align:right;font-size:0.95rem}
+    th{background:#fafafa;font-weight:700}
+    .small{font-size:0.9rem;color:var(--muted)}
+    .badge{background:#d9534f;color:#fff;padding:4px 8px;border-radius:999px;font-weight:700}
+    img.thumb{width:64px;height:64px;object-fit:cover;border-radius:6px;border:1px solid #eee}
+    /* modal */
+    .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.45);z-index:2000}
+    .modal.show{display:flex}
+    .modalCard{width:100%;max-width:820px;background:#fff;border-radius:10px;padding:14px}
+    .row{display:flex;gap:12px;align-items:flex-start}
+    .col{flex:1}
+    @media print{ .no-print{display:none!important} }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo">HV</div>
+      <div>
+        <h1>نظام تنبيهات المخزون — HealthVet</h1>
+        <div class="small">يعرض المنتجات منخفضة المخزون والنسخ القريبة من الانتهاء مع كل التفاصيل.</div>
+      </div>
+
+      <div class="controls no-print">
+        <label class="small">أيام الانتهاء:</label>
+        <input id="days" class="input" type="number" min="0" value="30" style="width:90px">
+        <label class="small">عتبة:</label>
+        <input id="threshold" class="input" type="number" min="0" placeholder="مثال 1" style="width:90px">
+        <button id="btnFetch" class="button">جلب الآن</button>
+        <button id="btnPrint" class="button" style="background:#444">طباعة</button>
+        <span id="badge" style="margin-right:8px"></span>
+      </div>
+    </header>
+
+    <main>
+      <div class="card">
+        <h3 style="margin-top:0">مخزون منخفض</h3>
+        <div id="lowCount" class="small" style="margin-bottom:8px">تحميل...</div>
+        <div style="overflow:auto">
+          <table id="lowTable" aria-live="polite">
+            <thead>
+              <tr>
+                <th>صورة</th>
+                <th>المنتج</th>
+                <th>الكود</th>
+                <th>نسخة / SKU</th>
+                <th>تركيب (AR)</th>
+                <th>تركيب (EN)</th>
+                <th>الكمية</th>
+                <th>الحد الأدنى</th>
+                <th>تفاصيل</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 style="margin-top:0">قريبة الانتهاء</h3>
+        <div id="expCount" class="small" style="margin-bottom:8px">تحميل...</div>
+        <div style="overflow:auto">
+          <table id="expTable" aria-live="polite">
+            <thead>
+              <tr>
+                <th>صورة</th>
+                <th>المنتج</th>
+                <th>الكود</th>
+                <th>نسخة / SKU</th>
+                <th>تركيب (AR)</th>
+                <th>تاريخ الصلاحية</th>
+                <th>بقي (يوم)</th>
+                <th>الكمية</th>
+                <th>تفاصيل</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 style="margin-top:0">ناتج (debug)</h3>
+        <pre id="debugPre" style="background:#111;color:#fff;padding:12px;border-radius:8px;max-height:240px;overflow:auto">ليس هناك ناتج بعد.</pre>
+      </div>
+    </main>
+  </div>
+
+  <!-- details modal -->
+  <div id="detailModal" class="modal" role="dialog" aria-modal="true">
+    <div class="modalCard">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <strong>تفاصيل النسخة</strong>
+        <button id="closeModal" class="button" style="background:#999">إغلاق</button>
+      </div>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+<script src="session_check.js"></script>
+  <script src="/health_vet/public/alerts.js"></script>
+</body>
+</html>

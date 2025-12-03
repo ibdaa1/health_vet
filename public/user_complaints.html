@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Dashboard - My Personal Work</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --primary: #2E5939;
+            --primary-light: #4A7C59;
+            --primary-dark: #1E472B;
+            --secondary: #B38E5D;
+            --secondary-light: #D4B78C;
+            --accent: #E74C3C;
+            --accent-light: #F1948A;
+            --warning: #F39C12;
+            --success: #27AE60;
+            --info: #3498DB;
+          
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-primary: #2C3E50;
+            --text-secondary: #566573;
+            --border-color: #D5DBDB;
+            --shadow: 0 2px 12px rgba(0,0,0,0.1);
+          
+            --font-xs: 0.625rem;
+            --font-sm: 0.75rem;
+            --font-base: 0.875rem;
+            --font-lg: 1rem;
+            --font-xl: 1.125rem;
+            --font-2xl: 1.375rem;
+          
+            --space-xs: 0.25rem;
+            --space-sm: 0.5rem;
+            --space-md: 1rem;
+            --space-lg: 1.5rem;
+            --space-xl: 2rem;
+          
+            --border-radius: 8px;
+            --input-height: 2.5rem;
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-color);
+            color: var(--text-primary);
+            line-height: 1.6;
+            font-size: var(--font-base);
+            padding: var(--space-md);
+        }
+        @media (max-width: 480px) {
+            body {
+                padding: var(--space-sm);
+                font-size: var(--font-sm);
+            }
+        }
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: var(--space-lg);
+        }
+        @media (min-width: 1200px) {
+            .container {
+                max-width: 1400px;
+            }
+        }
+        h2 {
+            font-size: var(--font-xl);
+            text-align: center;
+            color: var(--primary);
+            margin-bottom: var(--space-lg);
+            border-bottom: 2px solid var(--secondary);
+            padding-bottom: var(--space-sm);
+        }
+        h3 {
+            font-size: var(--font-lg);
+            color: var(--primary);
+            margin: var(--space-lg) 0 var(--space-md) 0;
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        .user-info {
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
+            color: white;
+            padding: var(--space-md);
+            border-radius: var(--border-radius);
+            margin-bottom: var(--space-lg);
+            text-align: center;
+        }
+        .user-info h3 {
+            color: white;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            gap: var(--space-lg);
+            flex-wrap: wrap;
+        }
+        .user-info span {
+            font-weight: normal;
+            opacity: 0.9;
+        }
+        .notification {
+            padding: var(--space-md);
+            border-radius: var(--border-radius);
+            margin-bottom: var(--space-md);
+            text-align: center;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-sm);
+        }
+        .notification.warning {
+            background: #FFF3CD;
+            border: 1px solid #FFEAA7;
+            color: #856404;
+        }
+        .notification.danger {
+            background: #F8D7DA;
+            border: 1px solid #F5C6CB;
+            color: #721C24;
+        }
+        .status-badge {
+            padding: var(--space-xs) var(--space-sm);
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: var(--font-xs);
+            display: inline-block;
+            min-width: 60px;
+            text-align: center;
+            text-transform: uppercase;
+        }
+        .status-open { background: var(--info); color: white; }
+        .status-inprogress { background: var(--warning); color: white; }
+        .status-closed { background: var(--success); color: white; }
+        .status-onhold { background: var(--text-secondary); color: white; }
+        .status-rejected { background: var(--accent); color: white; }
+        .final-status-pendingclose { background: var(--warning); color: white; }
+        .final-status-closed { background: var(--success); color: white; }
+        .final-status-rejected { background: var(--accent); color: white; }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: var(--space-md);
+            margin-bottom: var(--space-lg);
+        }
+        .stat-card {
+            background: var(--card-bg);
+            padding: var(--space-md);
+            border-radius: var(--border-radius);
+            text-align: center;
+            box-shadow: var(--shadow);
+            border-left: 4px solid var(--primary);
+            transition: transform 0.3s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-2px);
+        }
+        .stat-card h4 {
+            color: var(--text-secondary);
+            font-size: var(--font-sm);
+            margin-bottom: var(--space-sm);
+        }
+        .stat-card .number {
+            font-size: var(--font-2xl);
+            font-weight: bold;
+            color: var(--primary);
+        }
+        .btn {
+            padding: var(--space-sm) var(--space-lg);
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: var(--font-sm);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-sm);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+        .btn-outline:hover {
+            background: var(--bg-color);
+            transform: translateY(-2px);
+        }
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+        .btn-success:hover {
+            background: #219955;
+            transform: translateY(-2px);
+        }
+        .filter-bar {
+            background: var(--card-bg);
+            padding: var(--space-md);
+            border-radius: var(--border-radius);
+            margin-bottom: var(--space-lg);
+            box-shadow: var(--shadow);
+        }
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: var(--space-md);
+            margin-bottom: var(--space-md);
+        }
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-xs);
+        }
+        .filter-group label {
+            font-weight: bold;
+            color: var(--text-secondary);
+            font-size: var(--font-sm);
+        }
+        .filter-controls {
+            display: flex;
+            gap: var(--space-md);
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        input, select {
+            width: 100%;
+            padding: var(--space-sm);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-size: var(--font-sm);
+            height: var(--input-height);
+            transition: border-color 0.3s ease;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(46, 89, 57, 0.1);
+        }
+        .table-container {
+            overflow-x: auto;
+            margin-bottom: var(--space-lg);
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            position: relative;
+            max-width: 100%;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: var(--font-xs);
+            table-layout: fixed;
+        }
+        th, td {
+            padding: var(--space-xs) var(--space-sm);
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+            white-space: normal;
+            word-wrap: break-word;
+            overflow: visible;
+        }
+        th {
+            background: var(--primary);
+            color: white;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            font-size: var(--font-xs);
+        }
+        tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        tr:hover {
+            background: #e8f5e8;
+        }
+        .action-btn {
+            padding: var(--space-xs) var(--space-sm);
+            font-size: var(--font-xs);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .action-btn.edit {
+            background: var(--secondary);
+            color: white;
+        }
+        .action-btn.edit:hover {
+            background: var(--secondary-light);
+            transform: translateY(-1px);
+        }
+        .action-btn.map {
+            background: var(--info);
+            color: white;
+        }
+        .action-btn.map:hover {
+            background: #2980B9;
+            transform: translateY(-1px);
+        }
+        .message {
+            padding: var(--space-md);
+            border-radius: var(--border-radius);
+            margin: var(--space-md) 0;
+            text-align: center;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        .message.error {
+            background: var(--accent-light);
+            color: var(--accent);
+            border: 1px solid var(--accent);
+        }
+        .message.success {
+            background: #d4edda;
+            color: var(--success);
+            border: 1px solid var(--success);
+        }
+        .kpi-badge {
+            display: inline-block;
+            padding: 2px 4px;
+            border-radius: 12px;
+            font-size: var(--font-xs);
+            font-weight: bold;
+            margin: 0 1px;
+        }
+        .kpi-delay {
+            background: var(--accent-light);
+            color: var(--accent);
+        }
+        .kpi-warning {
+            background: #FDEBD0;
+            color: var(--warning);
+        }
+        .kpi-normal {
+            background: #D5F5E3;
+            color: var(--success);
+        }
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: var(--space-xl);
+            color: var(--text-secondary);
+        }
+        .loading-spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: var(--space-sm);
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        @media (max-width: 768px) {
+            .user-info h3 {
+                flex-direction: column;
+                gap: var(--space-sm);
+            }
+          
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+          
+            .filter-grid {
+                grid-template-columns: 1fr;
+            }
+          
+            .filter-controls {
+                flex-direction: column;
+            }
+          
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+          
+            th, td {
+                padding: 0.25rem 0.125rem;
+                font-size: 0.625rem;
+            }
+          
+            .status-badge {
+                min-width: 50px;
+                font-size: 0.55rem;
+            }
+          
+            .action-btn {
+                padding: 0.125rem 0.25rem;
+                font-size: 0.55rem;
+            }
+        }
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+          
+            h2 {
+                font-size: var(--font-lg);
+            }
+          
+            h3 {
+                font-size: var(--font-base);
+            }
+          
+            th, td {
+                padding: 0.125rem 0.0625rem;
+                font-size: 0.6rem;
+            }
+        }
+        .table-container::-webkit-scrollbar {
+            height: 8px;
+        }
+        .table-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+        .table-container::-webkit-scrollbar-thumb {
+            background: var(--primary-light);
+            border-radius: 4px;
+        }
+        .table-container::-webkit-scrollbar-thumb:hover {
+            background: var(--primary);
+        }
+        .lang-switch {
+            text-align: left;
+            margin-bottom: var(--space-md);
+        }
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-md);
+        }
+        .no-data {
+            text-align: center;
+            padding: var(--space-xl);
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+        .pagination-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--space-md);
+            background: var(--card-bg);
+            border-top: 1px solid var(--border-color);
+            border-radius: 0 0 var(--border-radius) var(--border-radius);
+        }
+        .pagination-info {
+            font-size: var(--font-sm);
+            color: var(--text-secondary);
+        }
+        .pagination-nav {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        .page-btn {
+            padding: var(--space-xs) var(--space-sm);
+            border: 1px solid var(--border-color);
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .page-btn:hover:not(:disabled) {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        .page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .page-input {
+            width: 50px;
+            text-align: center;
+            margin: 0 var(--space-xs);
+        }
+        .export-controls {
+            display: flex;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-md);
+            justify-content: flex-end;
+            flex-wrap: wrap;
+        }
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            .print-report, .print-report * {
+                visibility: visible;
+            }
+            .print-report {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                background: white;
+                padding: 20px;
+            }
+            .print-report table {
+                width: 100%;
+                font-size: 8px;
+                border-collapse: collapse;
+            }
+            .print-report th, .print-report td {
+                border: 1px solid #000;
+                padding: 1px;
+            }
+            .print-report th {
+                background: #f0f0f0 !important;
+                color: #000 !important;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .pagination-controls {
+                display: none !important;
+            }
+        }
+        .print-header {
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #000;
+            padding-bottom: 10px;
+        }
+        .print-footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 12px;
+            color: #666;
+        }
+        @media (max-width: 768px) {
+            .table-container {
+                overflow-x: hidden;
+            }
+            table {
+                font-size: 0.7rem;
+            }
+            th, td {
+                max-width: none;
+                width: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="lang-switch">
+            <button class="btn btn-outline" id="langBtn">
+                <i class="fas fa-language"></i>
+                <span id="langText">العربية</span>
+            </button>
+        </div>
+        <h2 id="title">
+            <i class="fas fa-tachometer-alt"></i>
+            <span data-i18n="title">Employee Dashboard - My Personal Work</span>
+        </h2>
+        <div class="user-info">
+            <h3>
+                <span><i class="fas fa-user"></i> <span data-i18n="name_label">Name:</span></span>
+                <span id="empName">Loading...</span>
+                <span><i class="fas fa-id-card"></i> <span data-i18n="id_label">Employee ID:</span></span>
+                <span id="empId">Loading...</span>
+                <span><i class="fas fa-briefcase"></i> <span data-i18n="job_title_label">Job Title:</span></span>
+                <span id="empTitle">Loading...</span>
+            </h3>
+        </div>
+        <div id="openNotification" class="notification warning" style="display: none;">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span id="openCountMessage">
+                <span data-i18n="open_notification_prefix">You have</span>
+                <span id="openCount">0</span>
+                <span data-i18n="open_notification_suffix">open complaint in your work to follow up</span>
+            </span>
+        </div>
+        <div id="pendingCloseNotification" class="notification danger" style="display: none;">
+            <i class="fas fa-clock"></i>
+            <span id="pendingCloseCountMessage">
+                <span data-i18n="pending_close_prefix">You have</span>
+                <span id="pendingCloseCount">0</span>
+                <span data-i18n="pending_close_suffix">complaint in your work pending final closure</span>
+            </span>
+        </div>
+        <div class="section-title">
+            <i class="fas fa-chart-bar"></i>
+            <h3 data-i18n="stats_title_main">Statistics for Your Personal Work</h3>
+        </div>
+        <div class="stats-grid" id="statsSection">
+        </div>
+        <div class="section-title">
+            <i class="fas fa-search"></i>
+            <h3 data-i18n="search_filter_title">Search in Your Work</h3>
+        </div>
+        <div class="filter-bar">
+            <div class="filter-grid">
+                <div class="filter-group">
+                    <label for="filterDateFrom" data-i18n="filter_from">From Date:</label>
+                    <input type="date" id="filterDateFrom">
+                </div>
+                <div class="filter-group">
+                    <label for="filterDateTo" data-i18n="filter_to">To Date:</label>
+                    <input type="date" id="filterDateTo">
+                </div>
+                <div class="filter-group">
+                    <label for="filterComplaintType" data-i18n="filter_type">Complaint Type:</label>
+                    <select id="filterComplaintType">
+                        <option value="" data-i18n="filter_all">All</option>
+                        <option value="Cats" data-i18n="type_cats">Cats</option>
+                        <option value="Dogs" data-i18n="type_dogs">Dogs</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="filterResponsePriority" data-i18n="filter_priority">Priority:</label>
+                    <select id="filterResponsePriority">
+                        <option value="" data-i18n="filter_all">All</option>
+                        <option value="Emergency" data-i18n="priority_emergency">Emergency</option>
+                        <option value="Scheduled" data-i18n="priority_scheduled">Scheduled</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="filterSource" data-i18n="filter_source">Source:</label>
+                    <select id="filterSource">
+                        <option value="" data-i18n="filter_all">All</option>
+                        <option value="Hotline" data-i18n="source_hotline">Hotline</option>
+                        <option value="In-person" data-i18n="source_in_person">In-person</option>
+                        <option value="Department" data-i18n="source_department">Department</option>
+                        <option value="Email" data-i18n="source_email">Email</option>
+                        <option value="Social Media" data-i18n="source_social_media">Social Media</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="filterArea" data-i18n="filter_area">Area:</label>
+                    <input type="text" id="filterArea" data-i18n="placeholder_area" placeholder="Area Name">
+                </div>
+            </div>
+            <div class="filter-controls">
+                <button class="btn btn-primary" onclick="loadDashboard()">
+                    <i class="fas fa-search"></i>
+                    <span data-i18n="btn_search">Search</span>
+                </button>
+                <button class="btn btn-outline" onclick="resetFilter()">
+                    <i class="fas fa-undo"></i>
+                    <span data-i18n="btn_all_complaints">Show All</span>
+                </button>
+                <button class="btn btn-success" onclick="exportToExcel()" id="excelBtn" style="display: none;">
+                    <i class="fas fa-file-excel"></i>
+                    <span data-i18n="btn_excel">Export Excel</span>
+                </button>
+                <button class="btn btn-primary" onclick="printReport()" id="printBtn" style="display: none;">
+                    <i class="fas fa-print"></i>
+                    <span data-i18n="btn_print">Print Report</span>
+                </button>
+            </div>
+        </div>
+        <div class="export-controls no-print" id="exportControls" style="display: none;">
+            <div class="pagination-info" id="paginationInfo">
+                <span data-i18n="showing">Showing</span>
+                <span id="startRecord">0</span>-<span id="endRecord">0</span>
+                <span data-i18n="of">of</span>
+                <span id="totalRecords">0</span>
+                <span data-i18n="records">records</span>
+                (<span data-i18n="page">Page</span> <span id="currentPage">1</span>
+                <span data-i18n="of">of</span> <span id="totalPages">1</span>)
+            </div>
+        </div>
+        <div class="section-title">
+            <i class="fas fa-list"></i>
+            <h3 data-i18n="complaint_list_title">List of Your Personal Work Complaints</h3>
+        </div>
+        <div class="table-container">
+            <table id="complaintsTable">
+                <thead>
+                    <tr>
+                        <th data-i18n="complaint_no">Complaint No</th>
+                        <th data-i18n="complainant_name">Complainant Name</th>
+                        <th data-i18n="complaint_date">Complaint Date</th>
+                        <th data-i18n="received_date">Received Date</th>
+                        <th data-i18n="registration_delay_days">Registration Delay</th>
+                        <th data-i18n="follow_up_delay_days">Follow-up Delay</th>
+                        <th data-i18n="complaint_type">Type</th>
+                        <th data-i18n="area">Area</th>
+                        <th data-i18n="complaint_status">Complaint Status</th>
+                        <th data-i18n="final_status">Final Status</th>
+                        <th data-i18n="response_days">Response Days</th>
+                        <th data-i18n="location">Location</th>
+                        <th data-i18n="actions">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td colspan="13" class="loading">
+                            <div class="loading-spinner"></div>
+                            <span data-i18n="table_loading">Loading...</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="pagination-controls no-print" id="paginationControls" style="display: none;">
+                <div class="pagination-info">
+                    <span data-i18n="showing">Showing</span>
+                    <span id="startRecord">0</span>-<span id="endRecord">0</span>
+                    <span data-i18n="of">of</span>
+                    <span id="totalRecords">0</span>
+                    <span data-i18n="records">records</span>
+                </div>
+                <div class="pagination-nav">
+                    <button class="page-btn" onclick="goToFirstPage()" id="firstPageBtn" disabled>
+                        <i class="fas fa-angle-double-right"></i>
+                    </button>
+                    <button class="page-btn" onclick="goToPrevPage()" id="prevPageBtn" disabled>
+                        <i class="fas fa-angle-right"></i>
+                    </button>
+                    <span>
+                        <span data-i18n="page">Page</span>
+                        <input type="number" id="pageInput" class="page-input" min="1" value="1" onchange="goToPage(this.value)">
+                        <span data-i18n="of">of</span>
+                        <span id="totalPages">1</span>
+                    </span>
+                    <button class="page-btn" onclick="goToNextPage()" id="nextPageBtn" disabled>
+                        <i class="fas fa-angle-left"></i>
+                    </button>
+                    <button class="page-btn" onclick="goToLastPage()" id="lastPageBtn" disabled>
+                        <i class="fas fa-angle-double-left"></i>
+                    </button>
+                </div>
+                <div class="pagination-info">
+                    <span data-i18n="rows_per_page">Rows per page:</span>
+                    <select id="rowsPerPage" onchange="changeRowsPerPage(this.value)">
+                        <option value="10">10</option>
+                        <option value="25" selected>25</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="message" id="message"></div>
+        <div id="printReport" class="print-report" style="display: none;">
+            <div class="print-header">
+                <h1>Employee Personal Work Report - Municipality</h1>
+                <p id="reportDate"></p>
+                <p id="reportUserInfo"></p>
+            </div>
+            <div id="reportStats"></div>
+            <div id="reportTable"></div>
+            <div class="print-footer">
+                <p>Generated on: <span id="printTime"></span></p>
+                <p>All rights reserved © Municipality</p>
+            </div>
+        </div>
+    </div>
+    <script>
+        const API_ENDPOINT = '/health_vet/api/get_user_complaints.php';
+        const FORM_BASE_URL = '/health_vet/public/add_Complaints.html';
+        const LANG_PATH = '/health_vet/languages/';
+      
+        let currentLang = localStorage.getItem('lang') || 'en';
+        let translations = {};
+        let allComplaints = [];
+        let statsCounts = {};
+        let isLoading = false;
+        let currentUserEmpID = 'EMP001';
+      
+        let currentPage = 1;
+        let rowsPerPage = 25;
+        let totalPages = 1;
+        let totalRecords = 0;
+        async function loadTranslations(lang = null) {
+            if (lang) currentLang = lang;
+            try {
+                const langFileName = `${currentLang}_user_complaints.json`;
+                const response = await fetch(`${LANG_PATH}${langFileName}`);
+                if (!response.ok) throw new Error(`Failed to load: ${response.status}`);
+                translations = await response.json();
+                applyTranslations();
+                updatePageDirection();
+                localStorage.setItem('lang', currentLang);
+                console.log(`Translations loaded: ${currentLang}`);
+                return true;
+            } catch (err) {
+                console.error('Error loading translations:', err);
+                translations = {};
+                applyTranslations();
+                return false;
+            }
+        }
+        function applyTranslations() {
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                const text = translations[key] || key;
+                if (el.tagName === 'INPUT' && el.hasAttribute('placeholder')) {
+                    el.placeholder = text;
+                } else if (el.tagName === 'TITLE') {
+                    document.title = text;
+                } else {
+                    el.textContent = text;
+                }
+            });
+            const langText = document.getElementById('langText');
+            if (langText) langText.textContent = currentLang === 'en' ? 'العربية' : 'English';
+        }
+        function updatePageDirection() {
+            const dir = currentLang === 'en' ? 'ltr' : 'rtl';
+            document.documentElement.dir = dir;
+            document.documentElement.lang = currentLang;
+        }
+        function translateType(type) {
+            return translations[`type_${type.toLowerCase()}`] || type;
+        }
+        function translatePriority(priority) {
+            return translations[`priority_${priority.toLowerCase()}`] || priority;
+        }
+        function translateSource(source) {
+            return translations[`source_${source.toLowerCase().replace(/ /g, '-')}`] || source;
+        }
+        function translateFinalStatus(status) {
+            return translations[`final_status_${status.toLowerCase().replace(/ /g, '')}`] || status;
+        }
+        async function loadDashboard() {
+            if (isLoading) return;
+            isLoading = true;
+            showLoadingState();
+            showMessage(translations['loading'] || 'Loading...', true);
+            try {
+                const params = new URLSearchParams({ empID: currentUserEmpID });
+                const from = document.getElementById('filterDateFrom').value;
+                const to = document.getElementById('filterDateTo').value;
+                const type = document.getElementById('filterComplaintType').value;
+                const priority = document.getElementById('filterResponsePriority').value;
+                const source = document.getElementById('filterSource').value;
+                const area = document.getElementById('filterArea').value;
+                if (from) params.append('from', from);
+                if (to) params.append('to', to);
+                if (type) params.append('type', type);
+                if (priority) params.append('priority', priority);
+                if (source) params.append('source', source);
+                if (area) params.append('area', area);
+                const response = await fetch(`${API_ENDPOINT}?${params}`);
+                if (!response.ok) throw new Error(`Connection error: ${response.status}`);
+                const data = await response.json();
+                if (data.success) {
+                    allComplaints = data.data || [];
+                    displayUserInfo(data.userInfo || {});
+                    displayStats(allComplaints);
+                    loadComplaints(allComplaints);
+                    document.getElementById('printBtn').style.display = 'inline-flex';
+                    document.getElementById('excelBtn').style.display = 'inline-flex';
+                    document.getElementById('exportControls').style.display = 'flex';
+                    showMessage(translations['success_loading'] || 'Loaded successfully', true);
+                } else {
+                    throw new Error(data.message || (translations['error_fetching'] || 'Error fetching data'));
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage(`${translations['error_fetching'] || 'Error'}: ${error.message}`, false);
+                displayEmptyStates();
+            } finally {
+                isLoading = false;
+                hideLoadingState();
+            }
+        }
+        function displayEmptyStates() {
+            displayUserInfo({});
+            displayStats([]);
+            loadComplaints([]);
+            document.getElementById('printBtn').style.display = 'none';
+            document.getElementById('excelBtn').style.display = 'none';
+            document.getElementById('exportControls').style.display = 'none';
+            document.getElementById('paginationControls').style.display = 'none';
+        }
+        function showLoadingState() {
+            document.querySelectorAll('.loading').forEach(el => el.style.display = 'flex');
+        }
+        function hideLoadingState() {
+            document.querySelectorAll('.loading').forEach(el => el.style.display = 'none');
+        }
+        function displayUserInfo(userInfo) {
+            document.getElementById('empName').textContent = userInfo.EmpName || (translations['unknown'] || 'Unknown');
+            document.getElementById('empId').textContent = userInfo.EmpID || (translations['unknown'] || 'Unknown');
+            document.getElementById('empTitle').textContent = userInfo.JobTitle || (translations['unknown'] || 'Unknown');
+        }
+        function displayStats(data) {
+            statsCounts = {
+                total: data.length,
+                open: data.filter(c => c.ComplaintStatus === 'Open').length,
+                inprogress: data.filter(c => c.ComplaintStatus === 'In Progress').length,
+                closed: data.filter(c => c.ComplaintStatus === 'Closed').length,
+                onhold: data.filter(c => c.ComplaintStatus === 'On Hold').length,
+                rejected: data.filter(c => c.ComplaintStatus === 'Rejected').length
+            };
+            const statsHTML = `
+                <div class="stat-card"><h4>${translations['total'] || 'Total'}</h4><div class="number">${statsCounts.total}</div></div>
+                <div class="stat-card"><h4>${translations['open'] || 'Open'}</h4><div class="number">${statsCounts.open}</div></div>
+                <div class="stat-card"><h4>${translations['inprogress'] || 'In Progress'}</h4><div class="number">${statsCounts.inprogress}</div></div>
+                <div class="stat-card"><h4>${translations['closed'] || 'Closed'}</h4><div class="number">${statsCounts.closed}</div></div>
+                <div class="stat-card"><h4>${translations['onhold'] || 'On Hold'}</h4><div class="number">${statsCounts.onhold}</div></div>
+                <div class="stat-card"><h4>${translations['rejected'] || 'Rejected'}</h4><div class="number">${statsCounts.rejected}</div></div>
+            `;
+            document.getElementById('statsSection').innerHTML = statsHTML;
+            updateNotifications(statsCounts.open, data.filter(c => c.FinalStatus === 'Pending Close').length);
+        }
+        function updateNotifications(openCount, pendingCount) {
+            const openNotif = document.getElementById('openNotification');
+            const pendingNotif = document.getElementById('pendingCloseNotification');
+            openNotif.style.display = openCount > 0 ? 'flex' : 'none';
+            document.getElementById('openCount').textContent = openCount;
+            pendingNotif.style.display = pendingCount > 0 ? 'flex' : 'none';
+            document.getElementById('pendingCloseCount').textContent = pendingCount;
+        }
+        function calculatePagination() {
+            totalRecords = allComplaints.length;
+            totalPages = Math.ceil(totalRecords / rowsPerPage);
+            if (currentPage > totalPages) currentPage = totalPages || 1;
+            updatePaginationControls();
+        }
+        function updatePaginationControls() {
+            const start = (currentPage - 1) * rowsPerPage + 1;
+            const end = Math.min(currentPage * rowsPerPage, totalRecords);
+            document.getElementById('startRecord').textContent = start;
+            document.getElementById('endRecord').textContent = end;
+            document.getElementById('totalRecords').textContent = totalRecords;
+            document.getElementById('currentPage').textContent = currentPage;
+            document.getElementById('totalPages').textContent = totalPages;
+            document.getElementById('pageInput').value = currentPage;
+            document.getElementById('firstPageBtn').disabled = currentPage === 1;
+            document.getElementById('prevPageBtn').disabled = currentPage === 1;
+            document.getElementById('nextPageBtn').disabled = currentPage === totalPages;
+            document.getElementById('lastPageBtn').disabled = currentPage === totalPages;
+            document.getElementById('paginationControls').style.display = totalRecords > 0 ? 'flex' : 'none';
+        }
+        function goToFirstPage() { currentPage = 1; loadComplaints(allComplaints); }
+        function goToPrevPage() { if (currentPage > 1) { currentPage--; loadComplaints(allComplaints); } }
+        function goToNextPage() { if (currentPage < totalPages) { currentPage++; loadComplaints(allComplaints); } }
+        function goToLastPage() { currentPage = totalPages; loadComplaints(allComplaints); }
+        function goToPage(pageNum) {
+            const page = parseInt(pageNum);
+            if (page >= 1 && page <= totalPages) { currentPage = page; loadComplaints(allComplaints); } else document.getElementById('pageInput').value = currentPage;
+        }
+        function changeRowsPerPage(newRows) { rowsPerPage = parseInt(newRows); currentPage = 1; loadComplaints(allComplaints); }
+        function loadComplaints(complaints) {
+            const tbody = document.querySelector('#complaintsTable tbody');
+            if (!tbody) return;
+            hideLoadingState();
+            calculatePagination();
+            const start = (currentPage - 1) * rowsPerPage;
+            const end = Math.min(start + rowsPerPage, complaints.length);
+            const pageData = complaints.slice(start, end);
+            if (pageData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="13" class="no-data">${translations['table_no_data'] || 'No data available'}</td></tr>`;
+                document.getElementById('paginationControls').style.display = 'none';
+                return;
+            }
+            tbody.innerHTML = pageData.map(c => {
+                const statusClass = `status-${(c.ComplaintStatus || '').toLowerCase().replace(/ /g, '')}`;
+                const finalStatusClass = `final-status-${(c.FinalStatus || '').toLowerCase().replace(/ /g, '')}`;
+                const regDelay = parseInt(c.RegistrationDelayDays || 0) > 0 ? `<span class="kpi-badge kpi-delay">${c.RegistrationDelayDays}</span>` : '<span class="kpi-badge kpi-normal">-</span>';
+                const fupDelay = parseInt(c.FollowUpDelayDays || 0) > 0 ? `<span class="kpi-badge kpi-warning">${c.FollowUpDelayDays}</span>` : '<span class="kpi-badge kpi-normal">-</span>';
+                const mapLink = c.Coordinates ? `<a href="https://maps.google.com/?q=${encodeURIComponent(c.Coordinates)}" target="_blank" class="action-btn map"><i class="fas fa-map-marker-alt"></i> ${translations['action_map'] || 'Map'}</a>` : '-';
+                return `
+                    <tr>
+                        <td>${c.ComplaintNo || ''}</td>
+                        <td>${c.ComplainantName || ''}</td>
+                        <td>${formatDate(c.ComplaintDate)}</td>
+                        <td>${formatDate(c.ReceivedDate)}</td>
+                        <td>${regDelay}</td>
+                        <td>${fupDelay}</td>
+                        <td>${translateType(c.ComplaintType)}</td>
+                        <td>${c.Area || ''}</td>
+                        <td><span class="status-badge ${statusClass}">${c.ComplaintStatus || ''}</span></td>
+                        <td><span class="status-badge ${finalStatusClass}">${translateFinalStatus(c.FinalStatus || '')}</span></td>
+                        <td>${c.ResponseDays || '-'}</td>
+                        <td>${mapLink}</td>
+                        <td><button class="action-btn edit" onclick="editComplaint(${c.ComplaintID})" title="${translations['action_edit'] || 'Edit'}"><i class="fas fa-edit"></i></button></td>
+                    </tr>
+                `;
+            }).join('');
+        }
+        function exportToExcel() {
+            if (allComplaints.length === 0) return showMessage('No data to export', false);
+            const excelData = allComplaints.map(c => ({
+                'Complaint No': c.ComplaintNo || '',
+                'Complainant Name': c.ComplainantName || '',
+                'Complaint Date': formatDate(c.ComplaintDate),
+                'Received Date': formatDate(c.ReceivedDate),
+                'Registration Delay': c.RegistrationDelayDays || 0,
+                'Follow-up Delay': c.FollowUpDelayDays || 0,
+                'Type': translateType(c.ComplaintType),
+                'Area': c.Area || '',
+                'Status': c.ComplaintStatus || '',
+                'Final Status': translateFinalStatus(c.FinalStatus || ''),
+                'Response Days': c.ResponseDays || 0
+            }));
+            const ws = XLSX.utils.json_to_sheet(excelData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'My Work');
+            XLSX.writeFile(wb, `My_Work_${new Date().toISOString().split('T')[0]}.xlsx`);
+            showMessage('Exported successfully', true);
+        }
+        function printReport() {
+            if (allComplaints.length === 0) return showMessage('No data to print', false);
+            const reportDate = new Date().toLocaleDateString('en-GB');
+            const printTime = new Date().toLocaleTimeString('en-GB');
+            const empName = document.getElementById('empName').textContent;
+            const empId = document.getElementById('empId').textContent;
+            const empTitle = document.getElementById('empTitle').textContent;
+            const reportStatsHTML = `
+                <h2>${translations['stats_title_main'] || 'Statistics'}</h2>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                    <div style="text-align: center; padding: 0.5rem; border: 1px solid #ddd;">
+                        <h4>${translations['total'] || 'Total'}</h4>
+                        <div style="font-size: 1.25rem; font-weight: bold;">${statsCounts.total}</div>
+                    </div>
+                    <div style="text-align: center; padding: 0.5rem; border: 1px solid #ddd;">
+                        <h4>${translations['open'] || 'Open'}</h4>
+                        <div style="font-size: 1.25rem; font-weight: bold;">${statsCounts.open}</div>
+                    </div>
+                    <div style="text-align: center; padding: 0.5rem; border: 1px solid #ddd;">
+                        <h4>${translations['inprogress'] || 'In Progress'}</h4>
+                        <div style="font-size: 1.25rem; font-weight: bold;">${statsCounts.inprogress}</div>
+                    </div>
+                    <div style="text-align: center; padding: 0.5rem; border: 1px solid #ddd;">
+                        <h4>${translations['closed'] || 'Closed'}</h4>
+                        <div style="font-size: 1.25rem; font-weight: bold;">${statsCounts.closed}</div>
+                    </div>
+                </div>
+            `;
+            const reportTableHTML = `
+                <h2>${translations['complaint_list_title'] || 'Complaints List'}</h2>
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 2rem; font-size: 8px;">
+                    <thead>
+                        <tr style="background: #2E5939; color: white;">
+                            <th style="padding: 4px; border: 1px solid #000;">${translations['complaint_no'] || 'Complaint No'}</th>
+                            <th style="padding: 4px; border: 1px solid #000;">${translations['complainant_name'] || 'Complainant Name'}</th>
+                            <th style="padding: 4px; border: 1px solid #000;">${translations['complaint_date'] || 'Complaint Date'}</th>
+                            <th style="padding: 4px; border: 1px solid #000;">${translations['received_date'] || 'Received Date'}</th>
+                            <th style="padding: 4px; border: 1px solid #000;">${translations['complaint_type'] || 'Type'}</th>
+                            <th style="padding: 4px; border: 1px solid #000;">${translations['area'] || 'Area'}</th>
+                            <th style="padding: 4px; border: 1px solid #000;">${translations['complaint_status'] || 'Status'}</th>
+                            <th style="padding: 4px; border: 1px solid #000;">${translations['final_status'] || 'Final Status'}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${allComplaints.map(c => `
+                            <tr>
+                                <td style="padding: 2px; border: 1px solid #000;">${c.ComplaintNo || ''}</td>
+                                <td style="padding: 2px; border: 1px solid #000;">${c.ComplainantName || ''}</td>
+                                <td style="padding: 2px; border: 1px solid #000;">${formatDate(c.ComplaintDate)}</td>
+                                <td style="padding: 2px; border: 1px solid #000;">${formatDate(c.ReceivedDate)}</td>
+                                <td style="padding: 2px; border: 1px solid #000;">${translateType(c.ComplaintType)}</td>
+                                <td style="padding: 2px; border: 1px solid #000;">${c.Area || ''}</td>
+                                <td style="padding: 2px; border: 1px solid #000;">${c.ComplaintStatus || ''}</td>
+                                <td style="padding: 2px; border: 1px solid #000;">${translateFinalStatus(c.FinalStatus || '')}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            document.getElementById('reportDate').innerHTML = `<strong>${translations['report_date'] || 'Report Date'}: ${reportDate}</strong>`;
+            document.getElementById('reportUserInfo').innerHTML = `Employee: ${empName} - ID: ${empId} - Title: ${empTitle}`;
+            document.getElementById('reportStats').innerHTML = reportStatsHTML;
+            document.getElementById('reportTable').innerHTML = reportTableHTML;
+            document.getElementById('printTime').textContent = printTime;
+            const printContent = document.getElementById('printReport');
+            printContent.style.display = 'block';
+            window.print();
+            setTimeout(() => {
+                printContent.style.display = 'none';
+            }, 500);
+        }
+        function formatDate(dateStr) {
+            if (!dateStr) return '';
+            try { return new Date(dateStr).toLocaleDateString('en-GB'); } catch { return dateStr; }
+        }
+        function resetFilter() {
+            document.querySelectorAll('#filterDateFrom, #filterDateTo, #filterComplaintType, #filterResponsePriority, #filterSource, #filterArea').forEach(el => el.value = '');
+            currentPage = 1;
+            loadDashboard();
+        }
+        function editComplaint(id) {
+            window.open(`${FORM_BASE_URL}?ComplaintID=${id}`, '_blank');
+        }
+        function showMessage(text, isSuccess) {
+            const msg = document.getElementById('message');
+            msg.textContent = text;
+            msg.className = `message ${isSuccess ? 'success' : 'error'}`;
+            msg.style.display = 'block';
+            setTimeout(() => { msg.style.display = 'none'; }, 5000);
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            loadTranslations().then(() => loadDashboard());
+            document.getElementById('langBtn').addEventListener('click', () => {
+                const newLang = currentLang === 'en' ? 'ar' : 'en';
+                loadTranslations(newLang).then(loadDashboard);
+            });
+            document.querySelectorAll('#filterDateFrom, #filterDateTo, #filterComplaintType, #filterResponsePriority, #filterSource, #filterArea').forEach(input => {
+                input.addEventListener('keypress', e => { if (e.key === 'Enter') loadDashboard(); });
+            });
+        });
+        window.loadDashboard = loadDashboard;
+        window.resetFilter = resetFilter;
+        window.editComplaint = editComplaint;
+        window.printReport = printReport;
+        window.exportToExcel = exportToExcel;
+        window.goToFirstPage = goToFirstPage;
+        window.goToPrevPage = goToPrevPage;
+        window.goToNextPage = goToNextPage;
+        window.goToLastPage = goToLastPage;
+        window.goToPage = goToPage;
+        window.changeRowsPerPage = changeRowsPerPage;
+    </script>
+</body>
+</html>

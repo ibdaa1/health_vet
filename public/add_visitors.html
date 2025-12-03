@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة الزوار - Health Vet</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        /* الألوان الهوية المؤسسية */
+        :root {
+            --primary-color: #2E4F4F; /* أخضر داكن / زيتوني غامق */
+            --secondary-color: #D4AF37; /* ذهبي / بيج داكن */
+            --text-primary: var(--primary-color);
+            --text-secondary: var(--secondary-color);
+        }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: white; /* خلفية بيضاء */
+            font-size: 12px; /* تصغير الخط */
+            overflow-x: auto;
+        }
+        h1, .h1 { color: var(--text-primary); font-size: 18px; }
+        .table th { 
+            background-color: var(--primary-color); 
+            color: white; 
+            position: relative;
+            padding: 8px 4px;
+            font-size: 11px;
+        }
+        .filter-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 10px;
+            cursor: pointer;
+            margin-right: 2px;
+            padding: 2px;
+        }
+        .filter-btn:hover { color: var(--secondary-color); }
+        .filter-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            z-index: 1000;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            /* صغيرة بنفس عرض العمود */
+            width: 100%;
+            min-width: unset;
+            max-height: 250px;
+            overflow-y: auto;
+            padding: 5px;
+            font-size: 11px;
+        }
+        .filter-search { width: 100%; padding: 3px; border: 1px solid #eee; border-radius: 3px; margin-bottom: 5px; font-size: 11px; }
+        .filter-checkbox { display: flex; align-items: center; padding: 2px; cursor: pointer; margin-bottom: 2px; }
+        .filter-checkbox:hover { background: #f8f9fa; }
+        .filter-checkbox input[type="checkbox"] { width: 12px; height: 12px; margin-left: 5px; } /* أيقونات شيك صغيرة جداً */
+        .date-range { display: flex; gap: 3px; margin-bottom: 5px; }
+        .date-range input { flex: 1; font-size: 11px; padding: 2px; }
+        .filter-actions { display: flex; gap: 3px; margin-top: 5px; }
+        .filter-actions button { font-size: 10px; padding: 2px 4px; flex: 1; }
+        .btn-primary { background-color: var(--primary-color); border-color: var(--primary-color); font-size: 11px; padding: 4px 8px; }
+        .btn-primary:hover { background-color: var(--text-secondary); }
+        .btn-sm { font-size: 10px; padding: 2px 4px; }
+        .form-control, .form-select { font-size: 11px; padding: 3px 5px; }
+        .form-control:focus { border-color: var(--text-secondary); box-shadow: 0 0 0 0.15rem rgba(212, 175, 55, 0.25); }
+        #formContainer { 
+            display: none; 
+            background: white; 
+            padding: 15px; 
+            border: 1px solid #ddd; 
+            margin-bottom: 15px; 
+            border-radius: 5px; 
+            box-shadow: 0 1px 5px rgba(0,0,0,0.05);
+        }
+        .lang-toggle { position: absolute; left: 10px; top: 10px; z-index: 1001; font-size: 11px; padding: 4px; }
+        .header-bar { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 15px; 
+            padding: 5px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .table-responsive { 
+            box-shadow: 0 1px 5px rgba(0,0,0,0.05); 
+            border-radius: 5px; 
+            overflow: hidden; 
+            margin-bottom: 20px;
+        }
+        /* RTL للعربية في النموذج */
+        [dir="rtl"] #formContainer {
+            direction: rtl;
+        }
+        [dir="rtl"] #formContainer input[type="text"],
+        [dir="rtl"] #formContainer input[type="datetime-local"],
+        [dir="rtl"] #formContainer select {
+            direction: rtl;
+            text-align: right;
+        }
+        /* LTR للإنجليزية */
+        [dir="ltr"] #formContainer {
+            direction: ltr;
+        }
+        [dir="ltr"] #formContainer input[type="text"],
+        [dir="ltr"] #formContainer input[type="datetime-local"],
+        [dir="ltr"] #formContainer select {
+            direction: ltr;
+            text-align: left;
+        }
+        @media (max-width: 768px) { /* للهواتف والتابلت */
+            body { font-size: 10px; }
+            .container-fluid { padding: 5px; }
+            .table th, .table td { padding: 4px 2px; font-size: 9px; }
+            .filter-dropdown { max-height: 200px; }
+            .row { flex-direction: column; }
+            .col-md-4, .col-md-6 { width: 100%; margin-bottom: 10px; }
+            .btn { font-size: 9px; padding: 3px 6px; }
+        }
+        @media (min-width: 769px) and (max-width: 1024px) { /* للتابلت */
+            body { font-size: 11px; }
+            .table th, .table td { padding: 6px 3px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- زر تبديل اللغة -->
+    <button class="btn btn-outline-secondary lang-toggle" id="langToggle">
+        <i class="fas fa-globe"></i> EN
+    </button>
+
+    <div class="container-fluid mt-2 px-2"> <!-- container-fluid للـ responsive -->
+        <div class="header-bar">
+            <h1 class="mb-0" id="pageTitle">إدارة الزوار</h1>
+            <div></div>
+        </div>
+        
+        <!-- نموذج الإضافة/التعديل -->
+        <div id="formContainer">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h5 id="formTitle" style="font-size: 14px;">إضافة زائر جديد</h5>
+                <button id="cancelBtn" class="btn btn-secondary btn-sm"><i class="fas fa-times"></i></button>
+            </div>
+            <form id="visitorForm">
+                <input type="hidden" id="visitors_id" name="visitors_id">
+                <div class="row g-2">
+                    <div class="col-md-4">
+                        <label for="visitors_date" class="form-label" style="font-size: 11px;" id="lbl-visitors_date">التاريخ *</label>
+                        <input type="datetime-local" class="form-control" id="visitors_date" name="visitors_date" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="time_in" class="form-label" style="font-size: 11px;" id="lbl-time_in">وقت الدخول *</label>
+                        <input type="datetime-local" class="form-control" id="time_in" name="time_in" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="time_out" class="form-label" style="font-size: 11px;" id="lbl-time_out">وقت الخروج</label>
+                        <input type="datetime-local" class="form-control" id="time_out" name="time_out">
+                    </div>
+                </div>
+                <div class="row g-2">
+                    <div class="col-md-6">
+                        <label for="visitor_name" class="form-label" style="font-size: 11px;" id="lbl-visitor_name">اسم الزائر *</label>
+                        <input type="text" class="form-control" id="visitor_name" name="visitor_name" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="contact_number" class="form-label" style="font-size: 11px;" id="lbl-contact_number">رقم الاتصال</label>
+                        <input type="text" class="form-control" id="contact_number" name="contact_number">
+                    </div>
+                </div>
+                <div class="row g-2">
+                    <div class="col-md-6">
+                        <label for="visit_type" class="form-label" style="font-size: 11px;" id="lbl-visit_type">نوع الزيارة *</label>
+                        <select class="form-select" id="visit_type" name="visit_type" required>
+                            <option value="Personal">شخصي</option>
+                            <option value="Official">رسمي</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="entity" class="form-label" style="font-size: 11px;" id="lbl-entity">الجهة</label>
+                        <input type="text" class="form-control" id="entity" name="entity" value="Environment & Protected Areas Authority">
+                    </div>
+                </div>
+                <div class="row g-2">
+                    <div class="col-md-6">
+                        <label for="service_type" class="form-label" style="font-size: 11px;" id="lbl-service_type">نوع الخدمة *</label>
+                        <select class="form-select" id="service_type" name="service_type" required>
+                            <option value="Visit">زيارة</option>
+                            <option value="Adoption">تبني</option>
+                            <option value="Surrender">تسليم</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="button" id="saveBtn" class="btn btn-primary btn-sm mt-2"><i class="fas fa-save"></i> حفظ</button>
+            </form>
+        </div>
+        
+        <button id="addNewBtn" class="btn btn-primary btn-sm mb-2">
+            <i class="fas fa-plus"></i> إضافة زائر جديد
+        </button>
+        
+        <!-- تقرير بسيط بالعربية -->
+        <div id="reportSection" style="display: none; margin-bottom: 15px; padding: 10px; background: #f8f9fa; border-radius: 5px; font-size: 11px;">
+            <h6 id="reportTitle" style="margin-bottom: 10px; color: var(--primary-color);">تقرير الزوار</h6>
+            <div id="reportContent"></div>
+            <button id="printReport" class="btn btn-sm btn-primary mt-2"><i class="fas fa-print"></i> طباعة التقرير</button>
+        </div>
+        
+        <div class="table-responsive">
+            <table class="table table-striped table-hover table-sm" id="visitorsTable"> <!-- table-sm للتصغير -->
+                <thead>
+                    <tr>
+                        <th style="width: 120px;">
+                            <span id="th-date">التاريخ</span>
+                            <button class="filter-btn" data-column="visitors_date"><i class="fas fa-filter"></i></button>
+                        </th>
+                        <th style="width: 100px;">
+                            <span id="th-timein">الوقت الدخول</span>
+                            <button class="filter-btn" data-column="time_in"><i class="fas fa-filter"></i></button>
+                        </th>
+                        <th style="width: 100px;">
+                            <span id="th-timeout">الوقت الخروج</span>
+                            <button class="filter-btn" data-column="time_out"><i class="fas fa-filter"></i></button>
+                        </th>
+                        <th style="width: 150px;">
+                            <span id="th-name">اسم الزائر</span>
+                            <button class="filter-btn" data-column="visitor_name"><i class="fas fa-filter"></i></button>
+                        </th>
+                        <th style="width: 100px;">
+                            <span id="th-contact">رقم الاتصال</span>
+                            <button class="filter-btn" data-column="contact_number"><i class="fas fa-filter"></i></button>
+                        </th>
+                        <th style="width: 80px;">
+                            <span id="th-visittype">نوع الزيارة</span>
+                            <button class="filter-btn" data-column="visit_type"><i class="fas fa-filter"></i></button>
+                        </th>
+                        <th style="width: 150px;">
+                            <span id="th-entity">الجهة</span>
+                            <button class="filter-btn" data-column="entity"><i class="fas fa-filter"></i></button>
+                        </th>
+                        <th style="width: 80px;">
+                            <span id="th-servicetype">نوع الخدمة</span>
+                            <button class="filter-btn" data-column="service_type"><i class="fas fa-filter"></i></button>
+                        </th>
+                        <th style="width: 100px;">
+                            <span id="th-createdby">مسجل بواسطة</span>
+                            <button class="filter-btn" data-column="created_by_name"><i class="fas fa-filter"></i></button>
+                        </th>
+                        <th style="width: 80px;" id="th-actions">إجراءات</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Dropdown للفلاتر -->
+    <div id="filterDropdown" class="filter-dropdown" style="display: none;"></div>
+    <script src="session_check.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentLang = 'ar';
+        let translations = {};
+        
+        // ترجمات العربية
+        const arTranslations = {
+            "pageTitle": "إدارة الزوار",
+            "modalTitle": "إضافة زائر جديد",
+            "addTitle": "إضافة زائر جديد",
+            "editTitle": "تعديل الزائر",
+            "save": "حفظ",
+            "cancel": "إلغاء",
+            "close": "إغلاق",
+            "addNew": "إضافة زائر جديد",
+            "edit": "تعديل",
+            "delete": "حذف",
+            "confirmDelete": "هل أنت متأكد من الحذف؟",
+            "apply": "تطبيق",
+            "clear": "مسح",
+            "search": "بحث...",
+            "selectAll": "تحديد الكل",
+            "showEmpty": "إظهار القيم الفارغة",
+            "empty": "فارغ",
+            "unauthorized": "غير مصرح لك بالوصول إلى هذه الصفحة.",
+            "errorLoad": "خطأ في جلب البيانات",
+            "errorServer": "خطأ في الاتصال بالخادم.",
+            "errorEdit": "خطأ في جلب بيانات التعديل.",
+            "visitorName": "اسم الزائر",
+            "contactNumber": "رقم الاتصال",
+            "visitType": "نوع الزيارة",
+            "entity": "الجهة",
+            "serviceType": "نوع الخدمة",
+            "personal": "شخصي",
+            "official": "رسمي",
+            "visit": "زيارة",
+            "adoption": "تبني",
+            "surrender": "تسليم",
+            "createdBy": "مسجل بواسطة",
+            "date": "التاريخ",
+            "timeIn": "الوقت الدخول",
+            "timeOut": "الوقت الخروج",
+            "reportTitle": "تقرير الزوار",
+            "totalVisitors": "إجمالي الزوار",
+            "filteredVisitors": "عدد الزوار المفلتر",
+            "dateRange": "نطاق التاريخ",
+            "print": "طباعة التقرير",
+            "dateLabel": "التاريخ *",
+            "timeInLabel": "وقت الدخول *",
+            "timeOutLabel": "وقت الخروج",
+            "visitorNameLabel": "اسم الزائر *",
+            "contactNumberLabel": "رقم الاتصال",
+            "visitTypeLabel": "نوع الزيارة *",
+            "entityLabel": "الجهة",
+            "serviceTypeLabel": "نوع الخدمة *",
+            "actions": "إجراءات"
+        };
+        
+        // ترجمات الإنجليزية
+        const enTranslations = {
+            "pageTitle": "Visitors Management",
+            "modalTitle": "Add New Visitor",
+            "addTitle": "Add New Visitor",
+            "editTitle": "Edit Visitor",
+            "save": "Save",
+            "cancel": "Cancel",
+            "close": "Close",
+            "addNew": "Add New Visitor",
+            "edit": "Edit",
+            "delete": "Delete",
+            "confirmDelete": "Are you sure you want to delete?",
+            "apply": "Apply",
+            "clear": "Clear",
+            "search": "Search...",
+            "selectAll": "Select All",
+            "showEmpty": "Show Empty Values",
+            "empty": "Empty",
+            "unauthorized": "You are not authorized to access this page.",
+            "errorLoad": "Error loading data",
+            "errorServer": "Server connection error.",
+            "errorEdit": "Error fetching edit data.",
+            "visitorName": "Visitor Name",
+            "contactNumber": "Contact Number",
+            "visitType": "Visit Type",
+            "entity": "Entity",
+            "serviceType": "Service Type",
+            "personal": "Personal",
+            "official": "Official",
+            "visit": "Visit",
+            "adoption": "Adoption",
+            "surrender": "Surrender",
+            "createdBy": "Created By",
+            "date": "Date",
+            "timeIn": "Time In",
+            "timeOut": "Time Out",
+            "reportTitle": "Visitors Report",
+            "totalVisitors": "Total Visitors",
+            "filteredVisitors": "Filtered Visitors Count",
+            "dateRange": "Date Range",
+            "print": "Print Report",
+            "dateLabel": "Date *",
+            "timeInLabel": "Time In *",
+            "timeOutLabel": "Time Out",
+            "visitorNameLabel": "Visitor Name *",
+            "contactNumberLabel": "Contact Number",
+            "visitTypeLabel": "Visit Type *",
+            "entityLabel": "Entity",
+            "serviceTypeLabel": "Service Type *",
+            "actions": "Actions"
+        };
+        
+        // تحميل الترجمات
+        function loadTranslations(lang) {
+            translations = lang === 'ar' ? arTranslations : enTranslations;
+            updateUI();
+        }
+        
+        let allData = [];
+        let employees = [];
+        let permissions = {};
+        let activeFilters = {}; // { column: [selectedValues] }
+        
+        // تحديث النصوص والـ dir
+        function updateUI() {
+            $('html').attr('lang', currentLang).attr('dir', currentLang === 'ar' ? 'rtl' : 'ltr');
+            $('#pageTitle').text(translations.pageTitle || 'إدارة الزوار');
+            $('#formTitle').text(translations.modalTitle || 'إضافة زائر جديد');
+            $('#addNewBtn').html(`<i class="fas fa-plus"></i> ${translations.addNew || 'إضافة زائر جديد'}`);
+            $('#cancelBtn').html(`<i class="fas fa-times"></i>`);
+            $('#saveBtn').html(`<i class="fas fa-save"></i> ${translations.save || 'حفظ'}`);
+            // عناوين الأعمدة
+            $('#th-date').text(translations.date || 'التاريخ');
+            $('#th-timein').text(translations.timeIn || 'الوقت الدخول');
+            $('#th-timeout').text(translations.timeOut || 'الوقت الخروج');
+            $('#th-name').text(translations.visitorName || 'اسم الزائر');
+            $('#th-contact').text(translations.contactNumber || 'رقم الاتصال');
+            $('#th-visittype').text(translations.visitType || 'نوع الزيارة');
+            $('#th-entity').text(translations.entity || 'الجهة');
+            $('#th-servicetype').text(translations.serviceType || 'نوع الخدمة');
+            $('#th-createdby').text(translations.createdBy || 'مسجل بواسطة');
+            $('#th-actions').text(translations.actions || 'إجراءات');
+            // تحديث تسميات النموذج
+            $('#lbl-visitors_date').text(translations.dateLabel || 'التاريخ *');
+            $('#lbl-time_in').text(translations.timeInLabel || 'وقت الدخول *');
+            $('#lbl-time_out').text(translations.timeOutLabel || 'وقت الخروج');
+            $('#lbl-visitor_name').text(translations.visitorNameLabel || 'اسم الزائر *');
+            $('#lbl-contact_number').text(translations.contactNumberLabel || 'رقم الاتصال');
+            $('#lbl-visit_type').text(translations.visitTypeLabel || 'نوع الزيارة *');
+            $('#lbl-entity').text(translations.entityLabel || 'الجهة');
+            $('#lbl-service_type').text(translations.serviceTypeLabel || 'نوع الخدمة *');
+            // تحديث dir للنموذج
+            $('#formContainer').attr('dir', currentLang === 'ar' ? 'rtl' : 'ltr');
+            // تحديث خيارات النموذج للترجمة
+            $('#visit_type option[value="Personal"]').text(currentLang === 'ar' ? translations.personal || 'شخصي' : translations.personal || 'Personal');
+            $('#visit_type option[value="Official"]').text(currentLang === 'ar' ? translations.official || 'رسمي' : translations.official || 'Official');
+            $('#service_type option[value="Visit"]').text(currentLang === 'ar' ? translations.visit || 'زيارة' : translations.visit || 'Visit');
+            $('#service_type option[value="Adoption"]').text(currentLang === 'ar' ? translations.adoption || 'تبني' : translations.adoption || 'Adoption');
+            $('#service_type option[value="Surrender"]').text(currentLang === 'ar' ? translations.surrender || 'تسليم' : translations.surrender || 'Surrender');
+            // تحديث تقرير
+            $('#reportTitle').text(translations.reportTitle || 'تقرير الزوار');
+            $('#printReport').html(`<i class="fas fa-print"></i> ${translations.print || 'طباعة التقرير'}`);
+            renderTable(allData);
+            generateReport();
+        }
+        
+        // تبديل اللغة
+        $('#langToggle').click(function() {
+            currentLang = currentLang === 'ar' ? 'en' : 'ar';
+            $(this).html(`<i class="fas fa-globe"></i> ${currentLang.toUpperCase()}`);
+            loadTranslations(currentLang);
+        });
+        
+        // جلب بيانات المستخدم
+        $.getJSON('../api/user_data.php', function(data) {
+            if (!data.success) {
+                window.location.href = 'login.php';
+                return;
+            }
+            permissions = data.permissions;
+            if (!permissions.canAdd && !permissions.canEdit && !permissions.canDelete) {
+                alert(translations.unauthorized || 'غير مصرح لك بالوصول إلى هذه الصفحة.');
+                window.history.back();
+                return;
+            }
+            if (!permissions.canAdd) $('#addNewBtn').hide();
+            loadData();
+        });
+        
+        // جلب البيانات
+        function loadData(filters = {}) {
+            let params = new URLSearchParams(filters);
+            $.getJSON('../api/add_visitors.php?' + params, function(response) {
+                if (response.success) {
+                    employees = response.employees || [];
+                    allData = response.data || []; // تأكيد array فارغ إذا لم يكن
+                    renderTable(allData);
+                    generateReport();
+                } else {
+                    alert(response.message || translations.errorLoad || 'خطأ في جلب البيانات');
+                    allData = []; // إعادة تعيين
+                    renderTable(allData);
+                    generateReport();
+                }
+            }).fail(function() {
+                alert(translations.errorServer || 'خطأ في الاتصال بالخادم.');
+                allData = [];
+                renderTable(allData);
+                generateReport();
+            });
+        }
+        
+        // رسم الجدول
+        function renderTable(data) {
+            let tbody = $('#tableBody');
+            tbody.empty();
+            let filteredData = data.filter(row => applyFilters(row));
+            filteredData.forEach(row => {
+                let tr = $('<tr>');
+                tr.append(`<td>${formatDate(row.visitors_date)}</td>`);
+                tr.append(`<td>${formatDate(row.time_in)}</td>`);
+                tr.append(`<td>${formatDate(row.time_out)}</td>`);
+                tr.append(`<td>${row.visitor_name || ''}</td>`);
+                tr.append(`<td>${row.contact_number || ''}</td>`);
+                tr.append(`<td>${translateValue(row.visit_type, 'visitType') || ''}</td>`);
+                tr.append(`<td>${row.entity || ''}</td>`);
+                tr.append(`<td>${translateValue(row.service_type, 'serviceType') || ''}</td>`);
+                tr.append(`<td>${row.created_by_name || ''}</td>`);
+                
+                let actions = '<td>';
+                if (permissions.canEdit) actions += `<button class="btn btn-warning btn-sm editBtn" data-id="${row.visitors_id}"><i class="fas fa-edit"></i></button> `;
+                if (permissions.canDelete) actions += `<button class="btn btn-danger btn-sm deleteBtn" data-id="${row.visitors_id}"><i class="fas fa-trash"></i></button>`;
+                actions += '</td>';
+                tr.append(actions);
+                tbody.append(tr);
+            });
+            
+            $('.editBtn').off('click').click(editRow);
+            $('.deleteBtn').off('click').click(deleteRow);
+        }
+        
+        // تنسيق التاريخ الميلادي dd/mm/yyyy
+        function formatDate(dateStr) {
+            if (!dateStr) return '';
+            let date = new Date(dateStr);
+            let day = String(date.getDate()).padStart(2, '0');
+            let month = String(date.getMonth() + 1).padStart(2, '0');
+            let year = date.getFullYear();
+            let hours = String(date.getHours()).padStart(2, '0');
+            let minutes = String(date.getMinutes()).padStart(2, '0');
+            return `${day}/${month}/${year} ${hours}:${minutes}`;
+        }
+        
+        // تطبيق الفلاتر (دعم multiple selection)
+        function applyFilters(row) {
+            for (let col in activeFilters) {
+                let selected = activeFilters[col] || [];
+                if (selected.length === 0) continue;
+                let val = row[col] || '';
+                if (!selected.includes(val)) return false;
+            }
+            // فلاتر التاريخ إذا وجدت
+            for (let col in activeFilters) {
+                if (col.includes('_from') || col.includes('_to')) continue;
+                let fromKey = `${col}_from`;
+                let toKey = `${col}_to`;
+                if (activeFilters[fromKey] || activeFilters[toKey]) {
+                    let dateVal = new Date(row[col]);
+                    let from = activeFilters[fromKey] ? new Date(activeFilters[fromKey]) : null;
+                    let to = activeFilters[toKey] ? new Date(activeFilters[toKey]) : null;
+                    if (from && dateVal < from) return false;
+                    if (to && dateVal > to) return false;
+                }
+            }
+            return true;
+        }
+        
+        // ترجمة القيم
+        function translateValue(val, key) {
+            if (!val) return '';
+            let transKey = val.toLowerCase();
+            return translations[`${key}_${transKey}`] || val;
+        }
+        
+        // فتح فلتر العمود (مثل Excel: checkboxes)
+        $(document).on('click', '.filter-btn', function(e) {
+            e.stopPropagation();
+            let column = $(this).data('column');
+            let th = $(this).closest('th');
+            let dropdown = $('#filterDropdown');
+            
+            // القيم الفريدة
+            let uniqueValues = [...new Set(allData.map(row => row[column] || translations.empty || 'فارغ'))].filter(v => v !== undefined && v !== null);
+            uniqueValues.sort((a, b) => a.localeCompare(b, currentLang));
+            
+            let selectedValues = activeFilters[column] || [];
+            let allSelected = uniqueValues.length > 0 && uniqueValues.every(v => selectedValues.includes(v));
+            let showEmpty = selectedValues.includes(translations.empty || 'فارغ');
+            
+            let html = `
+                <input type="text" class="filter-search" placeholder="${translations.search || 'بحث...'}">
+                <div class="filter-checkbox">
+                    <input type="checkbox" id="selectAll_${column}" ${allSelected ? 'checked' : ''}>
+                    <label for="selectAll_${column}" style="font-size: 11px; margin-right: 5px;">${translations.selectAll || 'تحديد الكل'}</label>
+                </div>
+                <div class="filter-checkbox">
+                    <input type="checkbox" id="showEmpty_${column}" ${showEmpty ? 'checked' : ''}>
+                    <label for="showEmpty_${column}" style="font-size: 11px; margin-right: 5px;">${translations.showEmpty || 'إظهار القيم الفارغة'}</label>
+                </div>
+            `;
+            
+            if (column.includes('date') || column.includes('time')) {
+                // فلتر تاريخ بين تاريخين
+                let from = activeFilters[`${column}_from`] || '';
+                let to = activeFilters[`${column}_to`] || '';
+                html += `
+                    <div class="date-range">
+                        <input type="date" id="filterFrom_${column}" class="form-control form-control-sm" value="${from}">
+                        <input type="date" id="filterTo_${column}" class="form-control form-control-sm" value="${to}">
+                    </div>
+                `;
+            } else {
+                // قائمة checkboxes
+                uniqueValues.forEach(val => {
+                    let displayVal = val === (translations.empty || 'فارغ') ? translations.empty || 'فارغ' : translateValue(val, column.replace('_', ''));
+                    let checked = selectedValues.includes(val) ? 'checked' : '';
+                    html += `
+                        <div class="filter-checkbox">
+                            <input type="checkbox" value="${val}" id="chk_${column}_${val.replace(/\s+/g, '_')}" ${checked}>
+                            <label for="chk_${column}_${val.replace(/\s+/g, '_')}" style="font-size: 11px; margin-right: 5px;">${displayVal}</label>
+                        </div>
+                    `;
+                });
+            }
+            
+            html += `
+                <div class="filter-actions">
+                    <button class="btn btn-primary btn-sm" onclick="applyColumnFilter('${column}')">${translations.apply || 'تطبيق'}</button>
+                    <button class="btn btn-secondary btn-sm" onclick="clearColumnFilter('${column}')">${translations.clear || 'مسح'}</button>
+                </div>
+            `;
+            
+            dropdown.html(html).css({
+                top: th.position().top + th.outerHeight(),
+                left: th.position().left,
+                width: th.width(),
+                right: 'auto'
+            }).show();
+            
+            // تحديد الكل
+            $(`#selectAll_${column}`).off('change').change(function() {
+                let isChecked = this.checked;
+                $(`.filter-dropdown input[type="checkbox"]:not(#selectAll_${column}, #showEmpty_${column})`).prop('checked', isChecked);
+            });
+            
+            // بحث
+            $('.filter-search').off('input').on('input', function() {
+                let search = $(this).val().toLowerCase();
+                $(this).closest('.filter-dropdown').find('.filter-checkbox label').each(function() {
+                    let item = $(this).closest('.filter-checkbox');
+                    item.toggle($(this).text().toLowerCase().includes(search));
+                });
+            });
+        });
+        
+        // تطبيق فلتر العمود
+        function applyColumnFilter(column) {
+            let selected = [];
+            $(`#filterDropdown input[type="checkbox"]:checked:not(#selectAll_${column}, #showEmpty_${column})`).each(function() {
+                selected.push($(this).val());
+            });
+            let showEmptyChecked = $(`#showEmpty_${column}`).is(':checked');
+            if (showEmptyChecked) {
+                selected.push(translations.empty || 'فارغ');
+            }
+            activeFilters[column] = selected;
+            if (column.includes('date') || column.includes('time')) {
+                activeFilters[`${column}_from`] = $(`#filterFrom_${column}`).val();
+                activeFilters[`${column}_to`] = $(`#filterTo_${column}`).val();
+            }
+            $('#filterDropdown').hide();
+            renderTable(allData);
+            generateReport();
+        }
+        
+        // مسح فلتر العمود
+        function clearColumnFilter(column) {
+            delete activeFilters[column];
+            delete activeFilters[`${column}_from`];
+            delete activeFilters[`${column}_to`];
+            $('#filterDropdown').hide();
+            renderTable(allData);
+            generateReport();
+        }
+        
+        // إغلاق dropdown
+        $(document).on('click', function(e) {
+            if (!$(e.target).closest('.filter-btn, .filter-dropdown').length) {
+                $('#filterDropdown').hide();
+            }
+        });
+        
+        // إضافة جديد
+        $('#addNewBtn').click(function() {
+            $('#visitorForm')[0].reset();
+            $('#visitors_id').val('');
+            $('#visitors_date').val(new Date().toISOString().slice(0, 16));
+            $('#time_in').val(new Date().toISOString().slice(0, 16));
+            $('#entity').val('Environment & Protected Areas Authority');
+            $('#formTitle').text(translations.addTitle || 'إضافة زائر جديد');
+            $('#formContainer').show();
+        });
+        
+        // إلغاء
+        $('#cancelBtn').click(function() {
+            $('#formContainer').hide();
+        });
+        
+        // حفظ
+        $('#saveBtn').click(function() {
+            let formData = $('#visitorForm').serializeArray();
+            let data = {};
+            formData.forEach(field => data[field.name] = field.value);
+            
+            $.ajax({
+                url: '../api/add_visitors.php',
+                method: 'POST',
+                data: JSON.stringify(data),
+                contentType: 'application/json',
+                success: function(response) {
+                    if (response.success) {
+                        loadData();
+                        $('#formContainer').hide();
+                        alert(response.message);
+                    } else {
+                        alert(response.message);
+                    }
+                },
+                error: function() {
+                    alert(translations.errorServer || 'خطأ في الاتصال بالخادم.');
+                }
+            });
+        });
+        
+        // تعديل
+        function editRow(e) {
+            let button = $(e.target).closest('button');
+            let id = button.data('id');
+            $.getJSON(`../api/add_visitors.php?id=${id}`, function(response) {
+                if (response.success && response.data && response.data.length > 0) {
+                    let row = response.data[0];
+                    $('#visitors_id').val(row.visitors_id || '');
+                    $('#visitors_date').val(row.visitors_date ? row.visitors_date.slice(0, 16) : '');
+                    $('#time_in').val(row.time_in ? row.time_in.slice(0, 16) : '');
+                    $('#time_out').val(row.time_out ? row.time_out.slice(0, 16) : '');
+                    $('#visitor_name').val(row.visitor_name || '');
+                    $('#contact_number').val(row.contact_number || '');
+                    $('#visit_type').val(row.visit_type || '');
+                    $('#entity').val(row.entity || 'Environment & Protected Areas Authority');
+                    $('#service_type').val(row.service_type || '');
+                    $('#formTitle').text(translations.editTitle || 'تعديل الزائر');
+                    $('#formContainer').show();
+                } else {
+                    alert(translations.errorEdit || 'خطأ في جلب بيانات التعديل.');
+                }
+            }).fail(function() {
+                alert(translations.errorServer || 'خطأ في الاتصال بالخادم.');
+            });
+        }
+        
+        // حذف
+        function deleteRow(e) {
+            let button = $(e.target).closest('button');
+            let id = button.data('id');
+            if (confirm(translations.confirmDelete || 'هل أنت متأكد من الحذف؟')) {
+                $.ajax({
+                    url: '../api/add_visitors.php',
+                    method: 'POST',
+                    data: JSON.stringify({ action: 'delete', visitors_id: id }),
+                    contentType: 'application/json',
+                    success: function(response) {
+                        if (response.success) {
+                            loadData();
+                            alert(response.message);
+                        } else {
+                            alert(response.message);
+                        }
+                    },
+                    error: function() {
+                        alert(translations.errorServer || 'خطأ في الاتصال بالخادم.');
+                    }
+                });
+            }
+        }
+        
+        // إنشاء تقرير بسيط
+        function generateReport() {
+            let filteredData = allData.filter(row => applyFilters(row));
+            let total = allData.length;
+            let filtered = filteredData.length;
+            let dateRange = '';
+            if (activeFilters.visitors_date_from || activeFilters.visitors_date_to) {
+                let from = activeFilters.visitors_date_from ? formatDate(activeFilters.visitors_date_from) : '';
+                let to = activeFilters.visitors_date_to ? formatDate(activeFilters.visitors_date_to) : '';
+                let rangePrefix = currentLang === 'ar' ? 'من ' : 'From ';
+                let rangeSuffix = currentLang === 'ar' ? ' إلى ' : ' to ';
+                dateRange = `${rangePrefix}${from}${rangeSuffix}${to}`;
+            }
+            let reportHtml = `
+                <p><strong>${translations.totalVisitors || 'إجمالي الزوار'}:</strong> ${total}</p>
+                <p><strong>${translations.filteredVisitors || 'عدد الزوار المفلتر'}:</strong> ${filtered}</p>
+                ${dateRange ? `<p><strong>${translations.dateRange || 'نطاق التاريخ'}:</strong> ${dateRange}</p>` : ''}
+            `;
+            $('#reportContent').html(reportHtml);
+            $('#reportSection').show();
+        }
+        
+        // طباعة التقرير
+        $('#printReport').click(function() {
+            let printContent = `
+                <html dir="${currentLang === 'ar' ? 'rtl' : 'ltr'}">
+                <head><title>${translations.reportTitle || 'تقرير الزوار'}</title></head>
+                <body style="font-family: Arial; font-size: 12px;">
+                    <h2>${translations.reportTitle || 'تقرير الزوار'}</h2>
+                    ${$('#reportContent').html()}
+                    <hr>
+                    <h3>${currentLang === 'ar' ? 'قائمة الزوار المفلترة:' : 'Filtered Visitors List:'}</h3>
+                    <table border="1" style="border-collapse: collapse; width: 100%;">
+                        <tr>
+                            <th>${translations.date || 'التاريخ'}</th>
+                            <th>${translations.timeIn || 'الوقت الدخول'}</th>
+                            <th>${translations.timeOut || 'الوقت الخروج'}</th>
+                            <th>${translations.visitorName || 'اسم الزائر'}</th>
+                            <th>${translations.contactNumber || 'رقم الاتصال'}</th>
+                            <th>${translations.visitType || 'نوع الزيارة'}</th>
+                            <th>${translations.entity || 'الجهة'}</th>
+                            <th>${translations.serviceType || 'نوع الخدمة'}</th>
+                            <th>${translations.createdBy || 'مسجل بواسطة'}</th>
+                        </tr>
+            `;
+            let filteredData = allData.filter(row => applyFilters(row));
+            filteredData.forEach(row => {
+                printContent += `
+                    <tr>
+                        <td>${formatDate(row.visitors_date)}</td>
+                        <td>${formatDate(row.time_in)}</td>
+                        <td>${formatDate(row.time_out)}</td>
+                        <td>${row.visitor_name || ''}</td>
+                        <td>${row.contact_number || ''}</td>
+                        <td>${translateValue(row.visit_type, 'visitType') || ''}</td>
+                        <td>${row.entity || ''}</td>
+                        <td>${translateValue(row.service_type, 'serviceType') || ''}</td>
+                        <td>${row.created_by_name || ''}</td>
+                    </tr>
+                `;
+            });
+            printContent += `
+                    </table>
+                    <p style="text-align: ${currentLang === 'ar' ? 'right' : 'left'}; margin-top: 20px;">${currentLang === 'ar' ? 'تاريخ التقرير: ' : 'Report Date: '}${new Date().toLocaleDateString(currentLang === 'ar' ? 'ar-SA' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                </body>
+                </html>
+            `;
+            let printWindow = window.open('', '_blank');
+            printWindow.document.write(printContent);
+            printWindow.document.close();
+            printWindow.print();
+        });
+        
+        loadTranslations(currentLang);
+    </script>
+</body>
+</html>

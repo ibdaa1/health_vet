@@ -1,0 +1,1578 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Expires" content="0">
+<title data-lang-key="title">تسجيل حيوان جديد</title>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+<style>
+:root {
+    --primary-green: #28a745;
+    --secondary-beige: #f5f5dc;
+    --background-white: #ffffff;
+    --text-dark: #343a40;
+    --border-color: #ced4da;
+    --light-gray: #f8f9fa;
+}
+body {
+    font-family: 'Tahoma', sans-serif;
+    background-color: var(--light-gray);
+    color: var(--text-dark);
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    text-align: right;
+}
+body[dir="ltr"] {
+    font-family: 'Arial', sans-serif;
+    text-align: left;
+}
+.container {
+    width: 95vw;
+    max-width: 800px;
+    min-width: 300px;
+    background-color: var(--background-white);
+    padding: 34px 17px 20px 17px;
+    border-radius: 14px;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.13);
+    margin: 32px 0 32px 0;
+    position: relative;
+}
+.logo-card {
+    position: absolute;
+    top: 10px;
+    inset-inline-end: 10px;
+    width: 54px;
+    height: 54px;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+body[dir="ltr"] .logo-card {
+    inset-inline-end: auto;
+    inset-inline-start: 10px;
+}
+.logo-card img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    border-radius: 5px;
+    background: #f5f5dc;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 2px 6px rgba(40,167,69,0.07);
+}
+@media (max-width:600px) {
+    .container { padding: 10vw 2vw 3vw 2vw; }
+    .logo-card { width: 32px; height: 32px; top: 3vw; inset-inline-end: 3vw; }
+    body[dir="ltr"] .logo-card { inset-inline-end: auto; inset-inline-start: 3vw; }
+    h2 { font-size: 1.2em; }
+    h3 { font-size: 1em; }
+    label, select, input, textarea, button { font-size: 1em; }
+}
+h2 {
+    color: var(--primary-green);
+    border-bottom: 1.7px solid var(--border-color);
+    padding-bottom: 9px;
+    margin-bottom: 18px;
+    text-align: center;
+    margin-top: 0;
+}
+h3 {
+    color: var(--text-dark);
+    border-bottom: 1px dashed var(--border-color);
+    padding-bottom: 5px;
+    margin-top: 24px;
+    margin-bottom: 6px;
+}
+label {
+    display: block;
+    margin-top: 15px;
+    font-weight: bold;
+    font-size: 0.97em;
+    margin-bottom: 3px;
+}
+input[type="text"], input[type="email"], input[type="tel"], input[type="date"], select, textarea, input[type="file"] {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    box-sizing: border-box;
+    transition: border-color 0.3s;
+    font-size: 1em;
+}
+body[dir="rtl"] input[type="date"] {
+    direction: rtl;
+    text-align: right;
+}
+body[dir="ltr"] input[type="date"] {
+    direction: ltr;
+    text-align: left;
+}
+input:focus, select:focus, textarea:focus {
+    border-color: var(--primary-green);
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.13);
+    outline: none;
+}
+button {
+    background-color: var(--primary-green);
+    color: white;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-top: 22px;
+    font-size: 1.05em;
+    transition: background-color 0.3s;
+    width: 100%;
+}
+button:hover { background-color: #1e7e34; }
+.signature-btn {
+    width: auto;
+    padding: 8px 15px;
+    margin-top: 5px;
+    font-size: 0.9em;
+    display: none;
+}
+.page-btns {
+    display: flex; gap: 8px; margin: 10px 0 5px 0; justify-content: center; flex-wrap: wrap;
+}
+body[dir="ltr"] .page-btns {
+    flex-direction: row-reverse;
+}
+.page-btns button {
+    width: auto;
+    padding: 6px 18px;
+    font-size: 0.98em;
+    margin-top: 0;
+    background-color: #ddd;
+    color: #333;
+    border: 1px solid #bbb;
+}
+.page-btns button.active, .page-btns button:disabled {
+    background-color: var(--primary-green);
+    color: #fff;
+}
+#unique_display {
+    background-color: #e9ecef;
+    padding: 13px;
+    border-radius: 6px;
+    margin-top: 16px;
+    font-weight: bold;
+    border: 1px solid var(--border-color);
+    text-align: center;
+}
+#animal_code_value {
+    color: var(--primary-green);
+    font-size: 1.16em;
+}
+#photos_preview {
+    display: flex;
+    gap: 12px;
+    margin-top: 13px;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+}
+body[dir="ltr"] #photos_preview {
+    justify-content: flex-end;
+}
+.photo-item {
+    width: 94px;
+    height: 94px;
+    border: 2px solid var(--border-color);
+    border-radius: 5px;
+    overflow: hidden;
+    position: relative;
+    background: #fafafa;
+}
+.photo-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.photo-item .delete-photo-btn {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
+    cursor: pointer;
+    display: none;
+}
+#auth_status, .success, .error, .info {
+    margin-top: 17px;
+    padding: 13px;
+    border-radius: 5px;
+    font-weight: bold;
+    text-align: center;
+    font-size: 1.02em;
+}
+.success { background-color: #e6ffed; color: #1e7e34; border: 1px solid #b8da8f; }
+.error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+.info { background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+.language-toggle {
+    position: absolute;
+    top: 10px;
+    inset-inline-start: 10px;
+    z-index: 3;
+}
+body[dir="ltr"] .language-toggle {
+    inset-inline-start: auto;
+    inset-inline-end: 10px;
+}
+.language-toggle button {
+    background: #fff;
+    border: 1px solid var(--border-color);
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+    color: var(--text-dark);
+}
+@media (max-width:450px) {
+    .container { min-width: unset; }
+    #photos_preview { gap: 6px; }
+    .photo-item { width: 62px; height: 62px; }
+}
+.search-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 13px;
+    gap: 6px;
+    flex-wrap: wrap;
+    direction: rtl;
+}
+body[dir="ltr"] .search-container {
+    direction: ltr;
+}
+.search-container input {
+    padding: 7px 15px;
+    border-radius: 5px;
+    border: 1px solid #ced4da;
+    max-width: 220px;
+    direction: ltr;
+    text-align: left;
+}
+body[dir="ltr"] .search-container input {
+    direction: ltr;
+    text-align: left;
+}
+.search-container button {
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border-radius: 50%;
+    font-size: 0.8em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--primary-green);
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+.search-container button:hover {
+    background-color: #1e7e34;
+}
+.action-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 10px;
+}
+.action-buttons button {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border-radius: 50%;
+    font-size: 1.2em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--primary-green);
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+.action-buttons button:hover {
+    background-color: #1e7e34;
+}
+.signature-note {
+    font-size: 0.9em;
+    color: #6c757d;
+    margin-top: 5px;
+    font-style: italic;
+}
+.custom-input-container {
+    margin-top: 10px;
+    display: none;
+}
+.print-report-btn {
+    background-color: #007bff;
+    margin-top: 10px;
+    display: none;
+}
+.print-report-btn:hover {
+    background-color: #0056b3;
+}
+.edit-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 10px;
+    flex-wrap: wrap;
+}
+.edit-buttons button {
+    width: auto;
+    padding: 10px 20px;
+    font-size: 1em;
+    margin-top: 0;
+    border-radius: 6px;
+}
+
+/* QR Scanner Modal Styles */
+.qr-modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.8);
+    justify-content: center;
+    align-items: center;
+}
+.qr-modal-content {
+    background-color: #fefefe;
+    margin: auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 90%;
+    max-width: 400px;
+    border-radius: 10px;
+    text-align: center;
+    direction: rtl;
+}
+body[dir="ltr"] .qr-modal-content {
+    direction: ltr;
+}
+.qr-modal video {
+    width: 100%;
+    max-width: 300px;
+    height: auto;
+    border-radius: 5px;
+}
+.qr-camera-select {
+    margin: 10px 0;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ced4da;
+}
+.qr-modal button {
+    margin: 5px;
+    padding: 10px 20px;
+    background-color: var(--primary-green);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+.qr-modal button:hover {
+    background-color: #1e7e34;
+}
+.qr-result {
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #e9ecef;
+    border-radius: 5px;
+    font-weight: bold;
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <div class="logo-card">
+        <img src="/health_vet/public/shjmunlogo.png" alt="الشعار">
+    </div>
+    <div class="language-toggle">
+        <button id="lang-toggle" data-lang-key="lang_toggle">EN</button>
+    </div>
+    <h2 data-lang-key="register_new_animal">تسجيل حيوان جديد</h2>
+    <div class="search-container">
+        <input type="text" id="search_code" placeholder data-lang-key="search_placeholder" style="padding:7px 15px;border-radius:5px;border:1px solid #ced4da;max-width:220px;">
+        <select id="search_field" style="padding:7px 15px;border-radius:5px;border:1px solid #ced4da;max-width:220px;">
+            <option value="animal_code" data-lang-key="search_by_code">الرمز الفريد</option>
+            <option value="animal_name" data-lang-key="animal_name_label">اسم الحيوان</option>
+            <option value="breed" data-lang-key="breed_label">السلالة</option>
+            <option value="color" data-lang-key="color_label">اللون</option>
+            <option value="country_of_origin" data-lang-key="country_of_origin_label">بلد المنشأ</option>
+            <option value="owner_name" data-lang-key="owner_name_label">اسم المالك</option>
+        </select>
+        <button type="button" id="btn_qr_scan" title="مسح QR">📱</button>
+        <button type="button" id="btn_search" title="بحث">🔍</button>
+        <button type="button" id="btn_cancel_search" title="إلغاء البحث">×</button>
+    </div>
+    <div id="search_results"></div>
+    <div class="action-buttons">
+        <button type="button" id="btn_new" title="إضافة جديد">➕</button>
+        <button type="button" id="btn_back" title="رجوع">↩️</button>
+    </div>
+    <div id="auth_status" class="info" data-lang-key="checking_permissions">جارٍ التحقق من الصلاحيات...</div>
+    <form id="addAnimalForm" style="display:none;" enctype="multipart/form-data">
+        <input type="hidden" id="animal_id_hidden" name="id">
+        <input type="hidden" id="sub_seq_hidden" name="sub_seq">
+        <input type="hidden" id="temp_animal_id" name="temp_animal_id">
+
+        <h3 data-lang-key="basic_registration">بيانات التسجيل الأساسية</h3>
+        <label for="animal_name" data-lang-key="animal_name_label">اسم الحيوان</label>
+        <input type="text" id="animal_name" name="animal_name" required>
+        <label for="animal_type" data-lang-key="animal_type_label">نوع الحيوان</label>
+        <select id="animal_type" name="animal_type" required>
+            <option value="" data-lang-key="select_type">اختر النوع</option>
+            <option value="Cats">Cats</option>
+            <option value="Dogs">Dogs</option>
+        </select>
+        <label for="animal_source" data-lang-key="animal_source_label">مصدر الحيوان</label>
+        <select id="animal_source" name="animal_source" required>
+            <option value="" data-lang-key="select_source">اختر المصدر</option>
+            <option value="Stray">Stray</option>
+            <option value="Surrended">Surrended</option>
+        </select>
+        <label for="country_of_origin" data-lang-key="country_of_origin_label">بلد المنشأ</label>
+        <input type="text" id="country_of_origin" name="country_of_origin" value="United Arab Emirates">
+        <label for="is_active" data-lang-key="animal_status_label">حالة الحيوان</label>
+        <select id="is_active" name="is_active" required>
+            <option value="Active" data-lang-key="active">نشط</option>
+            <option value="Inactive" data-lang-key="inactive">غير نشط</option>
+        </select>
+        <label for="registration_date" data-lang-key="registration_date_label">تاريخ التسجيل</label>
+        <input type="date" id="registration_date" name="registration_date" required>
+        <div id="unique_display">
+            <strong data-lang-key="unique_code_label">الرمز الفريد:</strong> <span id="animal_code_value">--</span>
+        </div>
+        <h3 data-lang-key="physical_details">التفاصيل الجسدية</h3>
+        <label for="gender" data-lang-key="gender_label">الجنس</label>
+        <select id="gender" name="gender">
+            <option value="Unknown" data-lang-key="unknown">غير معروف</option>
+            <option value="Male" data-lang-key="male">ذكر</option>
+            <option value="Female" data-lang-key="female">أنثى</option>
+            <option value="Mixed" data-lang-key="mixed">خليط (مجموعة)</option>
+        </select>
+        <label for="breed" data-lang-key="breed_label">السلالة</label>
+        <select id="breed" name="breed">
+            <option value="" data-lang-key="select_breed">اختر السلالة</option>
+            <option value="Other" data-lang-key="other">أخرى</option>
+        </select>
+        <div id="custom_breed_container" class="custom-input-container">
+            <label for="custom_breed" data-lang-key="custom_breed_label">إدخال سلالة مخصصة</label>
+            <input type="text" id="custom_breed" name="custom_breed" placeholder data-lang-key="custom_breed_placeholder">
+        </div>
+        <label for="color" data-lang-key="color_label">اللون</label>
+        <select id="color" name="color">
+            <option value="" data-lang-key="select_color">اختر اللون</option>
+            <option value="Other" data-lang-key="other">أخرى</option>
+        </select>
+        <div id="custom_color_container" class="custom-input-container">
+            <label for="custom_color" data-lang-key="custom_color_label">إدخال لون مخصص</label>
+            <input type="text" id="custom_color" name="custom_color" placeholder data-lang-key="custom_color_placeholder">
+        </div>
+        <label for="marking" data-lang-key="marking_label">العلامات المميزة</label>
+        <input type="text" id="marking" name="marking" placeholder data-lang-key="marking_placeholder">
+        <label for="birth_date" data-lang-key="birth_date_label">تاريخ الميلاد (إن وجد)</label>
+        <input type="text" id="birth_date" name="birth_date" placeholder="dd-mm-yyyy" maxlength="10">
+        <label for="estimated_age" data-lang-key="estimated_age_label">العمر التقديري</label>
+        <input type="text" id="estimated_age" name="estimated_age" placeholder data-lang-key="estimated_age_placeholder">
+        <h3 data-lang-key="animal_photos_title">صور الحيوان (حد أقصى 3 صور)</h3>
+        <label for="animal_photos" data-lang-key="animal_photos_label" style="font-weight: normal;">اختر صور الحيوان أو التقطها بالكاميرا. سيتم قصها وضغطها إلى 800x800 بكسل تلقائيًا.</label>
+        <input type="file" id="animal_photos" name="animal_photos[]" multiple accept="image/*" capture="environment">
+        <div id="photos_preview"></div>
+
+        <div id="delivered_fields_container" style="display:none;">
+            <h3 data-lang-key="delivered_info">بيانات المُسلّم (موظف)</h3>
+            <label data-lang-key="delivered_name_label">اسم المُسلّم</label>
+            <select id="delivered_by_select">
+                <option value="" data-lang-key="select_employee">اختر موظف...</option>
+            </select>
+            <input type="hidden" id="delivered_by_empid" name="delivered_by_empid">
+        </div>
+
+        <div id="owner_fields_container" style="display:none;">
+            <h3 data-lang-key="owner_info">بيانات المالك</h3>
+            <label for="owner_national_id" data-lang-key="owner_national_id_label">الرقم القومي / الهوية الوطنية</label>
+            <input type="text" id="owner_national_id" name="owner_national_id" placeholder data-lang-key="owner_national_id_placeholder">
+
+            <label for="owner_national_id_photo" data-lang-key="owner_national_id_photo_label">صورة الهوية الوطنية</label>
+            <input type="file" id="owner_national_id_photo" name="owner_national_id_photo" accept="image/*" capture="environment">
+
+            <input type="hidden" id="current_owner_national_id_photo" name="current_owner_national_id_photo">
+            <div id="owner_id_photo_preview" class="photo-item" style="display: none; margin-top: 10px;">
+                <img id="id_photo_img" src="" alt data-lang-key="id_photo_alt" title data-lang-key="id_photo_title">
+            </div>
+
+                                        <!-- زر فتح الاتفاقية -->
+<button id="openDeclaration" 
+        style="background:#28a745;color:#fff;padding:8px 16px;
+               border:none;border-radius:6px;cursor:pointer;font-size:14px;">
+    التعهد
+</button>
+
+<script>
+document.getElementById("openDeclaration").addEventListener("click", function() {
+    window.open(
+        "Declarations.html",   // مسار الملف
+        "DeclarationsWindow",                    // اسم النافذة
+        "width=900,height=700,scrollbars=yes,resizable=yes,top=50,left=50"
+    );
+});
+</script>
+               <!-- زر فتح الاتفاقية -->
+            
+            
+            
+            
+            <label for="owner_signature" data-lang-key="owner_signature_label">توقيع المالك (إلكتروني)</label>
+            <button type="button" id="open_signature_btn" class="signature-btn" data-lang-key="open_signature_btn">فتح نموذج التوقيع</button>
+            <div class="signature-note" data-lang-key="signature_note">افتح نموذج التوقيع الإلكتروني الخارجي على جهازك (تابلت/هاتف/حاسوب) واحفظ التوقيع هنا.</div>
+            <input type="hidden" id="current_owner_signature" name="current_owner_signature">
+            <div id="owner_signature_preview" class="photo-item" style="display: none; margin-top: 10px;">
+                <img id="sig_photo_img" src="" alt data-lang-key="sig_photo_alt" title data-lang-key="sig_photo_title">
+            </div>
+
+            <label for="owner_name" data-lang-key="owner_name_label">اسم المالك</label>
+            <input type="text" id="owner_name" name="owner_name">
+            <label for="owner_phone" data-lang-key="owner_phone_label">هاتف المالك</label>
+            <input type="tel" id="owner_phone" name="owner_phone">
+            <label for="owner_email" data-lang-key="owner_email_label">بريد المالك</label>
+            <input type="email" id="owner_email" name="owner_email">
+        </div>
+
+        <h3 data-lang-key="notes_title">ملاحظات</h3>
+        <label for="notes" data-lang-key="notes_label">ملاحظات إضافية</label>
+        <textarea id="notes" name="notes" rows="3"></textarea>
+
+        <button type="submit" id="submit_button" data-lang-key="save_btn">حفظ البيانات</button>
+        <div id="edit_buttons" class="edit-buttons" style="display:none;">
+            <button type="button" id="btn_update" data-lang-key="update_btn">تعديل</button>
+            <button type="button" id="btn_delete" data-lang-key="delete_btn">حذف</button>
+            <button type="button" id="print_report_btn" class="print-report-btn" data-lang-key="print_report_btn">طباعة التقرير</button>
+        </div>
+    </form>
+    <div id="message"></div>
+</div>
+
+<!-- QR Scanner Modal -->
+<div id="qrModal" class="qr-modal">
+    <div class="qr-modal-content">
+        <h3 data-lang-key="qr_scan_title">مسح رمز QR</h3>
+        <select id="qrCameraSelect" class="qr-camera-select">
+            <option value="environment">كاميرا خلفية</option>
+            <option value="user">كاميرا أمامية</option>
+        </select>
+        <video id="qrVideo" autoplay playsinline></video>
+        <div id="qrResult" class="qr-result" style="display:none;"></div>
+        <button id="qrCloseBtn" data-lang-key="close">إغلاق</button>
+    </div>
+</div>
+    
+<script src="session_check.js"></script>
+<script>
+// بيانات منسدلة (غير مُعدلة)
+const breeds = {
+    Cats: [
+        'Abyssinian', 'Aegean', 'American Bobtail', 'American Curl', 'American Shorthair', 'American Wirehair',
+        'Arabian Mau', 'Asian Semi-Longhair', 'Asian Shorthair', 'Australian Mist',
+        'Balinese', 'Bambino', 'Bengal', 'Birman', 'Bombay', 'British Longhair', 'British Shorthair',
+        'Burmese', 'Burmilla', 'California Spangled', 'Chantilly-Tiffany', 'Chartreux',
+        'Colorpoint Shorthair', 'Cornish Rex', 'Cymric', 'Devon Rex', 'Donskoy', 'Dragon Li',
+        'Egyptian Mau', 'European Shorthair', 'Exotic Shorthair', 'Havana Brown', 'Highlander',
+        'Japanese Bobtail', 'Javanese', 'Korat', 'LaPerm', 'Lykoi', 'Maine Coon', 'Manx', 'Munchkin',
+        'Nebelung', 'Norwegian Forest Cat', 'Ocicat', 'Oriental Longhair', 'Oriental Shorthair', 'Persian',
+        'Peterbald', 'Pixie-bob', 'Ragamuffin', 'Ragdoll', 'Russian Blue', 'Savannah', 'Scottish Fold',
+        'Selkirk Rex', 'Siamese', 'Siberian', 'Singapura', 'Snowshoe', 'Sokoke', 'Somali',
+        'Sphynx', 'Tonkinese', 'Toyger', 'Turkish Angora', 'Turkish Van', 'York Chocolate',
+        'Mixed Breed', 'Unknown'
+    ],
+    Dogs: [
+        'Affenpinscher', 'Airedale Terrier', 'Akita', 'Alaskan Malamute', 'American Bulldog', 'American English Coonhound',
+        'American Eskimo Dog', 'American Foxhound', 'American Hairless Terrier', 'American Pit Bull Terrier',
+        'American Staffordshire Terrier', 'American Water Spaniel', 'Anatolian Shepherd Dog', 'Appenzeller Sennenhund',
+        'Australian Cattle Dog', 'Australian Kelpie', 'Australian Shepherd', 'Australian Stumpy Tail Cattle Dog',
+        'Australian Terrier', 'Azawakh', 'Barbet', 'Basenji', 'Basset Hound', 'Beagle',
+        'Bearded Collie', 'Beauceron', 'Bedlington Terrier', 'Belgian Malinois', 'Belgian Sheepdog',
+        'Belgian Tervuren', 'Berner Laufhund', 'Bernese Mountain Dog', 'Bichon Frise', 'Biewer Terrier',
+        'Black and Tan Coonhound', 'Black Russian Terrier', 'Bloodhound', 'Blue Lacy', 'Bluetick Coonhound',
+        'Boerboel', 'Bolognese', 'Border Collie', 'Border Terrier', 'Borzoi', 'Boston Terrier',
+        'Bouvier des Flandres', 'Boxer', 'Boykin Spaniel', 'Bracco Italiano', 'Braque du Bourbonnais',
+        'Braque Francais Pyrenean', 'Briard', 'Brittany', 'Brussels Griffon', 'Bull Terrier',
+        'Bulldog', 'Bullmastiff', 'Cairn Terrier', 'Canaan Dog', 'Cane Corso', 'Cardigan Welsh Corgi',
+        'Catahoula Leopard Dog', 'Caucasian Ovtcharka', 'Cavalier King Charles Spaniel', 'Cesky Terrier',
+        'Chesapeake Bay Retriever', 'Chihuahua', 'Chinese Crested', 'Chinese Shar-Pei', 'Chinook', 'Chow Chow',
+        'Cirneco dell\'Etna', 'Clumber Spaniel', 'Cocker Spaniel', 'Collie', 'Coton de Tulear', 'Curly-Coated Retriever',
+        'Dachshund', 'Dalmatian', 'Dandie Dinmont Terrier', 'Danish-Swedish Farmdog', 'Doberman Pinscher',
+        'Dogo Argentino', 'Dogue de Bordeaux', 'Dutch Shepherd', 'English Cocker Spaniel', 'English Foxhound',
+        'English Setter', 'English Springer Spaniel', 'English Toy Spaniel', 'Entlebucher Mountain Dog',
+        'Eskimo Dog', 'Estrela Mountain Dog', 'Eurasier', 'Field Spaniel', 'Finnish Lapphund', 'Finnish Spitz',
+        'Flat-Coated Retriever', 'Fox Terrier', 'French Bulldog', 'French Spaniel', 'German Pinscher',
+        'German Shepherd Dog', 'German Shorthaired Pointer', 'German Wirehaired Pointer', 'Giant Schnauzer',
+        'Golden Retriever', 'Gordon Setter', 'Great Dane', 'Great Pyrenees', 'Greater Swiss Mountain Dog',
+        'Greenland Dog', 'Greyhound', 'Griffon Bruxellois', 'Harrier', 'Havanese', 'Hovawart',
+        'Ibizan Hound', 'Icelandic Sheepdog', 'Irish Red and White Setter', 'Irish Setter', 'Irish Terrier',
+        'Irish Water Spaniel', 'Irish Wolfhound', 'Italian Greyhound', 'Jack Russell Terrier', 'Japanese Chin',
+        'Japanese Spitz', 'Kai Ken', 'Karelian Bear Dog', 'Keeshond', 'Kelb Tal-Fenek', 'Kerry Blue Terrier',
+        'Klee Kai', 'Komondor', 'Kooikerhondje', 'Kuvasz', 'Labrador Retriever', 'Lagotto Romagnano',
+        'Lakeland Terrier', 'Leonberger', 'Lhasa Apso', 'Löwchen', 'Maltese', 'Manchester Terrier',
+        'Mastiff', 'Mexican Hairless Dog', 'Miniature Bull Terrier', 'Miniature Pinscher', 'Miniature Schnauzer',
+        'Mudi', 'Neapolitan Mastiff', 'Newfoundland', 'Norfolk Terrier', 'Norwegian Buhund', 'Norwegian Elkhound',
+        'Norwegian Lundehund', 'Norwich Terrier', 'Nova Scotia Duck Tolling Retriever', 'Old English Sheepdog',
+        'Otterhound', 'Papillon', 'Parson Russell Terrier', 'Pekingese', 'Pembroke Welsh Corgi', 'Petit Basset Griffon Vendeen',
+        'Pharaoh Hound', 'Plott', 'Pointer', 'Polish Lowland Sheepdog', 'Pomeranian', 'Poodle',
+        'Portuguese Podengo', 'Portuguese Water Dog', 'Pudelpointer', 'Pug', 'Puli', 'Pyrenean Shepherd',
+        'Rat Terrier', 'Redbone Coonhound', 'Rhodesian Ridgeback', 'Rottweiler', 'Saint Bernard', 'Saluki',
+        'Samoyed', 'Schapendoes', 'Schipperke', 'Schnauzer', 'Scottish Deerhound', 'Scottish Terrier',
+        'Sealyham Terrier', 'Shetland Sheepdog', 'Shiba Inu', 'Shih Tzu', 'Shikoku', 'Siberian Husky',
+        'Silken Windhound', 'Silky Terrier', 'Skye Terrier', 'Sloughi', 'Small Munsterlander', 'Smooth Fox Terrier',
+        'Soft Coated Wheaten Terrier', 'Spinone Italiano', 'Staffordshire Bull Terrier', 'Standard Schnauzer',
+        'Sussex Spaniel', 'Swedish Vallhund', 'Thai Ridgeback', 'Tibetan Mastiff', 'Tibetan Spaniel',
+        'Tibetan Terrier', 'Toy Fox Terrier', 'Treeing Tennessee Brindle', 'Treeing Walker Coonhound',
+        'Vizsla', 'Weimaraner', 'Welsh Springer Spaniel', 'Welsh Terrier', 'West Highland White Terrier',
+        'Whippet', 'White Swiss Shepherd Dog', 'Wire Fox Terrier', 'Wirehaired Pointing Griffon',
+        'Wirehaired Vizsla', 'Xoloitzcuintli', 'Yorkshire Terrier', 'Mixed Breed', 'Unknown'
+    ]
+};
+const colors = [
+    'White', 'Black', 'Blue', 'Red', 'Cream', 'Chocolate', 'Lilac', 'Cinnamon', 'Fawn', 'Silver',
+    'Golden', 'Brown', 'Grey', 'Smoke', 'Shaded', 'Tipped', 'Chinchilla', 'Shell', 'Tabby (Classic)', 'Tabby (Mackerel)',
+    'Tabby (Spotted)', 'Tabby (Ticked)', 'Tortoiseshell', 'Tortie', 'Calico', 'Tricolor', 'Bicolor', 'Van', 'Harlequin',
+    'Parti-Color', 'Brindle', 'Merle', 'Sable', 'Agouti', 'Siam', 'Pointed', 'Colorpoint', 'Bi-Color Pointed',
+    'Van Bi-Color', 'Mixed', 'Unknown'
+];
+
+let currentUserId = null;
+let currentLang = localStorage.getItem('lang') || 'ar';
+let translations = {};
+const urlParams = new URLSearchParams(window.location.search);
+const editId = urlParams.get("ID") || null;
+
+// QR Scanner Variables
+let qrVideo = null;
+let qrCanvas = null;
+let qrContext = null;
+let qrStream = null;
+let qrScanning = false;
+
+// دالة تحميل الترجمة (غير مُعدلة)
+async function loadTranslations(lang) {
+    try {
+        const res = await fetch(`../languages/${lang}.json?t=${Date.now()}`);
+        translations = await res.json();
+        applyTranslations();
+    } catch (e) {
+        console.error('Error loading translations:', e);
+        translations = {};
+        applyTranslations();
+    }
+}
+
+// دالة تطبيق الترجمات (غير مُعدلة)
+function applyTranslations() {
+    document.querySelectorAll('[data-lang-key]').forEach(el => {
+        const key = el.getAttribute('data-lang-key');
+        if (translations[key]) {
+            if (el.tagName === 'OPTION' || el.tagName === 'BUTTON' || (el.tagName === 'INPUT' && el.type !== 'file')) {
+                el.textContent = translations[key];
+            } else if (el.placeholder) {
+                el.placeholder = translations[key];
+            } else if (el.title) {
+                el.title = translations[key];
+            } else if (el.alt) {
+                el.alt = translations[key];
+            } else {
+                el.textContent = translations[key];
+            }
+        }
+    });
+    updateSelectOptions();
+}
+
+// تحديث options (غير مُعدلة)
+function updateSelectOptions() {
+    console.log('Updating select options...');
+    populateSelect('color', [...colors, 'Other'], translations['select_color'] || 'اختر اللون');
+    console.log('Colors populated:', colors.length + 1);
+    updateBreedOptions();
+}
+
+function populateSelect(selectId, options, defaultText = translations['select'] || 'Select') {
+    console.log(`Populating ${selectId} with ${options.length} options...`);
+    const select = document.getElementById(selectId);
+    if (!select) {
+        console.error(`Select element with id ${selectId} not found!`);
+        return;
+    }
+    select.innerHTML = `<option value="">${defaultText}</option>`;
+    options.forEach(option => {
+        const opt = document.createElement('option');
+        opt.value = option;
+        opt.textContent = option === 'Other' && translations['other'] ? translations['other'] : option;
+        select.appendChild(opt);
+    });
+    console.log(`Populated ${selectId} successfully.`);
+}
+
+function updateBreedOptions() {
+    const animalType = document.getElementById('animal_type').value;
+    if (animalType && breeds[animalType]) {
+        populateSelect('breed', [...breeds[animalType], 'Other'], translations['select_breed'] || 'Select Breed');
+    } else {
+        populateSelect('breed', ['Other'], translations['select_breed_first'] || 'Select Type First');
+    }
+    toggleCustomFields();
+}
+
+function setDefaultDate() {
+    const now = new Date();
+    const uaeDate = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Dubai' }).format(now);
+    document.getElementById('registration_date').value = uaeDate;
+}
+
+async function loadEmployees() {
+    try {
+        const res = await fetch(`../api/get_employees.php?t=${Date.now()}`);
+        const data = await res.json();
+        const select = document.getElementById('delivered_by_select');
+        select.innerHTML = `<option value="">${translations['select_employee'] || 'Select Employee...'}</option>`;
+        if (data.success && Array.isArray(data.data)) {
+            data.data.forEach(emp => {
+                const opt = document.createElement('option');
+                opt.value = emp.EmpID;
+                opt.textContent = emp.EmpName;
+                select.appendChild(opt);
+            });
+        }
+    } catch (e) {
+        console.error("Error loading employees:", e);
+    }
+}
+
+function toggleFields() {
+    const source = document.getElementById('animal_source').value;
+    const delivered = document.getElementById('delivered_fields_container');
+    const owner = document.getElementById('owner_fields_container');
+    document.getElementById('delivered_by_empid').value = '';
+
+    if (source === 'Stray') {
+        delivered.style.display = 'block';
+        owner.style.display = 'none';
+    } else if (source === 'Surrended') {
+        delivered.style.display = 'none';
+        owner.style.display = 'block';
+    } else {
+        delivered.style.display = 'none';
+        owner.style.display = 'none';
+    }
+    // تحديث ظهور زر الطباعة بناءً على المصدر
+    updatePrintReportButton(source);
+}
+
+function updatePrintReportButton(source) {
+    const printBtn = document.getElementById('print_report_btn');
+    if (source === 'Surrended' && document.getElementById('owner_fields_container').style.display !== 'none') {
+        printBtn.style.display = 'inline-block';
+    } else {
+        printBtn.style.display = 'none';
+    }
+}
+
+function toggleCustomFields() {
+    const breed = document.getElementById('breed').value;
+    const color = document.getElementById('color').value;
+    document.getElementById('custom_breed_container').style.display = breed === 'Other' ? 'block' : 'none';
+    document.getElementById('custom_color_container').style.display = color === 'Other' ? 'block' : 'none';
+}
+
+// دالة تنسيق إدخال تاريخ الميلاد (dd-mm-yyyy)
+function formatBirthDateInput(input) {
+    let value = input.value.replace(/\D/g, ''); // إزالة غير الأرقام
+    if (value.length >= 2) {
+        value = value.substring(0, 2) + '-' + value.substring(2);
+    }
+    if (value.length >= 5) {
+        value = value.substring(0, 5) + '-' + value.substring(5, 9);
+    }
+    input.value = value;
+}
+
+// دالة التحقق من صلاحية تاريخ الميلاد (dd-mm-yyyy فقط)
+function validateBirthDate(dateStr) {
+    if (!dateStr) return true; // إذا كان فارغاً، مقبول
+    const regex = /^(\d{2})-(\d{2})-(\d{4})$/;
+    const match = dateStr.match(regex);
+    if (!match) return false;
+    const day = parseInt(match[1], 10);
+    const month = parseInt(match[2], 10);
+    const year = parseInt(match[3], 10);
+    const date = new Date(year, month - 1, day);
+    return !isNaN(date.getTime()) && date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day && year > 0 && year <= new Date().getFullYear();
+}
+
+async function generateCode() {
+    const type = document.getElementById('animal_type').value;
+    const source = document.getElementById('animal_source').value;
+    const date = document.getElementById('registration_date').value;
+    if (!type || !source || !date) {
+        document.getElementById('animal_code_value').textContent = '--';
+        document.getElementById('sub_seq_hidden').value = '';
+        return;
+    }
+    const formData = new FormData();
+    formData.append('action', 'check_unique');
+    formData.append('animal_type', type);
+    formData.append('animal_source', source);
+    formData.append('registration_date', date);
+    try {
+        const res = await fetch('../api/animals_crud.php', { method: 'POST', body: formData });
+        const data = await res.json();
+        if (data.success) {
+            document.getElementById('animal_code_value').textContent = data.code;
+            document.getElementById('sub_seq_hidden').value = data.sub_seq;
+        } else {
+            document.getElementById('animal_code_value').textContent = (translations['error'] || 'Error: ') + (data.message || 'Unknown');
+            document.getElementById('sub_seq_hidden').value = '';
+        }
+    } catch (e) {
+        document.getElementById('animal_code_value').textContent = translations['connection_error'] || 'Connection Error';
+        document.getElementById('sub_seq_hidden').value = '';
+    }
+}
+
+document.getElementById('delivered_by_select').addEventListener('change', function() {
+    const opt = this.options[this.selectedIndex];
+    document.getElementById('delivered_by_empid').value = opt.value;
+});
+
+// معاينة الصور (غير مُعدلة)
+function previewImages(photos = []) {
+    const previewContainer = document.getElementById('photos_preview');
+    const files = document.getElementById('animal_photos').files;
+    previewContainer.innerHTML = '';
+    const isEditMode = !!editId;
+    const maxFiles = Math.min(files.length, 3);
+    for (let i = 0; i < maxFiles; i++) {
+        const file = files[i];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const item = document.createElement('div');
+                item.className = 'photo-item';
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.alt = translations['preview_image_alt'] || 'Preview Image';
+                item.appendChild(img);
+                if (isEditMode) {
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.className = 'delete-photo-btn';
+                    deleteBtn.textContent = '×';
+                    deleteBtn.onclick = () => {
+                        const dt = new DataTransfer();
+                        for (let j = 0; j < files.length; j++) {
+                            if (j !== i) dt.items.add(files[j]);
+                        }
+                        document.getElementById('animal_photos').files = dt.files;
+                        previewImages();
+                    };
+                    item.appendChild(deleteBtn);
+                    deleteBtn.style.display = 'block';
+                }
+                previewContainer.appendChild(item);
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+    if (isEditMode && photos.length > 0) {
+        photos.forEach((url, index) => {
+            const item = document.createElement('div');
+            item.className = 'photo-item';
+            const img = document.createElement('img');
+            img.src = '../' + url + '?t=' + Date.now();
+            img.alt = translations['saved_image_alt'] || 'Saved Image';
+            item.appendChild(img);
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'delete-photo-btn';
+            deleteBtn.textContent = '×';
+            deleteBtn.onclick = () => deletePhoto(url, index);
+            item.appendChild(deleteBtn);
+            deleteBtn.style.display = 'block';
+            previewContainer.appendChild(item);
+        });
+    }
+}
+
+async function deletePhoto(photoUrl, photoIndex) {
+    if (!confirm(translations['delete_photo_confirm'] || 'هل أنت متأكد من حذف هذه الصورة؟')) return;
+    const formData = new FormData();
+    formData.append('action', 'delete_photo');
+    formData.append('photo_url', photoUrl);
+    formData.append('animal_id', editId);
+    try {
+        const res = await fetch('../api/animals_crud.php', { method: 'POST', body: formData });
+        const data = await res.json();
+        console.log('Delete response:', data);
+        if (data.success) {
+            alert(translations['delete_photo_success'] || 'تم حذف الصورة بنجاح.');
+        } else {
+            alert(translations['delete_photo_error'] || 'فشل في حذف الصورة: ' + (data.message || 'غير معروف'));
+        }
+        await loadAnimal(editId);
+    } catch (e) {
+        console.error('Delete error:', e);
+        alert(translations['server_error'] || 'خطأ في الاتصال بالخادم.');
+        await loadAnimal(editId);
+    }
+}
+
+document.getElementById('owner_national_id_photo').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    const previewDiv = document.getElementById('owner_id_photo_preview');
+    const imgElement = document.getElementById('id_photo_img');
+
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            imgElement.src = e.target.result;
+            previewDiv.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    } else {
+        if (!document.getElementById('current_owner_national_id_photo').value) {
+            imgElement.src = '';
+            previewDiv.style.display = 'none';
+        }
+    }
+});
+
+function checkSignature(id) {
+    if (!id) return;
+    const storedKey = 'signature_' + id;
+    const stored = sessionStorage.getItem(storedKey);
+    if (stored) {
+        try {
+            const data = JSON.parse(stored);
+            document.getElementById('current_owner_signature').value = data.path;
+            const sigPreview = document.getElementById('owner_signature_preview');
+            const sigImg = document.getElementById('sig_photo_img');
+            sigImg.src = '../' + data.path + '?t=' + Date.now();
+            sigPreview.style.display = 'block';
+            sessionStorage.removeItem(storedKey);
+            if (id.startsWith('temp_')) {
+                document.getElementById('temp_animal_id').value = id;
+            }
+        } catch (e) {
+            console.error('Error parsing stored signature:', e);
+            sessionStorage.removeItem(storedKey);
+        }
+    }
+}
+
+document.getElementById('open_signature_btn').addEventListener('click', function() {
+    const animalId = document.getElementById('animal_id_hidden').value;
+    const tempAnimalId = document.getElementById('temp_animal_id').value;
+    const signatureId = animalId || tempAnimalId || ('temp_' + Date.now());
+    if (!animalId) {
+        document.getElementById('temp_animal_id').value = signatureId;
+    }
+    const signatureWindow = window.open('/health_vet/public/upload_signature.html?animal_id=' + signatureId, 'signatureWindow', 'width=600,height=500,scrollbars=yes,resizable=yes');
+    if (signatureWindow) {
+        signatureWindow.focus();
+        const interval = setInterval(() => {
+            checkSignature(signatureId);
+            if (document.getElementById('current_owner_signature').value) {
+                clearInterval(interval);
+            }
+        }, 1000);
+        setTimeout(() => clearInterval(interval), 30000);
+    } else {
+        alert(translations['popup_blocked'] || 'يرجى السماح بنافذة منبثقة جديدة.');
+    }
+});
+
+window.addEventListener('message', function(event) {
+    if (event.data.type === 'signature_updated') {
+        const signatureId = event.data.animal_id;
+        document.getElementById('current_owner_signature').value = event.data.signature_path;
+        const sigPreview = document.getElementById('owner_signature_preview');
+        const sigImg = document.getElementById('sig_photo_img');
+        sigImg.src = '../' + event.data.signature_path + '?t=' + Date.now();
+        sigPreview.style.display = 'block';
+        if (signatureId.startsWith('temp_')) {
+            document.getElementById('temp_animal_id').value = signatureId;
+        }
+    }
+});
+
+document.getElementById('btn_cancel_search').addEventListener('click', function() {
+    document.getElementById('search_code').value = '';
+    document.getElementById('search_field').value = 'animal_code';
+    document.getElementById('search_results').innerHTML = '';
+});
+
+document.getElementById('btn_new').addEventListener('click', function() {
+    window.location.href = window.location.pathname + '?';
+});
+
+document.getElementById('btn_back').addEventListener('click', function() {
+    window.location.href = '/health_vet/public/index.php';
+});
+
+// تعزيز الرجوع من المتصفح للذهاب مباشرة إلى index.php
+window.addEventListener('popstate', function(event) {
+    window.location.href = '/health_vet/public/index.php';
+});
+
+// منع الرجوع السابق وتوجيهه إلى index.php
+history.pushState(null, null, location.href);
+window.onpopstate = function() {
+    history.go(1); // يمنع الرجوع الفعلي
+    window.location.href = '/health_vet/public/index.php';
+};
+
+['animal_type', 'animal_source', 'registration_date'].forEach(id => {
+    document.getElementById(id).addEventListener('change', () => {
+        toggleFields();
+        generateCode();
+        if (id === 'animal_type') updateBreedOptions();
+    });
+});
+
+['breed', 'color'].forEach(id => {
+    document.getElementById(id).addEventListener('change', toggleCustomFields);
+});
+
+document.getElementById('animal_photos').addEventListener('change', function() {
+    if (this.files.length > 3) {
+        alert(translations['max_photos_alert'] || 'Maximum 3 photos allowed.');
+        const dt = new DataTransfer();
+        for (let i = 0; i < 3; i++) {
+            if (this.files[i]) dt.items.add(this.files[i]);
+        }
+        this.files = dt.files;
+    }
+    previewImages();
+});
+
+// تنسيق وتحقق من تاريخ الميلاد عند الإدخال
+document.getElementById('birth_date').addEventListener('input', function() {
+    formatBirthDateInput(this);
+});
+document.getElementById('birth_date').addEventListener('blur', function() {
+    const value = this.value.trim();
+    if (value && !validateBirthDate(value)) {
+        alert(translations['invalid_date'] || 'تاريخ الميلاد غير صالح. استخدم تنسيق dd-mm-yyyy مثل 01-01-2023.');
+        this.value = '';
+    }
+});
+
+let searchPage = 1;
+let lastSearchCode = '';
+let lastSearchField = 'animal_code';
+function renderSearchResults(data, total, page, pages) {
+    let html = `<div style="text-align:center;font-size:0.97em;">${translations['results_count'] || 'Results: '}${total} | ${translations['page'] || 'Page '} ${page} / ${pages}</div><ul style="padding:0;list-style:none;">`;
+    data.forEach(animal => {
+        html += `<li style="margin:7px 0;"><a href="?ID=${animal.id}" style="color:#28a745;text-decoration:underline;font-weight:bold;">${animal.animal_code}</a> (${animal.animal_name}, ${animal.breed}, ${animal.color})</li>`;
+    });
+    html += '</ul>';
+    html += `<div class="page-btns">`;
+    html += `<button ${page == 1 ? "disabled" : ""} onclick="doSearch('${lastSearchCode}', '${lastSearchField}', ${page - 1})">${translations['previous'] || 'Previous'}</button>`;
+    html += `<button ${page == pages ? "disabled" : ""} onclick="doSearch('${lastSearchCode}', '${lastSearchField}', ${page + 1})">${translations['next'] || 'Next'}</button>`;
+    html += `</div>`;
+    document.getElementById('search_results').innerHTML = html;
+}
+
+function doSearch(code, field, page = 1) {
+    lastSearchCode = code;
+    lastSearchField = field;
+    searchPage = page;
+    document.getElementById('search_results').innerHTML = `<div class="info">${translations['searching'] || 'Searching...'}</div>`;
+    const formData = new FormData();
+    formData.append('action', 'search_by_field');
+    formData.append('field', field);
+    formData.append('value', code);
+    formData.append('page', page);
+    fetch('../api/animals_crud.php', { method: 'POST', body: formData })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success && data.data && data.data.length) {
+                renderSearchResults(data.data, data.total, data.page, data.pages);
+            } else {
+                document.getElementById('search_results').innerHTML = `<div class="error">${translations['no_results'] || 'No results found.'}</div>`;
+            }
+        })
+        .catch(e => {
+            document.getElementById('search_results').innerHTML = `<div class="error">${translations['server_error'] || 'Server connection error.'}</div>`;
+        });
+}
+
+document.getElementById('btn_search').onclick = function() {
+    let code = document.getElementById('search_code').value.trim();
+    let field = document.getElementById('search_field').value;
+    if (!code) return;
+    doSearch(code, field, 1);
+};
+
+// QR Scanner Functions
+document.getElementById('btn_qr_scan').addEventListener('click', openQRScanner);
+
+function openQRScanner() {
+    const modal = document.getElementById('qrModal');
+    modal.style.display = 'flex';
+    startQRScan();
+}
+
+document.getElementById('qrCloseBtn').addEventListener('click', closeQRScanner);
+
+function closeQRScanner() {
+    const modal = document.getElementById('qrModal');
+    modal.style.display = 'none';
+    stopQRScan();
+}
+
+document.getElementById('qrCameraSelect').addEventListener('change', (e) => {
+    const facingMode = e.target.value;
+    startQRScan(facingMode);
+});
+
+async function startQRScan(facingMode = 'environment') {
+    try {
+        stopQRScan(); // Stop previous stream if any
+        qrVideo = document.getElementById('qrVideo');
+        qrCanvas = document.createElement('canvas');
+        qrContext = qrCanvas.getContext('2d');
+
+        const constraints = {
+            video: {
+                facingMode: { exact: facingMode }
+            }
+        };
+
+        qrStream = await navigator.mediaDevices.getUserMedia(constraints);
+        qrVideo.srcObject = qrStream;
+        qrVideo.play();
+
+        qrScanning = true;
+        scanQR();
+    } catch (err) {
+        console.error('Error accessing camera:', err);
+        // Fallback to other camera if environment fails
+        if (facingMode === 'environment') {
+            startQRScan('user');
+        } else {
+            alert('فشل في الوصول إلى الكاميرا. يرجى التحقق من الإذن.');
+        }
+    }
+}
+
+function stopQRScan() {
+    if (qrStream) {
+        qrStream.getTracks().forEach(track => track.stop());
+        qrStream = null;
+    }
+    qrScanning = false;
+}
+
+function scanQR() {
+    if (!qrScanning) return;
+
+    qrContext.drawImage(qrVideo, 0, 0, qrCanvas.width, qrCanvas.height);
+    const imageData = qrContext.getImageData(0, 0, qrCanvas.width, qrCanvas.height);
+    const code = jsQR(imageData.data, imageData.width, imageData.height);
+
+    if (code) {
+        const qrResult = document.getElementById('qrResult');
+        qrResult.textContent = `تم العثور على: ${code.data}`;
+        qrResult.style.display = 'block';
+        document.getElementById('search_code').value = code.data;
+        doSearch(code.data, 'animal_code', 1);
+        closeQRScanner();
+        return;
+    }
+
+    requestAnimationFrame(scanQR);
+}
+
+async function loadAnimal(id) {
+    const formData = new FormData();
+    formData.append('action', 'get');
+    formData.append('id', id);
+    try {
+        const res = await fetch('../api/animals_crud.php', { method: 'POST', body: formData });
+        const data = await res.json();
+        if (data.success && data.animal) {
+            const a = data.animal;
+            document.getElementById('animal_id_hidden').value = a.id;
+            document.getElementById('sub_seq_hidden').value = a.SUB;
+            document.getElementById('animal_name').value = a.animal_name || '';
+            document.getElementById('animal_type').value = a.animal_type;
+            updateBreedOptions();
+            document.getElementById('animal_source').value = a.animal_source;
+            document.getElementById('country_of_origin').value = a.country_of_origin || 'United Arab Emirates';
+            document.getElementById('is_active').value = a.is_active;
+            document.getElementById('registration_date').value = a.registration_date;
+            document.getElementById('animal_code_value').textContent = a.animal_code;
+            document.getElementById('gender').value = a.gender;
+
+            const breedSelect = document.getElementById('breed');
+            const customBreedInput = document.getElementById('custom_breed');
+            if (a.animal_type && breeds[a.animal_type] && breeds[a.animal_type].includes(a.breed)) {
+                breedSelect.value = a.breed;
+                customBreedInput.value = '';
+                document.getElementById('custom_breed_container').style.display = 'none';
+            } else {
+                breedSelect.value = 'Other';
+                customBreedInput.value = a.breed || '';
+                document.getElementById('custom_breed_container').style.display = 'block';
+            }
+
+            const colorSelect = document.getElementById('color');
+            const customColorInput = document.getElementById('custom_color');
+            if (colors.includes(a.color)) {
+                colorSelect.value = a.color;
+                customColorInput.value = '';
+                document.getElementById('custom_color_container').style.display = 'none';
+            } else {
+                colorSelect.value = 'Other';
+                customColorInput.value = a.color || '';
+                document.getElementById('custom_color_container').style.display = 'block';
+            }
+
+            document.getElementById('marking').value = a.marking;
+            // تحميل تاريخ الميلاد وتحويله إلى dd-mm-yyyy إذا كان موجوداً
+            let birthDateValue = a.birth_date || '';
+            if (birthDateValue) {
+                // افتراض أن البيانات المخزنة بتنسيق YYYY-MM-DD، حوّلها إلى dd-mm-yyyy
+                const dateObj = new Date(birthDateValue);
+                if (!isNaN(dateObj.getTime())) {
+                    const day = String(dateObj.getDate()).padStart(2, '0');
+                    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+                    const year = dateObj.getFullYear();
+                    birthDateValue = `${day}-${month}-${year}`;
+                }
+            }
+            document.getElementById('birth_date').value = birthDateValue;
+            if (!validateBirthDate(birthDateValue)) {
+                console.warn('Invalid birth date loaded:', birthDateValue);
+            }
+            document.getElementById('estimated_age').value = a.estimated_age;
+            document.getElementById('delivered_by_empid').value = a.delivered_by_empid || '';
+            document.getElementById('delivered_by_select').value = a.delivered_by_empid || '';
+            document.getElementById('owner_national_id').value = a.owner_national_id || '';
+            document.getElementById('current_owner_national_id_photo').value = a.owner_national_id_photo || '';
+            document.getElementById('current_owner_signature').value = a.owner_signature || '';
+            document.getElementById('owner_name').value = a.owner_name || '';
+            document.getElementById('owner_phone').value = a.owner_phone || '';
+            document.getElementById('owner_email').value = a.owner_email || '';
+
+            const idPhotoPreview = document.getElementById('owner_id_photo_preview');
+            const idPhotoImg = document.getElementById('id_photo_img');
+            if (a.owner_national_id_photo) {
+                idPhotoImg.src = '../' + a.owner_national_id_photo + '?t=' + Date.now();
+                idPhotoPreview.style.display = 'block';
+            } else {
+                idPhotoPreview.style.display = 'none';
+            }
+
+            const sigPhotoPreview = document.getElementById('owner_signature_preview');
+            const sigPhotoImg = document.getElementById('sig_photo_img');
+            if (a.owner_signature) {
+                sigPhotoImg.src = '../' + a.owner_signature + '?t=' + Date.now();
+                sigPhotoPreview.style.display = 'block';
+            } else {
+                sigPhotoPreview.style.display = 'none';
+            }
+
+            document.getElementById('notes').value = a.notes || '';
+            document.getElementById('submit_button').style.display = 'none';  // ✨ إخفاء save في edit
+            document.getElementById('edit_buttons').style.display = 'flex';
+            document.querySelector('.signature-btn').style.display = 'inline-block';
+            document.querySelectorAll('.delete-photo-btn').forEach(btn => btn.style.display = 'block');
+            toggleFields();
+
+            previewImages(data.photos || []);
+            checkSignature(id);
+            toggleCustomFields();
+        }
+    } catch (e) {
+        document.getElementById('message').innerHTML = `<div class="error">${translations['load_error'] || 'Failed to load animal data.'}</div>`;
+    }
+}
+
+// ✨ إصلاح submit لمنع add في وضع edit
+document.getElementById('addAnimalForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const isEditMode = !!document.getElementById('animal_id_hidden').value;  // ✨ تحقق من وضع التعديل
+    if (isEditMode) {
+        alert(translations['use_update_btn'] || 'في وضع التعديل، استخدم زر "تعديل" بدلاً من الحفظ.');
+        return;
+    }
+    
+    // التحقق من تاريخ الميلاد
+    const birthDate = document.getElementById('birth_date').value.trim();
+    if (birthDate && !validateBirthDate(birthDate)) {
+        alert(translations['invalid_date'] || 'تاريخ الميلاد غير صالح. استخدم تنسيق dd-mm-yyyy مثل 01-01-2023.');
+        return;
+    }
+    
+    // كود add كما هو...
+    const animalCode = document.getElementById('animal_code_value').textContent;
+    const subSeq = document.getElementById('sub_seq_hidden').value;
+    const animalName = document.getElementById('animal_name').value.trim();
+    const source = document.getElementById('animal_source').value;
+
+    if (!animalCode.includes('-') || !subSeq || !animalName) {
+        document.getElementById('message').innerHTML = `<div class="error">${translations['generate_code_error'] || 'Please select type, source, date, and animal name to generate unique code and sequence.'}</div>`;
+        return;
+    }
+
+    checkSignature(document.getElementById('temp_animal_id').value);
+
+    const formData = new FormData(this);
+    formData.append('action', 'add');
+    formData.append('animal_code', animalCode);
+    formData.append('sub_seq', subSeq);
+    formData.append('created_by', currentUserId);
+
+    if (document.getElementById('breed').value === 'Other') {
+        formData.set('breed', document.getElementById('custom_breed').value.trim() || 'Other');
+    }
+    if (document.getElementById('color').value === 'Other') {
+        formData.set('color', document.getElementById('custom_color').value.trim() || 'Other');
+    }
+
+    // تحويل تاريخ الميلاد إلى YYYY-MM-DD للحفظ في قاعدة البيانات
+    const birthDateFormatted = document.getElementById('birth_date').value.trim();
+    if (birthDateFormatted) {
+        const parts = birthDateFormatted.split('-');
+        if (parts.length === 3) {
+            const year = parts[2];
+            const month = parts[1];
+            const day = parts[0];
+            formData.set('birth_date', `${year}-${month}-${day}`);
+        }
+    }
+
+    const tempAnimalId = document.getElementById('temp_animal_id').value;
+    if (tempAnimalId) {
+        formData.append('temp_animal_id', tempAnimalId);
+    }
+
+    const submitBtn = document.getElementById('submit_button');
+    submitBtn.disabled = true;
+    submitBtn.textContent = translations['saving'] || '...Saving...';
+
+    try {
+        const res = await fetch('../api/animals_crud.php?t=' + Date.now(), { method: 'POST', body: formData });
+        const data = await res.json();
+        const msgDiv = document.getElementById('message');
+        msgDiv.className = '';
+        if (data.success) {
+            msgDiv.innerHTML = `<div class="success">${data.message || translations['save_success'] || 'Saved successfully.'}<br>${translations['unique_code'] || 'Unique Code: '}${data.code}</div>`;
+            // فتح generate_barcode.html مع الرمز الفريد
+            window.open(`/health_vet/public/generate_barcode.html?animal_code_input=${data.code}`, '_blank');
+            document.getElementById('temp_animal_id').value = '';
+            this.reset();
+            document.getElementById('country_of_origin').value = 'United Arab Emirates';
+            setDefaultDate();
+            toggleFields();
+            generateCode();
+            updateBreedOptions();
+            toggleCustomFields();
+            document.getElementById('photos_preview').innerHTML = '';
+            document.getElementById('owner_id_photo_preview').style.display = 'none';
+            document.getElementById('owner_signature_preview').style.display = 'none';
+            document.querySelector('.signature-btn').style.display = 'none';
+            document.getElementById('btn_update').style.display = 'none';
+            document.getElementById('btn_delete').style.display = 'none';
+            document.getElementById('print_report_btn').style.display = 'none';
+            document.getElementById('submit_button').style.display = 'block';
+        } else {
+            msgDiv.innerHTML = `<div class="error">${data.message || translations['save_error'] || 'Save failed.'}</div>`;
+        }
+    } catch (e) {
+        document.getElementById('message').innerHTML = `<div class="error">${translations['server_error'] || 'Server connection error.'}</div>`;
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = translations['save_btn'] || 'Save Data';
+    }
+});
+
+// دالة التعديل (مع console.log للتشخيص)
+document.getElementById('btn_update').onclick = async function() {
+    console.log('Update clicked, editId:', editId);  // ✨ تشخيص
+    if (!editId) {
+        alert('خطأ: معرف الحيوان مفقود.');
+        return;
+    }
+    
+    // التحقق من تاريخ الميلاد
+    const birthDate = document.getElementById('birth_date').value.trim();
+    if (birthDate && !validateBirthDate(birthDate)) {
+        alert(translations['invalid_date'] || 'تاريخ الميلاد غير صالح. استخدم تنسيق dd-mm-yyyy مثل 01-01-2023.');
+        return;
+    }
+    
+    const animalCode = document.getElementById('animal_code_value').textContent;
+    const subSeq = document.getElementById('sub_seq_hidden').value;
+    const animalName = document.getElementById('animal_name').value.trim();
+
+    if (!animalName) {
+        document.getElementById('message').innerHTML = `<div class="error">${translations['animal_name_required'] || 'Animal name is required.'}</div>`;
+        return;
+    }
+
+    checkSignature(editId);
+
+    const formData = new FormData(document.getElementById('addAnimalForm'));
+    formData.append('action', 'update');
+    formData.append('id', editId);
+    formData.append('animal_code', animalCode);
+    formData.append('sub_seq', subSeq);
+    formData.append('updated_by', currentUserId);
+
+    if (document.getElementById('breed').value === 'Other') {
+        formData.set('breed', document.getElementById('custom_breed').value.trim() || 'Other');
+    }
+    if (document.getElementById('color').value === 'Other') {
+        formData.set('color', document.getElementById('custom_color').value.trim() || 'Other');
+    }
+
+    // تحويل تاريخ الميلاد إلى YYYY-MM-DD للحفظ في قاعدة البيانات
+    const birthDateFormatted = document.getElementById('birth_date').value.trim();
+    if (birthDateFormatted) {
+        const parts = birthDateFormatted.split('-');
+        if (parts.length === 3) {
+            const year = parts[2];
+            const month = parts[1];
+            const day = parts[0];
+            formData.set('birth_date', `${year}-${month}-${day}`);
+        }
+    }
+
+    const btn = document.getElementById('btn_update');
+    btn.disabled = true;
+    btn.textContent = translations['updating'] || '...Updating...';
+    try {
+        const res = await fetch('../api/animals_crud.php?t=' + Date.now(), { method: 'POST', body: formData });
+        const data = await res.json();
+        console.log('Update response:', data);  // ✨ تشخيص
+        if (data.success) {
+            document.getElementById('message').innerHTML = `<div class="success">${data.message || translations['update_success'] || 'Updated successfully.'}</div>`;
+            // فتح generate_barcode.html مع الرمز الفريد بعد التعديل
+            window.open(`/health_vet/public/generate_barcode.html?animal_code_input=${animalCode}`, '_blank');
+            loadAnimal(editId);
+        } else {
+            document.getElementById('message').innerHTML = `<div class="error">${data.message || translations['update_error'] || 'Update failed.'}</div>`;
+        }
+    } finally {
+        btn.disabled = false;
+        btn.textContent = translations['update_btn'] || 'Update';
+    }
+};
+
+document.getElementById('btn_delete').onclick = async function() {
+    if (!editId) return;
+    if (!confirm(translations['delete_confirm'] || 'Are you sure to delete this animal?')) return;
+    const formData = new FormData();
+    formData.append('action', 'delete');
+    formData.append('id', editId);
+    const btn = document.getElementById('btn_delete');
+    btn.disabled = true;
+    btn.textContent = translations['deleting'] || '...Deleting...';
+    try {
+        const res = await fetch('../api/animals_crud.php?t=' + Date.now(), { method: 'POST', body: formData });
+        const data = await res.json();
+        if (data.success) {
+            document.getElementById('message').innerHTML = `<div class="success">${data.message || translations['delete_success'] || 'Deleted successfully.'}</div>`;
+            setTimeout(() => window.location.href = '/health_vet/public/index.php', 1500);
+        } else {
+            document.getElementById('message').innerHTML = `<div class="error">${data.message || translations['delete_error'] || 'Delete failed.'}</div>`;
+        }
+    } finally {
+        btn.disabled = false;
+        btn.textContent = translations['delete_btn'] || 'Delete';
+    }
+};
+
+// تعديل زر الطباعة ليستخدم owner_animals_report.html مع ID للحيوان المحدد
+document.getElementById('print_report_btn').onclick = function() {
+    const animalSource = document.getElementById('animal_source').value;
+    if (animalSource !== 'Surrended') {
+        alert(translations['print_only_surrended'] || 'زر الطباعة متاح فقط لحيوانات من نوع Surrended.');
+        return;
+    }
+    if (editId) {
+        window.open(`/health_vet/public/owner_animals_report.html?ID=${editId}`, '_blank');
+    } else {
+        alert(translations['no_code_error'] || 'لا يوجد معرف للحيوان للطباعة.');
+    }
+};
+
+async function loadResources() {
+    document.documentElement.lang = currentLang;
+    document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+    document.body.lang = currentLang;
+    document.body.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+    await loadTranslations(currentLang);
+    populateSelect('color', [...colors, 'Other'], translations['select_color'] || 'اختر اللون');
+    setDefaultDate();
+    await loadEmployees();
+    updateBreedOptions();
+    toggleCustomFields();
+    generateCode();
+
+    const form = document.getElementById('addAnimalForm');
+    const authDiv = document.getElementById('auth_status');
+    try {
+        const res = await fetch('../api/user_data.php?action=get_user_data&t=' + Date.now());
+        const user = await res.json();
+        if (user && user.success && user.user_data && user.user_data.EmpID) {
+            currentUserId = user.user_data.EmpID;
+            form.style.display = 'block';
+            authDiv.style.display = 'none';
+            document.querySelector('.signature-btn').style.display = editId ? 'inline-block' : 'none';
+            if (editId) {
+                loadAnimal(editId);
+            }
+        } else {
+            authDiv.textContent = translations['login_required'] || 'Please log in.';
+            authDiv.className = 'error';
+        }
+    } catch (e) {
+        authDiv.textContent = translations['server_path_error'] || 'Server connection error (check user_data.php path)';
+        authDiv.className = 'error';
+    }
+}
+
+document.getElementById('lang-toggle').addEventListener('click', function() {
+    currentLang = currentLang === 'ar' ? 'en' : 'ar';
+    localStorage.setItem('lang', currentLang);
+    document.getElementById('lang-toggle').textContent = currentLang === 'ar' ? 'EN' : 'عربي';
+    loadResources();
+});
+
+window.onload = loadResources;
+</script>
+</body>
+</html>

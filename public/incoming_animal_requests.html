@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة طلبات استلام الحيوانات - Health Vet</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        /* الألوان الهوية المؤسسية */
+        :root {
+            --primary-color: #2E4F4F; /* أخضر داكن / زيتوني غامق */
+            --secondary-color: #D4AF37; /* ذهبي / بيج داكن */
+            --text-primary: var(--primary-color);
+            --text-secondary: var(--secondary-color);
+        }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: white; /* خلفية بيضاء */
+            font-size: 12px; /* تصغير الخط */
+            overflow-x: auto;
+        }
+        h1, .h1 { color: var(--text-primary); font-size: 18px; }
+        .table th { 
+            background-color: var(--primary-color); 
+            color: white; 
+            position: relative;
+            padding: 8px 4px;
+            font-size: 11px;
+        }
+        .filter-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 10px;
+            cursor: pointer;
+            margin-right: 2px;
+            padding: 2px;
+        }
+        .filter-btn:hover { color: var(--secondary-color); }
+        .filter-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            z-index: 1000;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            /* صغيرة بنفس عرض العمود */
+            width: 100%;
+            min-width: unset;
+            max-height: 250px;
+            overflow-y: auto;
+            padding: 5px;
+            font-size: 11px;
+        }
+        .filter-search { width: 100%; padding: 3px; border: 1px solid #eee; border-radius: 3px; margin-bottom: 5px; font-size: 11px; }
+        .filter-checkbox { display: flex; align-items: center; padding: 2px; cursor: pointer; margin-bottom: 2px; }
+        .filter-checkbox:hover { background: #f8f9fa; }
+        .filter-checkbox input[type="checkbox"] { width: 12px; height: 12px; margin-left: 5px; } /* أيقونات شيك صغيرة جداً */
+        .date-range { display: flex; gap: 3px; margin-bottom: 5px; }
+        .date-range input { flex: 1; font-size: 11px; padding: 2px; }
+        .filter-actions { display: flex; gap: 3px; margin-top: 5px; }
+        .filter-actions button { font-size: 10px; padding: 2px 4px; flex: 1; }
+        .btn-primary { background-color: var(--primary-color); border-color: var(--primary-color); font-size: 11px; padding: 4px 8px; }
+        .btn-primary:hover { background-color: var(--text-secondary); }
+        .btn-sm { font-size: 10px; padding: 2px 4px; }
+        .form-control, .form-select { font-size: 11px; padding: 3px 5px; }
+        .form-control:focus { border-color: var(--text-secondary); box-shadow: 0 0 0 0.15rem rgba(212, 175, 55, 0.25); }
+        #formContainer { 
+            display: none; 
+            background: white; 
+            padding: 15px; 
+            border: 1px solid #ddd; 
+            margin-bottom: 15px; 
+            border-radius: 5px; 
+            box-shadow: 0 1px 5px rgba(0,0,0,0.05);
+        }
+        .lang-toggle { position: absolute; left: 10px; top: 10px; z-index: 1001; font-size: 11px; padding: 4px; }
+        .header-bar { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 15px; 
+            padding: 5px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .table-responsive { 
+            box-shadow: 0 1px 5px rgba(0,0,0,0.05); 
+            border-radius: 5px; 
+            overflow: hidden; 
+            margin-bottom: 20px;
+        }
+        /* RTL للعربية في النموذج */
+        [dir="rtl"] #formContainer {
+            direction: rtl;
+        }
+        [dir="rtl"] #formContainer input[type="text"],
+        [dir="rtl"] #formContainer input[type="date"],
+        [dir="rtl"] #formContainer select {
+            direction: rtl;
+            text-align: right;
+        }
+        /* LTR للإنجليزية */
+        [dir="ltr"] #formContainer {
+            direction: ltr;
+        }
+        [dir="ltr"] #formContainer input[type="text"],
+        [dir="ltr"] #formContainer input[type="date"],
+        [dir="ltr"] #formContainer select {
+            direction: ltr;
+            text-align: left;
+        }
+        @media (max-width: 768px) { /* للهواتف والتابلت */
+            body { font-size: 10px; }
+            .container-fluid { padding: 5px; }
+            .table th, .table td { padding: 4px 2px; font-size: 9px; }
+            .filter-dropdown { max-height: 200px; }
+            .row { flex-direction: column; }
+            .col-md-4, .col-md-6 { width: 100%; margin-bottom: 10px; }
+            .btn { font-size: 9px; padding: 3px 6px; }
+        }
+        @media (min-width: 769px) and (max-width: 1024px) { /* للتابلت */
+            body { font-size: 11px; }
+            .table th, .table td { padding: 6px 3px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- زر تبديل اللغة -->
+    <button class="btn btn-outline-secondary lang-toggle" id="langToggle">
+        <i class="fas fa-globe"></i> EN
+    </button>
+
+    <div class="container-fluid mt-2 px-2"> <!-- container-fluid للـ responsive -->
+        <div class="header-bar">
+            <h1 class="mb-0" id="pageTitle">إدارة طلبات استلام الحيوانات</h1>
+            <div></div>
+        </div>
+        
+        <!-- نموذج الإضافة/التعديل -->
+        <div id="formContainer">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h5 id="formTitle" style="font-size: 14px;">إضافة طلب جديد</h5>
+                <button id="cancelBtn" class="btn btn-secondary btn-sm"><i class="fas fa-times"></i></button>
+            </div>
+            <form id="requestForm">
+                <input type="hidden" id="id" name="id">
+                <div class="row g-2">
+                    <div class="col-md-4">
+                        <label for="request_date" class="form-label" style="font-size: 11px;" id="lbl-request_date">تاريخ الطلب *</label>
+                        <input type="date" class="form-control" id="request_date" name="request_date" required>
+                    </div>
+                </div>
+                <div class="row g-2">
+                    <div class="col-md-6">
+                        <label for="requester_name" class="form-label" style="font-size: 11px;" id="lbl-requester_name">اسم الطالب *</label>
+                        <input type="text" class="form-control" id="requester_name" name="requester_name" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="contact_number" class="form-label" style="font-size: 11px;" id="lbl-contact_number">رقم الاتصال</label>
+                        <input type="text" class="form-control" id="contact_number" name="contact_number">
+                    </div>
+                </div>
+                <div class="row g-2">
+                    <div class="col-md-6">
+                        <label for="animal_type" class="form-label" style="font-size: 11px;" id="lbl-animal_type">نوع الحيوان *</label>
+                        <select class="form-select" id="animal_type" name="animal_type" required>
+                            <option value="Cat">قطة</option>
+                            <option value="Dog">كلب</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="quantity" class="form-label" style="font-size: 11px;" id="lbl-quantity">الكمية *</label>
+                        <input type="number" class="form-control" id="quantity" name="quantity" min="1" value="1" required>
+                    </div>
+                </div>
+                <div class="row g-2">
+                    <div class="col-md-12">
+                        <label for="reason_for_abandonment" class="form-label" style="font-size: 11px;" id="lbl-reason_for_abandonment">سبب التخلي</label>
+                        <input type="text" class="form-control" id="reason_for_abandonment" name="reason_for_abandonment">
+                    </div>
+                </div>
+                <div class="row g-2">
+                    <div class="col-md-6">
+                        <label for="submission_method" class="form-label" style="font-size: 11px;" id="lbl-submission_method">طريقة التقديم *</label>
+                        <select class="form-select" id="submission_method" name="submission_method" required>
+                            <option value="Phone">هاتف</option>
+                            <option value="WhatsApp">واتساب</option>
+                            <option value="Email">بريد إلكتروني</option>
+                            <option value="InPerson">شخصياً</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="notes" class="form-label" style="font-size: 11px;" id="lbl-notes">ملاحظات</label>
+                        <textarea class="form-control" id="notes" name="notes" rows="3"></textarea>
+                    </div>
+                </div>
+                <button type="button" id="saveBtn" class="btn btn-primary btn-sm mt-2"><i class="fas fa-save"></i> حفظ</button>
+            </form>
+        </div>
+        
+        <button id="addNewBtn" class="btn btn-primary btn-sm mb-2">
+            <i class="fas fa-plus"></i> إضافة طلب جديد
+        </button>
+        
+        <!-- تقرير بسيط بالعربية -->
+        <div id="reportSection" style="display: none; margin-bottom: 15px; padding: 10px; background: #f8f9fa; border-radius: 5px; font-size: 11px;">
+            <h6 id="reportTitle" style="margin-bottom: 10px; color: var(--primary-color);">تقرير طلبات استلام الحيوانات</h6>
+            <div id="reportContent"></div>
+            <button id="printReport" class="btn btn-sm btn-primary mt-2"><i class="fas fa-print"></i> طباعة التقرير</button>
+        </div>
+        
+        <div class="table-responsive">
+            <table class="table table-striped table-hover table-sm" id="requestsTable"> <!-- table-sm للتصغير -->
+                <thead>
+                    <tr>
+                        <th style="width: 120px;">
+                            <span id="th-date">تاريخ الطلب</span>
+                            <button class="filter-btn" data-column="request_date"><i class="fas fa-filter"></i></button>
+                        </th>
+                        <th style="width: 150px;">
+                            <span id="th-requester">اسم الطالب</span>
+                            <button class="filter-btn" data-column="requester_name"><i class="fas fa-filter"></i></button>
+                        </th>
+                        <th style="width: 100px;">
+                            <span id="th-contact">رقم الاتصال</span>
+                            <button class="filter-btn" data-column="contact_number"><i class="fas fa-filter"></i></button>
+                        </th>
+                        <th style="width: 80px;">
+                            <span id="th-animaltype">نوع الحيوان</span>
+                            <button class="filter-btn" data-column="animal_type"><i class="fas fa-filter"></i></button>
+                        </th>
+                        <th style="width: 80px;">
+                            <span id="th-quantity">الكمية</span>
+                            <button class="filter-btn" data-column="quantity"><i class="fas fa-filter"></i></button>
+                        </th>
+                        <th style="width: 150px;">
+                            <span id="th-reason">سبب التخلي</span>
+                            <button class="filter-btn" data-column="reason_for_abandonment"><i class="fas fa-filter"></i></button>
+                        </th>
+                        <th style="width: 100px;">
+                            <span id="th-method">طريقة التقديم</span>
+                            <button class="filter-btn" data-column="submission_method"><i class="fas fa-filter"></i></button>
+                        </th>
+                        <th style="width: 200px;">
+                            <span id="th-notes">ملاحظات</span>
+                            <button class="filter-btn" data-column="notes"><i class="fas fa-filter"></i></button>
+                        </th>
+                        <th style="width: 100px;">
+                            <span id="th-createdby">مسجل بواسطة</span>
+                            <button class="filter-btn" data-column="created_by_name"><i class="fas fa-filter"></i></button>
+                        </th>
+                        <th style="width: 80px;" id="th-actions">إجراءات</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Dropdown للفلاتر -->
+    <div id="filterDropdown" class="filter-dropdown" style="display: none;"></div>
+    <script src="session_check.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentLang = 'ar';
+        let translations = {};
+        
+        // ترجمات العربية
+        const arTranslations = {
+            "pageTitle": "إدارة طلبات استلام الحيوانات",
+            "modalTitle": "إضافة طلب جديد",
+            "addTitle": "إضافة طلب جديد",
+            "editTitle": "تعديل الطلب",
+            "save": "حفظ",
+            "cancel": "إلغاء",
+            "close": "إغلاق",
+            "addNew": "إضافة طلب جديد",
+            "edit": "تعديل",
+            "delete": "حذف",
+            "confirmDelete": "هل أنت متأكد من الحذف؟",
+            "apply": "تطبيق",
+            "clear": "مسح",
+            "search": "بحث...",
+            "selectAll": "تحديد الكل",
+            "showEmpty": "إظهار القيم الفارغة",
+            "empty": "فارغ",
+            "unauthorized": "غير مصرح لك بالوصول إلى هذه الصفحة.",
+            "errorLoad": "خطأ في جلب البيانات",
+            "errorServer": "خطأ في الاتصال بالخادم.",
+            "errorEdit": "خطأ في جلب بيانات التعديل.",
+            "requesterName": "اسم الطالب",
+            "contactNumber": "رقم الاتصال",
+            "animalType": "نوع الحيوان",
+            "quantity": "الكمية",
+            "reasonForAbandonment": "سبب التخلي",
+            "submissionMethod": "طريقة التقديم",
+            "notes": "ملاحظات",
+            "createdBy": "مسجل بواسطة",
+            "date": "تاريخ الطلب",
+            "cat": "قطة",
+            "dog": "كلب",
+            "phone": "هاتف",
+            "whatsapp": "واتساب",
+            "email": "بريد إلكتروني",
+            "inperson": "شخصياً",
+            "reportTitle": "تقرير طلبات استلام الحيوانات",
+            "totalRequests": "إجمالي الطلبات",
+            "filteredRequests": "عدد الطلبات المفلتر",
+            "dateRange": "نطاق التاريخ",
+            "print": "طباعة التقرير",
+            "dateLabel": "تاريخ الطلب *",
+            "requesterNameLabel": "اسم الطالب *",
+            "contactNumberLabel": "رقم الاتصال",
+            "animalTypeLabel": "نوع الحيوان *",
+            "quantityLabel": "الكمية *",
+            "reasonForAbandonmentLabel": "سبب التخلي",
+            "submissionMethodLabel": "طريقة التقديم *",
+            "notesLabel": "ملاحظات",
+            "actions": "إجراءات"
+        };
+        
+        // ترجمات الإنجليزية
+        const enTranslations = {
+            "pageTitle": "Incoming Animal Requests Management",
+            "modalTitle": "Add New Request",
+            "addTitle": "Add New Request",
+            "editTitle": "Edit Request",
+            "save": "Save",
+            "cancel": "Cancel",
+            "close": "Close",
+            "addNew": "Add New Request",
+            "edit": "Edit",
+            "delete": "Delete",
+            "confirmDelete": "Are you sure you want to delete?",
+            "apply": "Apply",
+            "clear": "Clear",
+            "search": "Search...",
+            "selectAll": "Select All",
+            "showEmpty": "Show Empty Values",
+            "empty": "Empty",
+            "unauthorized": "You are not authorized to access this page.",
+            "errorLoad": "Error loading data",
+            "errorServer": "Server connection error.",
+            "errorEdit": "Error fetching edit data.",
+            "requesterName": "Requester Name",
+            "contactNumber": "Contact Number",
+            "animalType": "Animal Type",
+            "quantity": "Quantity",
+            "reasonForAbandonment": "Reason for Abandonment",
+            "submissionMethod": "Submission Method",
+            "notes": "Notes",
+            "createdBy": "Created By",
+            "date": "Request Date",
+            "cat": "Cat",
+            "dog": "Dog",
+            "phone": "Phone",
+            "whatsapp": "WhatsApp",
+            "email": "Email",
+            "inperson": "In Person",
+            "reportTitle": "Incoming Animal Requests Report",
+            "totalRequests": "Total Requests",
+            "filteredRequests": "Filtered Requests Count",
+            "dateRange": "Date Range",
+            "print": "Print Report",
+            "dateLabel": "Request Date *",
+            "requesterNameLabel": "Requester Name *",
+            "contactNumberLabel": "Contact Number",
+            "animalTypeLabel": "Animal Type *",
+            "quantityLabel": "Quantity *",
+            "reasonForAbandonmentLabel": "Reason for Abandonment",
+            "submissionMethodLabel": "Submission Method *",
+            "notesLabel": "Notes",
+            "actions": "Actions"
+        };
+        
+        // تحميل الترجمات
+        function loadTranslations(lang) {
+            translations = lang === 'ar' ? arTranslations : enTranslations;
+            updateUI();
+        }
+        
+        let allData = [];
+        let employees = [];
+        let permissions = {};
+        let activeFilters = {}; // { column: [selectedValues] }
+        
+        // تحديث النصوص والـ dir
+        function updateUI() {
+            $('html').attr('lang', currentLang).attr('dir', currentLang === 'ar' ? 'rtl' : 'ltr');
+            $('#pageTitle').text(translations.pageTitle || 'إدارة طلبات استلام الحيوانات');
+            $('#formTitle').text(translations.modalTitle || 'إضافة طلب جديد');
+            $('#addNewBtn').html(`<i class="fas fa-plus"></i> ${translations.addNew || 'إضافة طلب جديد'}`);
+            $('#cancelBtn').html(`<i class="fas fa-times"></i>`);
+            $('#saveBtn').html(`<i class="fas fa-save"></i> ${translations.save || 'حفظ'}`);
+            // عناوين الأعمدة
+            $('#th-date').text(translations.date || 'تاريخ الطلب');
+            $('#th-requester').text(translations.requesterName || 'اسم الطالب');
+            $('#th-contact').text(translations.contactNumber || 'رقم الاتصال');
+            $('#th-animaltype').text(translations.animalType || 'نوع الحيوان');
+            $('#th-quantity').text(translations.quantity || 'الكمية');
+            $('#th-reason').text(translations.reasonForAbandonment || 'سبب التخلي');
+            $('#th-method').text(translations.submissionMethod || 'طريقة التقديم');
+            $('#th-notes').text(translations.notes || 'ملاحظات');
+            $('#th-createdby').text(translations.createdBy || 'مسجل بواسطة');
+            $('#th-actions').text(translations.actions || 'إجراءات');
+            // تحديث تسميات النموذج
+            $('#lbl-request_date').text(translations.dateLabel || 'تاريخ الطلب *');
+            $('#lbl-requester_name').text(translations.requesterNameLabel || 'اسم الطالب *');
+            $('#lbl-contact_number').text(translations.contactNumberLabel || 'رقم الاتصال');
+            $('#lbl-animal_type').text(translations.animalTypeLabel || 'نوع الحيوان *');
+            $('#lbl-quantity').text(translations.quantityLabel || 'الكمية *');
+            $('#lbl-reason_for_abandonment').text(translations.reasonForAbandonmentLabel || 'سبب التخلي');
+            $('#lbl-submission_method').text(translations.submissionMethodLabel || 'طريقة التقديم *');
+            $('#lbl-notes').text(translations.notesLabel || 'ملاحظات');
+            // تحديث dir للنموذج
+            $('#formContainer').attr('dir', currentLang === 'ar' ? 'rtl' : 'ltr');
+            // تحديث خيارات النموذج للترجمة
+            $('#animal_type option[value="Cat"]').text(currentLang === 'ar' ? translations.cat || 'قطة' : translations.cat || 'Cat');
+            $('#animal_type option[value="Dog"]').text(currentLang === 'ar' ? translations.dog || 'كلب' : translations.dog || 'Dog');
+            $('#submission_method option[value="Phone"]').text(currentLang === 'ar' ? translations.phone || 'هاتف' : translations.phone || 'Phone');
+            $('#submission_method option[value="WhatsApp"]').text(currentLang === 'ar' ? translations.whatsapp || 'واتساب' : translations.whatsapp || 'WhatsApp');
+            $('#submission_method option[value="Email"]').text(currentLang === 'ar' ? translations.email || 'بريد إلكتروني' : translations.email || 'Email');
+            $('#submission_method option[value="InPerson"]').text(currentLang === 'ar' ? translations.inperson || 'شخصياً' : translations.inperson || 'In Person');
+            // تحديث تقرير
+            $('#reportTitle').text(translations.reportTitle || 'تقرير طلبات استلام الحيوانات');
+            $('#printReport').html(`<i class="fas fa-print"></i> ${translations.print || 'طباعة التقرير'}`);
+            renderTable(allData);
+            generateReport();
+        }
+        
+        // تبديل اللغة
+        $('#langToggle').click(function() {
+            currentLang = currentLang === 'ar' ? 'en' : 'ar';
+            $(this).html(`<i class="fas fa-globe"></i> ${currentLang.toUpperCase()}`);
+            loadTranslations(currentLang);
+        });
+        
+        // جلب بيانات المستخدم
+        $.getJSON('../api/user_data.php', function(data) {
+            if (!data.success) {
+                window.location.href = 'login.php';
+                return;
+            }
+            permissions = data.permissions;
+            if (!permissions.canAdd && !permissions.canEdit && !permissions.canDelete) {
+                alert(translations.unauthorized || 'غير مصرح لك بالوصول إلى هذه الصفحة.');
+                window.history.back();
+                return;
+            }
+            if (!permissions.canAdd) $('#addNewBtn').hide();
+            loadData();
+        });
+        
+        // جلب البيانات
+        function loadData(filters = {}) {
+            let params = new URLSearchParams(filters);
+            $.getJSON('../api/incoming_animal_requests.php?' + params, function(response) {
+                if (response.success) {
+                    employees = response.employees || [];
+                    allData = response.data || []; // تأكيد array فارغ إذا لم يكن
+                    renderTable(allData);
+                    generateReport();
+                } else {
+                    alert(response.message || translations.errorLoad || 'خطأ في جلب البيانات');
+                    allData = []; // إعادة تعيين
+                    renderTable(allData);
+                    generateReport();
+                }
+            }).fail(function() {
+                alert(translations.errorServer || 'خطأ في الاتصال بالخادم.');
+                allData = [];
+                renderTable(allData);
+                generateReport();
+            });
+        }
+        
+        // رسم الجدول
+        function renderTable(data) {
+            let tbody = $('#tableBody');
+            tbody.empty();
+            let filteredData = data.filter(row => applyFilters(row));
+            filteredData.forEach(row => {
+                let tr = $('<tr>');
+                tr.append(`<td>${formatDate(row.request_date)}</td>`);
+                tr.append(`<td>${row.requester_name || ''}</td>`);
+                tr.append(`<td>${row.contact_number || ''}</td>`);
+                tr.append(`<td>${translateValue(row.animal_type, 'animalType') || ''}</td>`);
+                tr.append(`<td>${row.quantity || ''}</td>`);
+                tr.append(`<td>${row.reason_for_abandonment || ''}</td>`);
+                tr.append(`<td>${translateValue(row.submission_method, 'submissionMethod') || ''}</td>`);
+                tr.append(`<td>${row.notes || ''}</td>`);
+                tr.append(`<td>${row.created_by_name || ''}</td>`);
+                
+                let actions = '<td>';
+                if (permissions.canEdit) actions += `<button class="btn btn-warning btn-sm editBtn" data-id="${row.id}"><i class="fas fa-edit"></i></button> `;
+                if (permissions.canDelete) actions += `<button class="btn btn-danger btn-sm deleteBtn" data-id="${row.id}"><i class="fas fa-trash"></i></button>`;
+                actions += '</td>';
+                tr.append(actions);
+                tbody.append(tr);
+            });
+            
+            $('.editBtn').off('click').click(editRow);
+            $('.deleteBtn').off('click').click(deleteRow);
+        }
+        
+        // تنسيق التاريخ الميلادي dd/mm/yyyy
+        function formatDate(dateStr) {
+            if (!dateStr) return '';
+            let date = new Date(dateStr + 'T00:00:00');
+            let day = String(date.getDate()).padStart(2, '0');
+            let month = String(date.getMonth() + 1).padStart(2, '0');
+            let year = date.getFullYear();
+            return `${day}/${month}/${year}`;
+        }
+        
+        // تطبيق الفلاتر (دعم multiple selection)
+        function applyFilters(row) {
+            for (let col in activeFilters) {
+                let selected = activeFilters[col] || [];
+                if (selected.length === 0) continue;
+                let val = row[col] || '';
+                if (!selected.includes(val)) return false;
+            }
+            // فلاتر التاريخ إذا وجدت
+            for (let col in activeFilters) {
+                if (col.includes('_from') || col.includes('_to')) continue;
+                let fromKey = `${col}_from`;
+                let toKey = `${col}_to`;
+                if (activeFilters[fromKey] || activeFilters[toKey]) {
+                    let dateVal = new Date(row[col]);
+                    let from = activeFilters[fromKey] ? new Date(activeFilters[fromKey]) : null;
+                    let to = activeFilters[toKey] ? new Date(activeFilters[toKey]) : null;
+                    if (from && dateVal < from) return false;
+                    if (to && dateVal > to) return false;
+                }
+            }
+            return true;
+        }
+        
+        // ترجمة القيم
+        function translateValue(val, key) {
+            if (!val) return '';
+            let transKey = val.toLowerCase();
+            return translations[`${key}_${transKey}`] || val;
+        }
+        
+        // فتح فلتر العمود (مثل Excel: checkboxes)
+        $(document).on('click', '.filter-btn', function(e) {
+            e.stopPropagation();
+            let column = $(this).data('column');
+            let th = $(this).closest('th');
+            let dropdown = $('#filterDropdown');
+            
+            // القيم الفريدة
+            let uniqueValues = [...new Set(allData.map(row => row[column] || translations.empty || 'فارغ'))].filter(v => v !== undefined && v !== null);
+            uniqueValues.sort((a, b) => a.localeCompare(b, currentLang));
+            
+            let selectedValues = activeFilters[column] || [];
+            let allSelected = uniqueValues.length > 0 && uniqueValues.every(v => selectedValues.includes(v));
+            let showEmpty = selectedValues.includes(translations.empty || 'فارغ');
+            
+            let html = `
+                <input type="text" class="filter-search" placeholder="${translations.search || 'بحث...'}">
+                <div class="filter-checkbox">
+                    <input type="checkbox" id="selectAll_${column}" ${allSelected ? 'checked' : ''}>
+                    <label for="selectAll_${column}" style="font-size: 11px; margin-right: 5px;">${translations.selectAll || 'تحديد الكل'}</label>
+                </div>
+                <div class="filter-checkbox">
+                    <input type="checkbox" id="showEmpty_${column}" ${showEmpty ? 'checked' : ''}>
+                    <label for="showEmpty_${column}" style="font-size: 11px; margin-right: 5px;">${translations.showEmpty || 'إظهار القيم الفارغة'}</label>
+                </div>
+            `;
+            
+            if (column.includes('date')) {
+                // فلتر تاريخ بين تاريخين
+                let from = activeFilters[`${column}_from`] || '';
+                let to = activeFilters[`${column}_to`] || '';
+                html += `
+                    <div class="date-range">
+                        <input type="date" id="filterFrom_${column}" class="form-control form-control-sm" value="${from}">
+                        <input type="date" id="filterTo_${column}" class="form-control form-control-sm" value="${to}">
+                    </div>
+                `;
+            } else {
+                // قائمة checkboxes
+                uniqueValues.forEach(val => {
+                    let displayVal = val === (translations.empty || 'فارغ') ? translations.empty || 'فارغ' : translateValue(val, column.replace('_', ''));
+                    let checked = selectedValues.includes(val) ? 'checked' : '';
+                    html += `
+                        <div class="filter-checkbox">
+                            <input type="checkbox" value="${val}" id="chk_${column}_${val.replace(/\s+/g, '_')}" ${checked}>
+                            <label for="chk_${column}_${val.replace(/\s+/g, '_')}" style="font-size: 11px; margin-right: 5px;">${displayVal}</label>
+                        </div>
+                    `;
+                });
+            }
+            
+            html += `
+                <div class="filter-actions">
+                    <button class="btn btn-primary btn-sm" onclick="applyColumnFilter('${column}')">${translations.apply || 'تطبيق'}</button>
+                    <button class="btn btn-secondary btn-sm" onclick="clearColumnFilter('${column}')">${translations.clear || 'مسح'}</button>
+                </div>
+            `;
+            
+            dropdown.html(html).css({
+                top: th.position().top + th.outerHeight(),
+                left: th.position().left,
+                width: th.width(),
+                right: 'auto'
+            }).show();
+            
+            // تحديد الكل
+            $(`#selectAll_${column}`).off('change').change(function() {
+                let isChecked = this.checked;
+                $(`.filter-dropdown input[type="checkbox"]:not(#selectAll_${column}, #showEmpty_${column})`).prop('checked', isChecked);
+            });
+            
+            // بحث
+            $('.filter-search').off('input').on('input', function() {
+                let search = $(this).val().toLowerCase();
+                $(this).closest('.filter-dropdown').find('.filter-checkbox label').each(function() {
+                    let item = $(this).closest('.filter-checkbox');
+                    item.toggle($(this).text().toLowerCase().includes(search));
+                });
+            });
+        });
+        
+        // تطبيق فلتر العمود
+        function applyColumnFilter(column) {
+            let selected = [];
+            $(`#filterDropdown input[type="checkbox"]:checked:not(#selectAll_${column}, #showEmpty_${column})`).each(function() {
+                selected.push($(this).val());
+            });
+            let showEmptyChecked = $(`#showEmpty_${column}`).is(':checked');
+            if (showEmptyChecked) {
+                selected.push(translations.empty || 'فارغ');
+            }
+            activeFilters[column] = selected;
+            if (column.includes('date')) {
+                activeFilters[`${column}_from`] = $(`#filterFrom_${column}`).val();
+                activeFilters[`${column}_to`] = $(`#filterTo_${column}`).val();
+            }
+            $('#filterDropdown').hide();
+            renderTable(allData);
+            generateReport();
+        }
+        
+        // مسح فلتر العمود
+        function clearColumnFilter(column) {
+            delete activeFilters[column];
+            delete activeFilters[`${column}_from`];
+            delete activeFilters[`${column}_to`];
+            $('#filterDropdown').hide();
+            renderTable(allData);
+            generateReport();
+        }
+        
+        // إغلاق dropdown
+        $(document).on('click', function(e) {
+            if (!$(e.target).closest('.filter-btn, .filter-dropdown').length) {
+                $('#filterDropdown').hide();
+            }
+        });
+        
+        // إضافة جديد
+        $('#addNewBtn').click(function() {
+            $('#requestForm')[0].reset();
+            $('#id').val('');
+            $('#request_date').val(new Date().toISOString().slice(0, 10));
+            $('#quantity').val(1);
+            $('#formTitle').text(translations.addTitle || 'إضافة طلب جديد');
+            $('#formContainer').show();
+        });
+        
+        // إلغاء
+        $('#cancelBtn').click(function() {
+            $('#formContainer').hide();
+        });
+        
+        // حفظ
+        $('#saveBtn').click(function() {
+            let formData = $('#requestForm').serializeArray();
+            let data = {};
+            formData.forEach(field => data[field.name] = field.value);
+            
+            $.ajax({
+                url: '../api/incoming_animal_requests.php',
+                method: 'POST',
+                data: JSON.stringify(data),
+                contentType: 'application/json',
+                success: function(response) {
+                    if (response.success) {
+                        loadData();
+                        $('#formContainer').hide();
+                        alert(response.message);
+                    } else {
+                        alert(response.message);
+                    }
+                },
+                error: function() {
+                    alert(translations.errorServer || 'خطأ في الاتصال بالخادم.');
+                }
+            });
+        });
+        
+        // تعديل
+        function editRow(e) {
+            let button = $(e.target).closest('button');
+            let id = button.data('id');
+            $.getJSON(`../api/incoming_animal_requests.php?id=${id}`, function(response) {
+                if (response.success && response.data && response.data.length > 0) {
+                    let row = response.data[0];
+                    $('#id').val(row.id || '');
+                    $('#request_date').val(row.request_date || '');
+                    $('#requester_name').val(row.requester_name || '');
+                    $('#contact_number').val(row.contact_number || '');
+                    $('#animal_type').val(row.animal_type || '');
+                    $('#quantity').val(row.quantity || 1);
+                    $('#reason_for_abandonment').val(row.reason_for_abandonment || '');
+                    $('#submission_method').val(row.submission_method || '');
+                    $('#notes').val(row.notes || '');
+                    $('#formTitle').text(translations.editTitle || 'تعديل الطلب');
+                    $('#formContainer').show();
+                } else {
+                    alert(translations.errorEdit || 'خطأ في جلب بيانات التعديل.');
+                }
+            }).fail(function() {
+                alert(translations.errorServer || 'خطأ في الاتصال بالخادم.');
+            });
+        }
+        
+        // حذف
+        function deleteRow(e) {
+            let button = $(e.target).closest('button');
+            let id = button.data('id');
+            if (confirm(translations.confirmDelete || 'هل أنت متأكد من الحذف؟')) {
+                $.ajax({
+                    url: '../api/incoming_animal_requests.php',
+                    method: 'POST',
+                    data: JSON.stringify({ action: 'delete', id: id }),
+                    contentType: 'application/json',
+                    success: function(response) {
+                        if (response.success) {
+                            loadData();
+                            alert(response.message);
+                        } else {
+                            alert(response.message);
+                        }
+                    },
+                    error: function() {
+                        alert(translations.errorServer || 'خطأ في الاتصال بالخادم.');
+                    }
+                });
+            }
+        }
+        
+        // إنشاء تقرير بسيط
+        function generateReport() {
+            let filteredData = allData.filter(row => applyFilters(row));
+            let total = allData.length;
+            let filtered = filteredData.length;
+            let dateRange = '';
+            if (activeFilters.request_date_from || activeFilters.request_date_to) {
+                let from = activeFilters.request_date_from ? formatDate(activeFilters.request_date_from) : '';
+                let to = activeFilters.request_date_to ? formatDate(activeFilters.request_date_to) : '';
+                let rangePrefix = currentLang === 'ar' ? 'من ' : 'From ';
+                let rangeSuffix = currentLang === 'ar' ? ' إلى ' : ' to ';
+                dateRange = `${rangePrefix}${from}${rangeSuffix}${to}`;
+            }
+            let reportHtml = `
+                <p><strong>${translations.totalRequests || 'إجمالي الطلبات'}:</strong> ${total}</p>
+                <p><strong>${translations.filteredRequests || 'عدد الطلبات المفلتر'}:</strong> ${filtered}</p>
+                ${dateRange ? `<p><strong>${translations.dateRange || 'نطاق التاريخ'}:</strong> ${dateRange}</p>` : ''}
+            `;
+            $('#reportContent').html(reportHtml);
+            $('#reportSection').show();
+        }
+        
+        // طباعة التقرير
+        $('#printReport').click(function() {
+            let printContent = `
+                <html dir="${currentLang === 'ar' ? 'rtl' : 'ltr'}">
+                <head><title>${translations.reportTitle || 'تقرير طلبات استلام الحيوانات'}</title></head>
+                <body style="font-family: Arial; font-size: 12px;">
+                    <h2>${translations.reportTitle || 'تقرير طلبات استلام الحيوانات'}</h2>
+                    ${$('#reportContent').html()}
+                    <hr>
+                    <h3>${currentLang === 'ar' ? 'قائمة الطلبات المفلترة:' : 'Filtered Requests List:'}</h3>
+                    <table border="1" style="border-collapse: collapse; width: 100%;">
+                        <tr>
+                            <th>${translations.date || 'تاريخ الطلب'}</th>
+                            <th>${translations.requesterName || 'اسم الطالب'}</th>
+                            <th>${translations.contactNumber || 'رقم الاتصال'}</th>
+                            <th>${translations.animalType || 'نوع الحيوان'}</th>
+                            <th>${translations.quantity || 'الكمية'}</th>
+                            <th>${translations.reasonForAbandonment || 'سبب التخلي'}</th>
+                            <th>${translations.submissionMethod || 'طريقة التقديم'}</th>
+                            <th>${translations.notes || 'ملاحظات'}</th>
+                            <th>${translations.createdBy || 'مسجل بواسطة'}</th>
+                        </tr>
+            `;
+            let filteredData = allData.filter(row => applyFilters(row));
+            filteredData.forEach(row => {
+                printContent += `
+                    <tr>
+                        <td>${formatDate(row.request_date)}</td>
+                        <td>${row.requester_name || ''}</td>
+                        <td>${row.contact_number || ''}</td>
+                        <td>${translateValue(row.animal_type, 'animalType') || ''}</td>
+                        <td>${row.quantity || ''}</td>
+                        <td>${row.reason_for_abandonment || ''}</td>
+                        <td>${translateValue(row.submission_method, 'submissionMethod') || ''}</td>
+                        <td>${row.notes || ''}</td>
+                        <td>${row.created_by_name || ''}</td>
+                    </tr>
+                `;
+            });
+            printContent += `
+                    </table>
+                    <p style="text-align: ${currentLang === 'ar' ? 'right' : 'left'}; margin-top: 20px;">${currentLang === 'ar' ? 'تاريخ التقرير: ' : 'Report Date: '}${new Date().toLocaleDateString(currentLang === 'ar' ? 'ar-SA' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                </body>
+                </html>
+            `;
+            let printWindow = window.open('', '_blank');
+            printWindow.document.write(printContent);
+            printWindow.document.close();
+            printWindow.print();
+        });
+        
+        loadTranslations(currentLang);
+    </script>
+</body>
+</html>

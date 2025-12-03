@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>إدارة فئات المنتجات — HealthVet</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+:root {
+  --brand: #2b5d34;
+  --accent: #c79b3c;
+  --muted: #666;
+  --success: #28a745;
+  --error: #dc3545;
+  --warning: #ffc107;
+  --light: #f8f9fa;
+  --dark: #343a40;
+  font-family: "Tajawal", sans-serif;
+}
+body { background: var(--light); color: var(--dark); padding: 20px; margin: 0; }
+.container { max-width: 1200px; margin: auto; background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+.header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid var(--brand); }
+.logo { font-size: 1.5rem; font-weight: bold; color: var(--brand); }
+.add-new { background: var(--brand); color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; transition: background 0.3s; }
+.add-new:hover { background: #1f4b2a; }
+.form-section { background: #f9f9f9; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
+.form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-bottom: 15px; }
+input, select, textarea { padding: 10px; border: 1px solid #ddd; border-radius: 6px; transition: border-color 0.3s; width: 100%; }
+input:focus, select:focus, textarea:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 2px rgba(199,155,60,0.1); }
+label { font-weight: 600; color: var(--brand); margin-bottom: 5px; display: block; }
+button { padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; transition: all 0.3s; font-weight: 600; }
+.btn-primary { background: var(--brand); color: white; }
+.btn-primary:hover { background: #1f4b2a; transform: translateY(-1px); }
+.btn-warning { background: var(--warning); color: var(--dark); }
+.btn-warning:hover { background: #e0a800; }
+.btn-danger { background: var(--error); color: white; }
+.btn-danger:hover { background: #c82333; }
+#saveBtn { background: var(--success); color: white; }
+#saveBtn:hover { background: #218838; }
+#status { margin-top: 10px; padding: 10px; border-radius: 6px; font-weight: bold; }
+.status-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+.status-error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+th, td { padding: 12px; text-align: right; border-bottom: 1px solid #ddd; }
+th { background: var(--brand); color: white; font-weight: 600; }
+tr:hover { background: #f8f9f9; }
+.bulk-actions { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
+.pagination { display: flex; justify-content: center; gap: 5px; margin-top: 20px; }
+.pagination button { padding: 8px 12px; background: white; border: 1px solid #ddd; }
+.pagination button.active { background: var(--brand); color: white; }
+#searchInput { max-width: 300px; }
+.sortable-handle { cursor: move; color: var(--muted); margin-left: 5px; }
+.lang-switcher { display: flex; gap: 10px; }
+.lang-btn { padding: 5px 10px; border: 1px solid var(--brand); border-radius: 4px; background: transparent; cursor: pointer; }
+.lang-btn.active { background: var(--brand); color: white; }
+.no-data { text-align: center; padding: 40px; color: var(--muted); font-style: italic; }
+@media (max-width: 768px) { .form-row { grid-template-columns: 1fr; } }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div class="logo" id="logo"><i class="fas fa-boxes"></i> إدارة فئات المنتجات — HealthVet</div>
+        <div class="lang-switcher">
+            <button class="lang-btn active" data-lang="ar" id="langAr">العربية</button>
+            <button class="lang-btn" data-lang="en" id="langEn">English</button>
+        </div>
+        <a href="#" class="add-new" id="addNewBtn"><i class="fas fa-plus"></i> إضافة فئة جديدة</a>
+    </div>
+    <!-- نموذج الإضافة / التعديل -->
+    <div class="form-section" id="formSection" style="display: none;">
+        <h3 id="formTitle">إضافة فئة جديدة</h3>
+        <form id="categoryForm">
+            <input type="hidden" id="itemID">
+            <div class="form-row">
+                <div>
+                    <label id="lblNameAr" for="nameAR">الاسم بالعربي <span style="color: var(--error);">*</span></label>
+                    <input type="text" id="nameAR" placeholder="الاسم كما يظهر في الموقع" required>
+                </div>
+                <div>
+                    <label id="lblNameEn" for="nameEN">الاسم بالإنجليزي</label>
+                    <input type="text" id="nameEN" placeholder="Name in English">
+                </div>
+            </div>
+            <div class="form-row">
+                <div>
+                    <label id="lblParentId" for="parentID">الفئة الأب</label>
+                    <select id="parentID">
+                        <option value="0" id="optNone">لا شيء</option>
+                        <!-- populated by JS -->
+                    </select>
+                </div>
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: flex-start;">
+                <button type="submit" id="saveBtn" class="btn-primary"><i class="fas fa-save"></i> حفظ</button>
+                <button type="button" id="cancelBtn" class="btn-warning"><i class="fas fa-times"></i> إلغاء</button>
+            </div>
+        </form>
+    </div>
+    <!-- أدوات البحث والتصفية -->
+    <div class="bulk-actions">
+        <input type="text" id="searchInput" placeholder="بحث في الاسم...">
+        <select id="bulkAction">
+            <option value="" id="optBulkNone">أجرِ إجراءً جماعيًا</option>
+            <option value="delete" id="optBulkDelete">حذف</option>
+        </select>
+        <button id="applyBulk" class="btn-primary"><i class="fas fa-check"></i> تطبيق</button>
+        <button id="loadMore" class="btn-primary"><i class="fas fa-sync"></i> تحديث</button>
+    </div>
+    <!-- جدول الفئات -->
+    <table id="inventoryTable">
+        <thead>
+            <tr>
+                <th><input type="checkbox" id="selectAll"></th>
+                <th id="thNameAr"><i class="fas fa-sort" data-sort="Name_AR"></i> الاسم بالعربي</th>
+                <th id="thNameEn"><i class="fas fa-sort" data-sort="Name_EN"></i> الاسم بالإنجليزي</th>
+                <th id="thParent"><i class="fas fa-sitemap"></i> الفئة الأب</th>
+                <th id="thCreated"><i class="fas fa-clock" data-sort="CreatedAt"></i> إنشاء</th>
+                <th id="thUpdated"><i class="fas fa-sync-alt" data-sort="UpdatedAt"></i> تحديث</th>
+                <th id="thActions"><i class="fas fa-cogs"></i> عمليات</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+    </table>
+    <div id="status" class="status-success"></div>
+    <div class="pagination" id="pagination"></div>
+</div>
+<script>
+const apiBase = '../api/inventory_api.php';
+let inventoryData = [];
+let currentPage = 1;
+let perPage = 50; // Fixed to 50
+let selectedIds = [];
+let currentLang = 'ar';
+let currentSortBy = 'ItemID';
+let currentSortDir = 'ASC';
+
+// Translations
+const translations = {
+    ar: {
+        logo: 'إدارة فئات المنتجات — HealthVet',
+        formTitleAdd: 'إضافة فئة جديدة',
+        formTitleEdit: 'تعديل فئة:',
+        lblNameAr: 'الاسم بالعربي',
+        lblNameEn: 'الاسم بالإنجليزي',
+        lblParentId: 'الفئة الأب',
+        optNone: 'لا شيء',
+        optBulkNone: 'أجرِ إجراءً جماعيًا',
+        optBulkDelete: 'حذف',
+        thNameAr: 'الاسم بالعربي',
+        thNameEn: 'الاسم بالإنجليزي',
+        thParent: 'الفئة الأب',
+        thCreated: 'إنشاء',
+        thUpdated: 'تحديث',
+        thActions: 'عمليات',
+        addNewBtn: 'إضافة فئة جديدة',
+        saveBtn: 'حفظ',
+        cancelBtn: 'إلغاء',
+        searchPlaceholder: 'بحث في الاسم...',
+        applyBulk: 'تطبيق',
+        loadMore: 'تحديث',
+        statusSuccess: 'تم الحفظ بنجاح',
+        statusError: 'حدث خطأ',
+        confirmDelete: 'هل تريد الحذف حقًا؟',
+        confirmBulkDelete: 'حذف العناصر المحددة؟',
+        noItems: 'لا شيء',
+        noRecords: 'لا توجد سجلات',
+        editBtn: 'تعديل',
+        deleteBtn: 'حذف'
+    },
+    en: {
+        logo: 'Product Categories Management — HealthVet',
+        formTitleAdd: 'Add New Category',
+        formTitleEdit: 'Edit Category:',
+        lblNameAr: 'Name in Arabic',
+        lblNameEn: 'Name in English',
+        lblParentId: 'Parent Category',
+        optNone: 'None',
+        optBulkNone: 'Bulk Action',
+        optBulkDelete: 'Delete',
+        thNameAr: 'Name in Arabic',
+        thNameEn: 'Name in English',
+        thParent: 'Parent Category',
+        thCreated: 'Created',
+        thUpdated: 'Updated',
+        thActions: 'Actions',
+        addNewBtn: 'Add New Category',
+        saveBtn: 'Save',
+        cancelBtn: 'Cancel',
+        searchPlaceholder: 'Search by name...',
+        applyBulk: 'Apply',
+        loadMore: 'Refresh',
+        statusSuccess: 'Saved successfully',
+        statusError: 'An error occurred',
+        confirmDelete: 'Are you sure you want to delete?',
+        confirmBulkDelete: 'Delete selected items?',
+        noItems: 'None',
+        noRecords: 'No records found',
+        editBtn: 'Edit',
+        deleteBtn: 'Delete'
+    }
+};
+
+function setLanguage(lang) {
+    currentLang = lang;
+    document.documentElement.lang = lang;
+    document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+    const t = translations[lang];
+    // Update static texts
+    document.getElementById('logo').innerHTML = `<i class="fas fa-boxes"></i> ${t.logo}`;
+    document.getElementById('formTitle').textContent = t.formTitleAdd;
+    document.getElementById('lblNameAr').childNodes[0].nodeValue = `${t.lblNameAr} `;
+    document.getElementById('lblNameEn').textContent = t.lblNameEn;
+    document.getElementById('lblParentId').textContent = t.lblParentId;
+    document.getElementById('optNone').textContent = t.optNone;
+    document.getElementById('optBulkNone').textContent = t.optBulkNone;
+    document.getElementById('optBulkDelete').textContent = t.optBulkDelete;
+    document.getElementById('thNameAr').innerHTML = `<i class="fas fa-sort" data-sort="Name_AR"></i> ${t.thNameAr}`;
+    document.getElementById('thNameEn').innerHTML = `<i class="fas fa-sort" data-sort="Name_EN"></i> ${t.thNameEn}`;
+    document.getElementById('thParent').innerHTML = `<i class="fas fa-sitemap"></i> ${t.thParent}`;
+    document.getElementById('thCreated').innerHTML = `<i class="fas fa-clock" data-sort="CreatedAt"></i> ${t.thCreated}`;
+    document.getElementById('thUpdated').innerHTML = `<i class="fas fa-sync-alt" data-sort="UpdatedAt"></i> ${t.thUpdated}`;
+    document.getElementById('thActions').innerHTML = `<i class="fas fa-cogs"></i> ${t.thActions}`;
+    document.getElementById('addNewBtn').innerHTML = `<i class="fas fa-plus"></i> ${t.addNewBtn}`;
+    document.getElementById('saveBtn').innerHTML = `<i class="fas fa-save"></i> ${t.saveBtn}`;
+    document.getElementById('cancelBtn').innerHTML = `<i class="fas fa-times"></i> ${t.cancelBtn}`;
+    document.getElementById('searchInput').placeholder = t.searchPlaceholder;
+    document.getElementById('applyBulk').innerHTML = `<i class="fas fa-check"></i> ${t.applyBulk}`;
+    document.getElementById('loadMore').innerHTML = `<i class="fas fa-sync"></i> ${t.loadMore}`;
+    // Update lang buttons
+    document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelector(`[data-lang="${lang}"]`).classList.add('active');
+    // Reload data with new lang
+    loadParents();
+    loadInventory('', currentPage);
+}
+
+// Language switch
+document.getElementById('langAr').addEventListener('click', () => setLanguage('ar'));
+document.getElementById('langEn').addEventListener('click', () => setLanguage('en'));
+
+// تحميل البيانات مع الهرمية
+async function loadInventory(search = '', page = 1, sortBy = currentSortBy, sortDir = currentSortDir) {
+    currentPage = page;
+    currentSortBy = sortBy;
+    currentSortDir = sortDir;
+    const params = new URLSearchParams({
+        action: 'list',
+        search: search,
+        page: page,
+        per_page: perPage,
+        sort_by: sortBy,
+        sort_dir: sortDir,
+        lang: currentLang
+    });
+    const res = await fetch(`${apiBase}?${params}`);
+    const data = await res.json();
+    console.log('API Response:', data); // Debug log
+    if (data.success) {
+        inventoryData = data.data;
+        const totalPages = Math.ceil(data.total / perPage);
+        renderTable(data.total === 0);
+        renderPagination(totalPages, page);
+        if (data.total === 0) {
+            document.getElementById('status').textContent = translations[currentLang].noRecords;
+            document.getElementById('status').className = 'status-error';
+        }
+    } else {
+        document.getElementById('status').textContent = data.message || translations[currentLang].statusError;
+        document.getElementById('status').className = 'status-error';
+        document.getElementById('tableBody').innerHTML = `<tr><td colspan="7" class="no-data">${data.message || translations[currentLang].statusError}</td></tr>`;
+    }
+}
+// عرض الجدول كجدول مسطح
+function renderTable(isEmpty = false) {
+    const tbody = document.getElementById('tableBody');
+    if (isEmpty) {
+        tbody.innerHTML = `<tr><td colspan="7" class="no-data">${translations[currentLang].noRecords}</td></tr>`;
+        return;
+    }
+    tbody.innerHTML = '';
+    inventoryData.forEach(item => {
+        renderFlatRow(item, tbody);
+    });
+    // Drag & Drop for flat list
+    new Sortable(tbody, {
+        animation: 150,
+        onEnd: async (evt) => {
+            const newOrder = Array.from(tbody.children).map(row => row.dataset.id);
+            await fetch(`${apiBase}?action=sort`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ order: newOrder })
+            });
+            loadInventory(document.getElementById('searchInput').value, currentPage);
+        }
+    });
+    // تحديد الكل
+    const selectAll = document.getElementById('selectAll');
+    if (selectAll) {
+        selectAll.addEventListener('change', (e) => {
+            selectedIds = e.target.checked ? inventoryData.map(i => i.ItemID) : [];
+            updateCheckboxes();
+        });
+    }
+}
+function renderFlatRow(item, parentEl) {
+    const t = translations[currentLang];
+    const tr = document.createElement('tr');
+    tr.dataset.id = item.ItemID;
+    tr.innerHTML = `
+        <td><input type="checkbox" class="row-select" value="${item.ItemID}" ${selectedIds.includes(item.ItemID) ? 'checked' : ''}></td>
+        <td>${item.Name_AR || ''}</td>
+        <td>${item.Name_EN || t.noItems}</td>
+        <td>${item.ParentName || t.noItems}</td>
+        <td>${item.CreatedAt || ''}</td>
+        <td>${item.UpdatedAt || ''}</td>
+        <td>
+            <button class="btn-warning editBtn" data-id="${item.ItemID}"><i class="fas fa-edit"></i> ${t.editBtn}</button>
+            <button class="btn-danger deleteBtn" data-id="${item.ItemID}"><i class="fas fa-trash"></i> ${t.deleteBtn}</button>
+            <i class="fas fa-grip-vertical sortable-handle" title="سحب للترتيب"></i>
+        </td>
+    `;
+    parentEl.appendChild(tr);
+}
+function renderPagination(totalPages, current) {
+    const pag = document.getElementById('pagination');
+    pag.innerHTML = '';
+    if (totalPages === 0) return;
+    for (let i = 1; i <= totalPages; i++) {
+        const btn = document.createElement('button');
+        btn.textContent = i;
+        btn.className = i === current ? 'active' : '';
+        btn.addEventListener('click', () => loadInventory(document.getElementById('searchInput').value, i, currentSortBy, currentSortDir));
+        pag.appendChild(btn);
+    }
+}
+function updateCheckboxes() {
+    document.querySelectorAll('.row-select').forEach(cb => {
+        cb.checked = selectedIds.includes(parseInt(cb.value));
+    });
+}
+// Sorting headers
+document.querySelectorAll('th [data-sort]').forEach(icon => {
+    icon.addEventListener('click', () => {
+        const sortBy = icon.dataset.sort;
+        let sortDir = 'ASC';
+        if (currentSortBy === sortBy && currentSortDir === 'ASC') sortDir = 'DESC';
+        loadInventory(document.getElementById('searchInput').value, currentPage, sortBy, sortDir);
+    });
+});
+// حفظ / تحديث
+document.getElementById('categoryForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const ItemID = document.getElementById('itemID').value;
+    const Name_AR = document.getElementById('nameAR').value.trim();
+    const Name_EN = document.getElementById('nameEN').value.trim();
+    const ParentID = document.getElementById('parentID').value || 0;
+    if (!Name_AR) { alert(`${translations[currentLang].lblNameAr} مطلوب`); return; }
+    const action = ItemID ? 'update' : 'add';
+    const res = await fetch(`${apiBase}?action=${action}&lang=${currentLang}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ItemID, Name_AR, Name_EN, ParentID })
+    });
+    const data = await res.json();
+    document.getElementById('status').textContent = data.message || (data.success ? translations[currentLang].statusSuccess : translations[currentLang].statusError);
+    document.getElementById('status').className = data.success ? 'status-success' : 'status-error';
+    if (data.success) {
+        resetForm();
+        loadInventory(document.getElementById('searchInput').value, currentPage);
+        document.getElementById('formSection').style.display = 'none';
+    }
+});
+// إضافة جديدة
+document.getElementById('addNewBtn').addEventListener('click', (e) => {
+    e.preventDefault();
+    document.getElementById('formTitle').textContent = translations[currentLang].formTitleAdd;
+    document.getElementById('formSection').style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+// تعديل
+document.addEventListener('click', (e) => {
+    if (e.target.closest('.editBtn')) {
+        const id = e.target.closest('.editBtn').dataset.id;
+        editItem(id);
+    } else if (e.target.closest('.deleteBtn')) {
+        const id = e.target.closest('.deleteBtn').dataset.id;
+        if (confirm(translations[currentLang].confirmDelete)) deleteItem(id);
+    }
+});
+async function editItem(id) {
+    const params = new URLSearchParams({ action: 'get', id: id, lang: currentLang });
+    const res = await fetch(`${apiBase}?${params}`);
+    const data = await res.json();
+    if (data.success) {
+        const item = data.data;
+        document.getElementById('itemID').value = item.ItemID;
+        document.getElementById('nameAR').value = item.Name_AR;
+        document.getElementById('nameEN').value = item.Name_EN;
+        document.getElementById('parentID').value = item.ParentID || 0;
+        document.getElementById('formTitle').textContent = `${translations[currentLang].formTitleEdit} ${item.Name_AR}`;
+        document.getElementById('formSection').style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+}
+async function deleteItem(id) {
+    const res = await fetch(`${apiBase}?action=delete&lang=${currentLang}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ItemID: id })
+    });
+    const data = await res.json();
+    document.getElementById('status').textContent = data.message || (data.success ? translations[currentLang].statusSuccess : translations[currentLang].statusError);
+    document.getElementById('status').className = data.success ? 'status-success' : 'status-error';
+    if (data.success) loadInventory(document.getElementById('searchInput').value, currentPage);
+}
+// إجراء جماعي
+document.getElementById('applyBulk').addEventListener('click', async () => {
+    const action = document.getElementById('bulkAction').value;
+    if (!action || selectedIds.length === 0) return alert('اختر إجراءً وعناصر');
+    if (action === 'delete' && !confirm(translations[currentLang].confirmBulkDelete)) return;
+    const res = await fetch(`${apiBase}?action=bulk&bulk_action=${action}&lang=${currentLang}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids: selectedIds })
+    });
+    const data = await res.json();
+    document.getElementById('status').textContent = data.message || (data.success ? translations[currentLang].statusSuccess : translations[currentLang].statusError);
+    document.getElementById('status').className = data.success ? 'status-success' : 'status-error';
+    if (data.success) {
+        selectedIds = [];
+        loadInventory(document.getElementById('searchInput').value, currentPage);
+    }
+});
+// البحث والترتيب
+document.getElementById('searchInput').addEventListener('input', (e) => {
+    currentPage = 1;
+    loadInventory(e.target.value, 1);
+});
+// إلغاء
+document.getElementById('cancelBtn').addEventListener('click', resetForm);
+function resetForm() {
+    document.getElementById('categoryForm').reset();
+    document.getElementById('itemID').value = '';
+    document.getElementById('parentID').innerHTML = `<option value="0">${translations[currentLang].optNone}</option>`; // Reload parents
+    loadParents();
+}
+// تحميل الفئات الأب
+async function loadParents() {
+    const params = new URLSearchParams({ action: 'parents', lang: currentLang });
+    const res = await fetch(`${apiBase}?${params}`);
+    const data = await res.json();
+    if (data.success) {
+        const select = document.getElementById('parentID');
+        select.innerHTML = `<option value="0">${translations[currentLang].optNone}</option>`;
+        data.data.forEach(item => {
+            const opt = document.createElement('option');
+            opt.value = item.ItemID;
+            opt.textContent = `-- ${item.Name}`;
+            select.appendChild(opt);
+        });
+    }
+}
+// تحميل الأولي
+window.onload = () => {
+    loadParents();
+    loadInventory();
+    document.getElementById('loadMore').addEventListener('click', () => loadInventory(document.getElementById('searchInput').value, currentPage));
+};
+</script>
+</body>
+</html>

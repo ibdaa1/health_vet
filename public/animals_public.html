@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-lang-key="title">عرض الحيوانات للتبني</title>
+    <style>
+        :root {
+            --primary-green: #28a745;
+            --secondary-blue: #007bff;
+            --background-white: #ffffff;
+            --text-dark: #343a40;
+            --border-color: #ced4da;
+            --light-gray: #f8f9fa;
+            --card-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            --flip-transition: transform 0.6s;
+            --card-width: 300px;
+        }
+        body {
+            font-family: 'Tahoma', sans-serif;
+            background-color: var(--light-gray);
+            color: var(--text-dark);
+            margin: 0;
+            padding: 20px 0;
+            text-align: center;
+        }
+        .header {
+            background: linear-gradient(135deg, var(--primary-green), #20c997);
+            color: white;
+            padding: 40px 20px;
+            margin-bottom: 40px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+        }
+        .contact-info {
+            margin-top: 20px;
+            font-size: 1.1em;
+        }
+        .contact-phone, .contact-email {
+            display: inline-block;
+            margin: 0 20px;
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 25px;
+            text-decoration: none;
+            color: white;
+            transition: background 0.3s;
+        }
+        .contact-phone:hover, .contact-email:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        .filters {
+            background: var(--background-white);
+            padding: 20px;
+            margin-bottom: 40px;
+            border-radius: 10px;
+            box-shadow: var(--card-shadow);
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .filters h2 {
+            color: var(--primary-green);
+            margin-top: 0;
+        }
+        .filter-row {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .filter-group label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: var(--text-dark);
+        }
+        .filter-group select {
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            min-width: 150px;
+        }
+        .sections {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .section {
+            margin-bottom: 60px;
+        }
+        .section h2 {
+            color: var(--primary-green);
+            text-align: right;
+            margin-bottom: 30px;
+            font-size: 2em;
+            border-bottom: 2px solid var(--primary-green);
+            padding-bottom: 10px;
+        }
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(var(--card-width), 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        .flip-card {
+            perspective: 1000px;
+            height: 450px;
+        }
+        .flip-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: var(--flip-transition);
+            transform-style: preserve-3d;
+            cursor: pointer;
+        }
+        .flip-card:hover .flip-card-inner {
+            transform: rotateY(180deg);
+        }
+        .flip-card-front, .flip-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 15px;
+            box-shadow: var(--card-shadow);
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .flip-card-front {
+            background: linear-gradient(135deg, #fff, #f0f8ff);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .flip-card-back {
+            background: linear-gradient(135deg, var(--primary-green), #20c997);
+            color: white;
+            transform: rotateY(180deg);
+            overflow-y: auto;
+            text-align: right;
+        }
+        .photos-carousel {
+            display: flex;
+            overflow-x: auto;
+            gap: 5px;
+            margin-bottom: 15px;
+            padding: 10px 0;
+            scrollbar-width: thin;
+            justify-content: center;
+        }
+        .photo-thumb {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 10px;
+            flex-shrink: 0;
+            border: 2px solid white;
+        }
+        .animal-name {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .animal-type {
+            font-size: 1.1em;
+            color: var(--secondary-blue);
+            margin-bottom: 10px;
+        }
+        .back-details {
+            padding-right: 10px;
+        }
+        .back-details h3 {
+            margin-top: 0;
+            border-bottom: 1px solid rgba(255,255,255,0.3);
+            padding-bottom: 5px;
+        }
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding: 5px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 5px;
+        }
+        .photos-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+            gap: 5px;
+            margin-top: 10px;
+        }
+        .photos-list .photo-thumb {
+            width: 60px;
+            height: 60px;
+        }
+        .contact-back {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255,255,255,0.3);
+        }
+        .contact-back p {
+            margin: 5px 0;
+            font-weight: bold;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2em;
+            color: var(--primary-green);
+        }
+        .error {
+            text-align: center;
+            color: #dc3545;
+            padding: 20px;
+            background: #f8d7da;
+            border-radius: 5px;
+            margin: 20px;
+        }
+        .no-animals {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+            font-size: 1.1em;
+        }
+        @media (max-width: 768px) {
+            .cards-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            .filter-row {
+                flex-direction: column;
+                align-items: center;
+            }
+            .filter-group select {
+                min-width: 200px;
+            }
+            .photos-carousel {
+                justify-content: center;
+            }
+            .photo-thumb {
+                width: 60px;
+                height: 60px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1 data-lang-key="page_title">الحيوانات المتاحة للتبني</h1>
+        <p data-lang-key="welcome_message">مرحباً بك في قائمة الحيوانات المتاحة للتبني. يمكنك تصفح التفاصيل والاتصال بنا للتبني.</p>
+        <div class="contact-info">
+            <a href="tel:+971559740334" class="contact-phone">📞 +971 55 974 0334</a>
+            <a href="mailto:mahmoud.mohd@shjmun.gov.ae" class="contact-email">✉️ mahmoud.mohd@shjmun.gov.ae</a>
+        </div>
+    </div>
+
+    <div class="filters">
+        <h2 data-lang-key="filters_title">فلاتر البحث</h2>
+        <div class="filter-row">
+            <div class="filter-group">
+                <label data-lang-key="filter_type">نوع الحيوان</label>
+                <select id="filter-type">
+                    <option value="">الكل</option>
+                    <option value="Cats">قطط</option>
+                    <option value="Dogs">كلاب</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label data-lang-key="filter_gender">الجنس</label>
+                <select id="filter-gender">
+                    <option value="">الكل</option>
+                    <option value="Male">ذكر</option>
+                    <option value="Female">أنثى</option>
+                    <option value="Unknown">غير معروف</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label data-lang-key="filter_age">العمر التقديري</label>
+                <select id="filter-age">
+                    <option value="">الكل</option>
+                    <option value="young">شاب</option>
+                    <option value="adult">بالغ</option>
+                    <option value="senior">كبير في السن</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label data-lang-key="filter_status">الحالة</label>
+                <select id="filter-status">
+                    <option value="">الكل</option>
+                    <option value="Active">متاح</option>
+                </select>
+            </div>
+        </div>
+        <button onclick="applyFilters()" data-lang-key="apply_filters" style="background: var(--primary-green); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-size: 1em;">تطبيق الفلاتر</button>
+    </div>
+
+    <div class="sections">
+        <div id="cats-section" class="section">
+            <h2 data-lang-key="cats_section">القطط المتاحة</h2>
+            <div id="cats-grid" class="cards-grid"></div>
+            <div id="cats-no-results" class="no-animals" style="display: none;" data-lang-key="no_cats">لا توجد قطط متاحة حالياً.</div>
+        </div>
+
+        <div id="dogs-section" class="section">
+            <h2 data-lang-key="dogs_section">الكلاب المتاحة</h2>
+            <div id="dogs-grid" class="cards-grid"></div>
+            <div id="dogs-no-results" class="no-animals" style="display: none;" data-lang-key="no_dogs">لا توجد كلاب متاحة حالياً.</div>
+        </div>
+    </div>
+
+    <div id="loading" class="loading" style="display: none;">جاري تحميل الحيوانات...</div>
+    <div id="error-message" class="error" style="display: none;"></div>
+<script src="session_check.js"></script>
+    <script>
+        let currentLang = localStorage.getItem('lang') || 'ar';
+        let translations = {};
+        let allAnimals = [];
+        let filteredAnimals = [];
+        // دالة تحميل الترجمة
+        async function loadTranslations(lang) {
+            try {
+                const res = await fetch(`../languages/${lang}.json?t=${Date.now()}`);
+                translations = await res.json();
+                applyTranslations();
+            } catch (e) {
+                console.error('Error loading translations:', e);
+            }
+        }
+
+        // دالة تطبيق الترجمات
+        function applyTranslations() {
+            document.querySelectorAll('[data-lang-key]').forEach(el => {
+                const key = el.getAttribute('data-lang-key');
+                if (translations[key]) {
+                    el.textContent = translations[key];
+                }
+            });
+        }
+
+        // جلب الحيوانات
+        async function fetchAnimals() {
+            document.getElementById('loading').style.display = 'block';
+            try {
+                const res = await fetch('../api/get_animals_c.php?action=get_public&t=' + Date.now());
+                if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+                const data = await res.json();
+                if (data.success) {
+                    allAnimals = data.animals.filter(a => a.is_active === 'Active');
+                    filteredAnimals = [...allAnimals];
+                    renderSections();
+                } else {
+                    showError(data.message || 'خطأ في جلب البيانات.');
+                }
+            } catch (e) {
+                console.error('Fetch error:', e);
+                showError('خطأ في الاتصال بالسيرفر: ' + e.message);
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        // تطبيق الفلاتر
+        function applyFilters() {
+            const type = document.getElementById('filter-type').value;
+            const gender = document.getElementById('filter-gender').value;
+            const age = document.getElementById('filter-age').value;
+            const status = document.getElementById('filter-status').value;
+
+            filteredAnimals = allAnimals.filter(animal => {
+                return (!type || animal.animal_type === type) &&
+                       (!gender || animal.gender === gender) &&
+                       (!age || matchesAge(animal.estimated_age, age)) &&
+                       (!status || animal.is_active === status);
+            });
+            renderSections();
+        }
+
+        // مطابقة العمر
+        function matchesAge(ageStr, filter) {
+            if (!ageStr) return false;
+            const ageNum = parseFloat(ageStr.match(/\d+/)?.[0] || 0);
+            if (filter === 'young') return ageNum <= 1;
+            if (filter === 'adult') return ageNum > 1 && ageNum <= 7;
+            if (filter === 'senior') return ageNum > 7;
+            return true;
+        }
+
+        // عرض الأقسام
+        function renderSections() {
+            const cats = filteredAnimals.filter(a => a.animal_type === 'Cats');
+            const dogs = filteredAnimals.filter(a => a.animal_type === 'Dogs');
+
+            renderGrid('cats-grid', cats, 'cats-no-results');
+            renderGrid('dogs-grid', dogs, 'dogs-no-results');
+        }
+
+        // عرض الشبكة
+        function renderGrid(gridId, animals, noResultsId) {
+            const grid = document.getElementById(gridId);
+            const noResults = document.getElementById(noResultsId);
+            if (animals.length === 0) {
+                grid.style.display = 'none';
+                noResults.style.display = 'block';
+                return;
+            }
+            noResults.style.display = 'none';
+            grid.style.display = 'grid';
+            grid.innerHTML = animals.map(animal => generateCard(animal)).join('');
+        }
+
+        // إنشاء بطاقة
+        function generateCard(animal) {
+            // عرض أول 4 صور في الأمامية كـ carousel
+            const frontPhotos = animal.photos && animal.photos.length > 0 ? animal.photos.slice(0, 4).map(photo => `<img src="../${photo}" alt="${animal.animal_name}" class="photo-thumb" onerror="this.src='../uploads/no-image.png'">`).join('') : '<div class="photo-thumb" style="background: #ddd; display: flex; align-items: center; justify-content: center;">لا توجد صور</div>';
+            // عرض كل الصور في الخلفية كـ grid
+            const backPhotos = animal.photos && animal.photos.length > 0 ? `<div class="photos-list">${animal.photos.map(photo => `<img src="../${photo}" alt="صورة إضافية" class="photo-thumb" onerror="this.src='../uploads/no-image.png'">`).join('')}</div>` : '<p data-lang-key="no_photos">لا توجد صور إضافية</p>';
+            const details = `
+                <h3>${animal.animal_name || 'غير محدد'}</h3>
+                <div class="detail-item"><span data-lang-key="type">النوع:</span> ${animal.animal_type}</div>
+                <div class="detail-item"><span data-lang-key="gender">الجنس:</span> ${animal.gender}</div>
+                <div class="detail-item"><span data-lang-key="age">العمر:</span> ${animal.estimated_age || 'غير محدد'}</div>
+                <div class="detail-item"><span data-lang-key="color">اللون:</span> ${animal.color || 'غير محدد'}</div>
+                <div class="detail-item"><span data-lang-key="source">المصدر:</span> ${animal.animal_source}</div>
+                ${animal.owner_name ? `<div class="detail-item"><span data-lang-key="owner">المالك:</span> ${animal.owner_name}</div>` : ''}
+                <div class="detail-item"><span data-lang-key="status">الحالة:</span> ${animal.is_active}</div>
+                <div class="detail-item"><span data-lang-key="notes">ملاحظات:</span> ${animal.notes || 'لا توجد'}</div>
+                ${backPhotos}
+                <div class="contact-back">
+                    <p data-lang-key="contact_title">للتبني، اتصل بنا:</p>
+                    <p><a href="tel:+971559740334" style="color: white; text-decoration: none;">📞 +971 55 974 0334</a></p>
+                    <p><a href="mailto:mahmoud.mohd@shjmun.gov.ae" style="color: white; text-decoration: none;">✉️ mahmoud.mohd@shjmun.gov.ae</a></p>
+                </div>
+            `;
+            return `
+                <div class="flip-card">
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front">
+                            <div class="photos-carousel">
+                                ${frontPhotos}
+                            </div>
+                            <div class="animal-name">${animal.animal_name || 'غير محدد'}</div>
+                            <div class="animal-type">${animal.animal_type} - ${animal.estimated_age || 'غير محدد'}</div>
+                        </div>
+                        <div class="flip-card-back">
+                            <div class="back-details">
+                                ${details}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function showError(msg) {
+            document.getElementById('error-message').textContent = msg;
+            document.getElementById('error-message').style.display = 'block';
+        }
+
+        // تحميل الموارد
+        async function loadResources() {
+            document.documentElement.lang = currentLang;
+            document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+            document.body.lang = currentLang;
+            document.body.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+            await loadTranslations(currentLang);
+            fetchAnimals();
+        }
+
+        // زر تبديل اللغة
+        document.getElementById('lang-toggle').addEventListener('click', function() {
+            currentLang = currentLang === 'ar' ? 'en' : 'ar';
+            localStorage.setItem('lang', currentLang);
+            document.getElementById('lang-toggle').textContent = currentLang === 'ar' ? 'EN' : 'عربي';
+            loadResources();
+        });
+
+        // حدث الفلاتر
+        document.getElementById('filter-type').addEventListener('change', applyFilters);
+        document.getElementById('filter-gender').addEventListener('change', applyFilters);
+        document.getElementById('filter-age').addEventListener('change', applyFilters);
+        document.getElementById('filter-status').addEventListener('change', applyFilters);
+
+        window.onload = loadResources;
+    </script>
+</body>
+</html>

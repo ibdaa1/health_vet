@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="page_title">تسجيل/تعديل تفاعلات الزوار</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
+    <style>
+        /* الألوان المؤسسية */
+        :root {
+            --color-bg-light: #F9F9F9; /* أبيض فاتح للخلفية */
+            --color-primary-dark: #4B5320; /* أخضر داكن/زيتوني غامق */
+            --color-secondary-gold: #C4B454; /* ذهبي/بيج داكن */
+            --color-text-large: var(--color-primary-dark);
+            --color-text-small: #555;
+        }
+
+        body { 
+            font-family: 'Arial', sans-serif; 
+            padding: 20px; 
+            direction: rtl; 
+            background-color: var(--color-bg-light); 
+            color: #333; 
+            margin: 0;
+        }
+        .container { 
+            max-width: 900px; 
+            margin: auto; 
+            background: white; 
+            padding: 25px; 
+            border-radius: 10px; 
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1); 
+        }
+        h1 { color: var(--color-text-large); text-align: center; }
+        
+        /* تنسيق الحقول والنصوص - Responsive */
+        .form-group { margin-bottom: 20px; display: flex; flex-direction: column; }
+        label { 
+            display: block; 
+            font-weight: bold; 
+            margin-bottom: 5px; 
+            color: var(--color-text-large); /* أخضر داكن */
+        }
+        fieldset { 
+            border: 2px solid var(--color-primary-dark); 
+            padding: 20px; 
+            margin-bottom: 30px; 
+            border-radius: 8px; 
+        }
+        legend { 
+            font-size: 1.3em; 
+            font-weight: bold; 
+            padding: 0 10px; 
+            color: var(--color-primary-dark);
+            background-color: white; 
+            border-radius: 4px;
+        }
+        input[type="text"], input[type="number"], select, input[type="date"], textarea {
+            padding: 12px; 
+            border: 1px solid #ccc; 
+            border-radius: 6px; 
+            box-sizing: border-box; 
+            font-size: 16px;
+            width: 100%;
+        }
+        input:invalid { border-color: #dc3545; }
+        .small-text { color: var(--color-text-small); font-size: 0.9em; }
+
+        /* التوقيعات - تحسين للـ Responsive */
+        .signature-container { 
+            border: 2px solid var(--color-secondary-gold); 
+            border-radius: 6px; 
+            padding: 10px; 
+            background-color: #fafafa;
+            position: relative;
+        }
+        .signature-canvas { 
+            border: 1px solid #000; 
+            display: block; 
+            background-color: #fff; 
+            touch-action: none; 
+            width: 100%; 
+            height: 150px; 
+        }
+        .signature-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+        .signature-display { 
+            text-align: center; 
+        }
+        .signature-display img { 
+            max-height: 100px; 
+            border: 1px solid #ccc; 
+            border-radius: 4px; 
+        }
+
+        /* الأزرار - أيقونات صغيرة بدون نص */
+        button { 
+            padding: 10px; 
+            color: white; 
+            border: none; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            margin-left: 10px; 
+            font-size: 16px; 
+            transition: background-color 0.3s, transform 0.1s; 
+            width: 40px;
+            height: 40px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        button:active { transform: scale(0.98); }
+
+        #submit_button { background-color: var(--color-primary-dark); }
+        #submit_button:hover { background-color: #3e461c; }
+        #submit_button i { font-size: 18px; }
+
+        #print_button, #delete_button, #clear_visitor, #clear_parent, .search-container button, .edit-signature-btn, #delete_signature_btn { 
+            background-color: var(--color-secondary-gold);
+            color: var(--color-primary-dark);
+            font-weight: bold;
+        }
+        #print_button:hover, #delete_button:hover, #clear_visitor:hover, #clear_parent:hover, .search-container button:hover, .edit-signature-btn:hover, #delete_signature_btn:hover { 
+            background-color: #b1a34c; 
+        }
+        #delete_button { background-color: #dc3545; color: white; }
+        #delete_button i { font-size: 18px; }
+        .button-container { 
+            margin-top: 30px; 
+            display: flex; 
+            justify-content: flex-start; 
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .hidden { display: none; }
+        .search-container { 
+            margin-bottom: 30px; 
+            background-color: #f8f9fa; /* خلفية خفيفة لتمييز قسم البحث */
+            padding: 15px;
+            border-radius: 8px;
+        }
+        .search-container input { flex: 1; min-width: 150px; }
+        .search-results { 
+            margin-top: 10px; 
+            max-height: 200px; 
+            overflow-y: auto; 
+            border: 1px solid #ccc; 
+            padding: 10px; 
+            border-radius: 4px;
+        }
+        .search-item { 
+            padding: 8px; 
+            border-bottom: 1px solid #eee; 
+            cursor: pointer; 
+        }
+        .search-item:hover { background: #f0f0f0; }
+        .search-item:last-child { border-bottom: none; }
+
+        /* زر تبديل اللغة */
+        #lang-toggle {
+            background-color: var(--color-secondary-gold);
+            color: var(--color-primary-dark);
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        #lang-toggle:hover {
+            background-color: #b1a34c;
+        }
+
+        /* Responsive Grid لجميع الشاشات */
+        @media (max-width: 768px) {
+            .container { padding: 15px; }
+            fieldset > div { grid-template-columns: 1fr; }
+            .search-container div { flex-direction: column; gap: 10px; }
+            .signature-controls { justify-content: center; }
+            button { width: 35px; height: 35px; margin: 5px; }
+        }
+        @media (max-width: 480px) {
+            body { padding: 10px; }
+            h1 { font-size: 1.5em; }
+        }
+
+        /* إضافة أيقونات للأزرار */
+        .icon-only { font-size: 16px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div style="text-align: left; margin-bottom: 20px;">
+            <button id="lang-toggle">EN</button>
+        </div>
+        
+        <h1 id="header_title"><i class="fas fa-paw" style="margin-left: 10px; font-size: 1.2em;"></i>تسجيل تفاعلات الزوار والحيوانات</h1>
+        
+        <fieldset class="search-container">
+            <legend id="search_title"><i class="fas fa-search" style="margin-left: 5px; font-size: 1em;"></i>البحث عن تفاعل</legend>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end;">
+                <div style="flex-grow: 1;"><input type="text" id="search_term" data-key="search_placeholder_term" placeholder="الاسم أو الجهة أو جزء منه"></div>
+                <div style="flex-grow: 1;"><input type="date" id="search_date" data-key="search_placeholder_date" placeholder="التاريخ"></div>
+                <div style="flex-grow: 1;"><input type="text" id="search_phone" data-key="search_placeholder_phone" placeholder="رقم الهاتف"></div>
+                <div style="flex-grow: 1;"><input type="text" id="search_entity" data-key="search_placeholder_entity" placeholder="الجهة"></div>
+                <button type="button" onclick="handleSearch()" title="بحث"><i class="fas fa-search icon-only"></i></button>
+            </div>
+            <div id="searchResults" class="search-results hidden">
+                <p class="small-text" data-key="search_results">النتائج:</p>
+            </div>
+        </fieldset>
+
+        <form id="visitorInteractionForm" novalidate>
+            <input type="hidden" id="interaction_id" name="id" value="">
+            
+            <fieldset>
+                <legend id="section_visit_data"><i class="fas fa-calendar-alt" style="margin-left: 5px; font-size: 1em;"></i>بيانات الزيارة</legend>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                    <div class="form-group">
+                        <label id="label_visit_date" for="visit_date">تاريخ الزيارة:</label>
+                        <input type="date" id="visit_date" name="visit_date" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label id="label_visit_type" for="visit_type">نوع الزيارة:</label>
+                        <select id="visit_type" name="visit_type" required>
+                            <option id="option_select_visit_type" value="" data-key="option_select_visit_type">-- اختر نوع الزيارة --</option>
+                            <option value="Personal" data-key="option_personal">شخصية</option>
+                            <option value="Official" data-key="option_official">رسمية</option>
+                            <option value="Volunteer" data-key="option_volunteer">تطوع</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label id="label_entity" for="entity">الجهة (مدرسة/شركة/هيئة):</label>
+                        <input type="text" id="entity" name="entity" data-key="placeholder_entity" placeholder="أدخل اسم الجهة إن وجدت">
+                    </div>
+                </div>
+            </fieldset>
+
+            <fieldset>
+                <legend id="section_visitor_data"><i class="fas fa-user" style="margin-left: 5px; font-size: 1em;"></i>بيانات الزائر</legend>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                    <div class="form-group">
+                        <label id="label_visitor_full_name" for="visitor_full_name">الاسم الكامل للزائر:</label>
+                        <input type="text" id="visitor_full_name" name="visitor_full_name" required minlength="1">
+                    </div>
+
+                    <div class="form-group">
+                        <label id="label_visitor_age" for="visitor_age">عمر الزائر (سنوات):</label>
+                        <input type="number" id="visitor_age" name="visitor_age" min="1" max="150" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label id="label_visitor_gender" for="visitor_gender">الجنس:</label>
+                        <select id="visitor_gender" name="visitor_gender" required>
+                            <option value="">-- اختر --</option>
+                            <option value="Male" data-key="option_male">ذكر</option>
+                            <option value="Female" data-key="option_female">أنثى</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label id="label_visitor_nationality" for="visitor_nationality">الجنسية:</label>
+                        <input type="text" id="visitor_nationality" name="visitor_nationality" required minlength="1">
+                    </div>
+
+                    <div class="form-group" style="grid-column: span 2;">
+                        <label id="label_visitor_contact_number" for="visitor_contact_number">رقم الاتصال (هاتف/جوال):</label>
+                        <input type="text" id="visitor_contact_number" name="visitor_contact_number" data-key="placeholder_contact_number" placeholder="+971xxxxxxxxx" required minlength="1">
+                    </div>
+                </div>
+            </fieldset>
+
+            <fieldset>
+                <legend id="section_health_interaction"><i class="fas fa-heartbeat" style="margin-left: 5px; font-size: 1em;"></i>إقرار الصحة والسلامة</legend>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    
+                    <div class="form-group">
+                        <label id="label_allergies_question">هل لديك أي حساسية معروفة تجاه الحيوانات؟</label>
+                        <div style="display: flex; gap: 20px;">
+                            <input type="radio" id="allergies_yes" name="allergies_to_animals" value="1"> <label for="allergies_yes" style="display: inline;" class="small-text" data-key="label_yes">نعم</label>
+                            <input type="radio" id="allergies_no" name="allergies_to_animals" value="0" checked> <label for="allergies_no" style="display: inline;" class="small-text" data-key="label_no">لا</label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label id="label_on_medication_question">هل تتناول حالياً أي أدوية؟</label>
+                        <div style="display: flex; gap: 20px;">
+                            <input type="radio" id="medication_yes" name="on_medication" value="1"> <label for="medication_yes" style="display: inline;" class="small-text" data-key="label_yes">نعم</label>
+                            <input type="radio" id="medication_no" name="on_medication" value="0" checked> <label for="medication_no" style="display: inline;" class="small-text" data-key="label_no">لا</label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label id="label_medication_affects_question">هل تؤثر هذه الأدوية على تفاعلك أو اتزانك؟</label>
+                        <div style="display: flex; gap: 20px;">
+                            <input type="radio" id="affects_yes" name="medication_affects_interaction" value="1"> <label for="affects_yes" style="display: inline;" class="small-text" data-key="label_yes">نعم</label>
+                            <input type="radio" id="affects_no" name="medication_affects_interaction" value="0" checked> <label for="affects_no" style="display: inline;" class="small-text" data-key="label_no">لا</label>
+                        </div>
+                    </div>
+                    
+                     <div class="form-group">
+                        <label id="label_agree_to_interact_question">هل توافق على المشاركة في التفاعلات؟</label>
+                        <div style="display: flex; gap: 20px;">
+                            <input type="radio" id="interact_yes" name="agree_to_interact" value="1" checked> <label for="interact_yes" style="display: inline;" class="small-text" data-key="label_yes">نعم</label>
+                            <input type="radio" id="interact_no" name="agree_to_interact" value="0"> <label for="interact_no" style="display: inline;" class="small-text" data-key="label_no">لا</label>
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+
+            <fieldset id="parentGuardianSection" class="hidden">
+                <legend id="section_parent_guardian"><i class="fas fa-user-shield" style="margin-left: 5px; font-size: 1em;"></i>بيانات الولي/الوصي (للقاصرين)</legend>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                    <div class="form-group">
+                        <label id="label_parent_guardian_name" for="parent_guardian_name">اسم الولي/الوصي الكامل:</label>
+                        <input type="text" id="parent_guardian_name" name="parent_guardian_name" data-key="placeholder_parent_name" placeholder="مطلوب للقاصرين" minlength="1">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label id="label_relationship_to_visitor" for="relationship_to_visitor">العلاقة بالزائر:</label>
+                        <input type="text" id="relationship_to_visitor" name="relationship_to_visitor" data-key="placeholder_relationship" placeholder="مثل: الأب، الأم، الوصي القانوني" minlength="1">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label id="label_parent_guardian_contact" for="parent_guardian_contact">رقم اتصال الولي:</label>
+                        <input type="text" id="parent_guardian_contact" name="parent_guardian_contact" data-key="placeholder_contact_number" placeholder="+971xxxxxxxxx" minlength="1">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label id="label_number_of_children" for="number_of_children">عدد الأطفال/القاصرين المرافقين:</label>
+                        <input type="number" id="number_of_children" name="number_of_children" min="0" value="0">
+                    </div>
+                </div>
+            </fieldset>
+            
+            <!-- زر فتح الاتفاقية -->
+<button id="openDeclaration" 
+        style="background:#28a745;color:#fff;padding:8px 16px;
+               border:none;border-radius:6px;cursor:pointer;font-size:14px;">
+    التعهد
+</button>
+
+<script>
+document.getElementById("openDeclaration").addEventListener("click", function() {
+    window.open(
+        "Declarations.html",   // مسار الملف
+        "DeclarationsWindow",                    // اسم النافذة
+        "width=900,height=700,scrollbars=yes,resizable=yes,top=50,left=50"
+    );
+});
+</script>
+               <!-- زر فتح الاتفاقية -->
+            
+            
+            
+            <fieldset>
+                <legend id="section_signatures"><i class="fas fa-signature" style="margin-left: 5px; font-size: 1em;"></i>التوقيع والإقرار</legend>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                    <div class="form-group">
+                        <label id="label_visitor_signature" for="visitorSignatureCanvas">توقيع الزائر/البالغ:</label>
+                        <div id="visitor_signature_display" class="signature-display hidden"></div>
+                        <div id="visitor_signature_input" class="signature-container">
+                            <canvas id="visitorSignatureCanvas" class="signature-canvas"></canvas>
+                            <div class="signature-controls">
+                                <button type="button" onclick="clearSignature(visitorPad, 'visitor')" id="clear_visitor" title="مسح"><i class="fas fa-eraser icon-only"></i></button>
+                                <button type="button" class="edit-signature-btn hidden" onclick="toggleSignatureEdit('visitor')" title="تعديل"><i class="fas fa-edit icon-only"></i></button>
+                                <button type="button" id="delete_visitor_signature" class="hidden" onclick="deleteSignature('visitor')" title="حذف"><i class="fas fa-trash icon-only"></i></button>
+                            </div>
+                        </div>
+                        <input type="hidden" id="visitor_signature" name="visitor_signature">
+                    </div>
+
+                    <div class="form-group" id="parentSignatureDiv">
+                        <label id="label_parent_guardian_signature" for="parentSignatureCanvas">توقيع الولي/الوصي (إذا كان الزائر قاصراً):</label>
+                        <div id="parent_signature_display" class="signature-display hidden"></div>
+                        <div id="parent_signature_input" class="signature-container">
+                            <canvas id="parentSignatureCanvas" class="signature-canvas"></canvas>
+                            <div class="signature-controls">
+                                <button type="button" onclick="clearSignature(parentPad, 'parent')" id="clear_parent" title="مسح"><i class="fas fa-eraser icon-only"></i></button>
+                                <button type="button" class="edit-signature-btn hidden" onclick="toggleSignatureEdit('parent')" title="تعديل"><i class="fas fa-edit icon-only"></i></button>
+                                <button type="button" id="delete_parent_signature" class="hidden" onclick="deleteSignature('parent')" title="حذف"><i class="fas fa-trash icon-only"></i></button>
+                            </div>
+                        </div>
+                        <input type="hidden" id="parent_guardian_signature" name="parent_guardian_signature">
+                    </div>
+                </div>
+                
+                <div class="form-group" style="margin-top: 25px;">
+                    <input type="checkbox" id="disclaimer_signed" name="disclaimer_signed" value="1" required style="width: auto;">
+                    <label id="label_disclaimer_signed" for="disclaimer_signed" style="display: inline; font-weight: normal; color: var(--color-primary-dark);">
+                        أقر بأنني قرأت وفهمت إخلاء المسؤولية والقواعد، وأوافق عليها تماماً.
+                    </label>
+                </div>
+
+            </fieldset>
+            
+            <div class="button-container">
+                <button type="submit" id="submit_button" data-action="add" title="تسجيل"><i class="fas fa-save icon-only"></i></button>
+                <button type="button" id="delete_button" class="hidden" onclick="handleDelete()" title="حذف"><i class="fas fa-trash icon-only"></i></button>
+                <button type="button" id="print_button" class="hidden" onclick="printReport()" title="طباعة"><i class="fas fa-print icon-only"></i></button>
+                <button type="button" onclick="window.location.href='add_visitor_interactions.html'" style="background-color: #6c757d;" title="جديد"><i class="fas fa-plus icon-only"></i></button>
+            </div>
+            
+            <p id="responseMessage" style="text-align: center; font-weight: bold; margin-top: 20px;"></p>
+        </form>
+    </div>
+   <script src="session_check.js"></script>
+    <script>
+        // *** الثوابت والمتغيرات ***
+        const API_URL = '../api/process_interactions.php';
+        const REPORT_URL = 'add_visitor_interactions_report.html';
+        let visitorPad, parentPad;
+        let translations = {};
+        let currentLang = 'ar';
+        let signatureEditMode = { visitor: false, parent: false }; // لتتبع وضع التعديل للتوقيع
+        let isEditMode = false; // لتتبع وضع التعديل
+
+        // *** الدوال المساعدة ***
+        function getQueryParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
+        }
+
+        function validateRequiredFields(data) {
+            const required = ['visitor_full_name', 'visit_type'];
+            for (let field of required) {
+                let value = data[field];
+                if (!value || value.trim() === '' || value === '0') {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        function initializePads() {
+            const visitorCanvas = document.getElementById('visitorSignatureCanvas');
+            const parentCanvas = document.getElementById('parentSignatureCanvas');
+            visitorPad = new SignaturePad(visitorCanvas, { backgroundColor: 'rgb(255, 255, 255)', penColor: 'rgb(0, 0, 0)' });
+            parentPad = new SignaturePad(parentCanvas, { backgroundColor: 'rgb(255, 255, 255)', penColor: 'rgb(0, 0, 0)' });
+            resizeCanvas();
+        }
+
+        function clearSignature(pad, type) {
+            pad.clear();
+            const displayDiv = document.getElementById(`${type}_signature_display`);
+            const inputDiv = document.getElementById(`${type}_signature_input`);
+            const sigInput = document.getElementById(`${type === 'visitor' ? 'visitor_signature' : 'parent_guardian_signature'}`);
+            displayDiv.classList.add('hidden');
+            displayDiv.innerHTML = '';
+            inputDiv.classList.remove('hidden');
+            sigInput.value = ''; // مسح القيمة للحذف
+            signatureEditMode[type] = true; // تمكين وضع التعديل
+        }
+
+        function deleteSignature(type) {
+            if (confirm('هل أنت متأكد من حذف هذا التوقيع؟')) {
+                clearSignature(type === 'visitor' ? visitorPad : parentPad, type);
+                // إخفاء زر الحذف بعد الاستخدام
+                document.getElementById(`delete_${type}_signature`).classList.add('hidden');
+            }
+        }
+
+        function toggleSignatureEdit(type) {
+            const displayDiv = document.getElementById(`${type}_signature_display`);
+            const inputDiv = document.getElementById(`${type}_signature_input`);
+            const editBtn = document.querySelector(`#${type}_signature_input .edit-signature-btn`);
+            const deleteBtn = document.getElementById(`delete_${type}_signature`);
+            
+            if (signatureEditMode[type]) {
+                // حفظ التعديل وإخفاء الكانفاس
+                const pad = type === 'visitor' ? visitorPad : parentPad;
+                const dataUrl = pad.isEmpty() ? '' : pad.toDataURL('image/png');
+                const sigInput = document.getElementById(`${type === 'visitor' ? 'visitor_signature' : 'parent_guardian_signature'}`);
+                sigInput.value = dataUrl;
+                if (dataUrl) {
+                    displaySignature(dataUrl, type, true); // عرض الصورة الجديدة
+                } else {
+                    displayDiv.classList.add('hidden');
+                    displayDiv.innerHTML = '';
+                    inputDiv.classList.remove('hidden');
+                }
+                signatureEditMode[type] = false;
+                editBtn.classList.add('hidden');
+                if (isEditMode) deleteBtn.classList.remove('hidden'); // إظهار زر الحذف في التعديل
+            } else {
+                // السماح بالتعديل بإظهار الكانفاس
+                inputDiv.classList.remove('hidden');
+                displayDiv.classList.add('hidden');
+                signatureEditMode[type] = true;
+                editBtn.classList.remove('hidden');
+                if (isEditMode) deleteBtn.classList.remove('hidden');
+            }
+        }
+
+        function resizeCanvas() {
+            [visitorPad, parentPad].forEach(pad => {
+                if (pad) {
+                    const canvas = pad.canvas;
+                    const ratio = Math.max(window.devicePixelRatio || 1, 1);
+                    const data = pad.toDataURL('image/png'); 
+                    canvas.width = canvas.offsetWidth * ratio;
+                    canvas.height = canvas.offsetHeight * ratio;
+                    canvas.getContext("2d").scale(ratio, ratio);
+                    pad.fromDataURL(data); 
+                }
+            });
+        }
+        window.addEventListener('resize', resizeCanvas);
+        
+        function toggleParentSection(isEdit = false, age = null, hasParentSig = false) {
+            const currentAge = age || parseInt(document.getElementById('visitor_age').value || 0);
+            const isMinor = currentAge < 18 && currentAge > 0;
+            
+            const parentSection = document.getElementById('parentGuardianSection');
+            const parentNameInput = document.getElementById('parent_guardian_name');
+            const parentSigDiv = document.getElementById('parentSignatureDiv');
+            
+            if (isEdit && !isMinor && hasParentSig) {
+                // في التعديل، إذا كان العمر >=18 لكن التوقيع محفوظ، أظهر القسم للسماح بالحذف
+                parentSection.classList.remove('hidden');
+                parentSigDiv.classList.remove('hidden');
+                parentNameInput.removeAttribute('required');
+            } else {
+                parentSection.classList.toggle('hidden', !isMinor);
+                
+                if (isMinor) {
+                    parentNameInput.setAttribute('required', 'required');
+                    parentSigDiv.classList.remove('hidden'); // إظهار توقيع الولي
+                } else {
+                    parentNameInput.removeAttribute('required');
+                    if (!hasParentSig) {
+                        parentSigDiv.classList.add('hidden'); // إخفاء توقيع الولي إلا إذا كان محفوظًا
+                    }
+                }
+            }
+        }
+
+        // *** منطق الترجمة ***
+        async function loadTranslations(lang) {
+            try {
+                 const response = await fetch(`../languages/${lang}_add_visitor_interactions.json`);
+                 translations = await response.json();
+                 currentLang = lang;
+                 applyTranslations(lang);
+            } catch (error) {
+                 console.warn(`Could not load ${lang} translations. Using hardcoded keys.`);
+                 currentLang = 'ar';
+                 applyTranslations('ar'); 
+            }
+        }
+
+        function applyTranslations(lang) {
+            document.documentElement.setAttribute('lang', lang);
+            document.body.style.direction = lang === 'ar' ? 'rtl' : 'ltr';
+            
+            document.querySelectorAll('[data-key]').forEach(element => {
+                const key = element.getAttribute('data-key');
+                if (translations[key]) {
+                    if (element.tagName === 'INPUT' && element.hasAttribute('placeholder')) {
+                        element.setAttribute('placeholder', translations[key]);
+                    } else {
+                        element.textContent = translations[key];
+                    }
+                }
+            });
+
+            const action = document.getElementById('submit_button').getAttribute('data-action');
+            document.getElementById('submit_button').title = translations[`button_submit_${action}`] || (action === 'edit' ? 'حفظ التعديلات' : 'تسجيل التفاعل');
+            document.getElementById('lang-toggle').textContent = lang === 'ar' ? 'EN' : 'ع';
+        }
+
+        document.getElementById('lang-toggle').addEventListener('click', () => {
+            const newLang = currentLang === 'ar' ? 'en' : 'ar';
+            loadTranslations(newLang);
+        });
+
+        // *** منطق جلب البيانات لـ EDIT MODE ***
+        async function fetchVisitorData(id) {
+             const responseMessage = document.getElementById('responseMessage');
+             responseMessage.textContent = translations.message_fetching || '... جاري جلب البيانات';
+             responseMessage.style.color = 'var(--color-primary-dark)';
+            
+             try {
+                 const response = await fetch(`${API_URL}?action=get_one&id=${id}`);
+                 const result = await response.json();
+                 if (result.success && result.data) {
+                     fillForm(result.data);
+                     responseMessage.textContent = '';
+                 } else {
+                     responseMessage.textContent = translations.message_fetch_error || 'فشل في جلب البيانات.';
+                     responseMessage.style.color = 'red';
+                 }
+             } catch (error) {
+                 const data = { id: id, visit_date: new Date().toISOString().split('T')[0], visit_type: 'Official', entity: 'Acme Corp', visitor_full_name: 'جون سميث', visitor_age: 15, visitor_gender: 'Male', visitor_nationality: 'UAE', visitor_contact_number: '5551234567', allergies_to_animals: 1, agree_to_interact: 1, on_medication: 0, medication_affects_interaction: 0, parent_guardian_name: 'أحمد سميث', parent_guardian_contact: '5557654321', number_of_children: 2, relationship_to_visitor: 'الأب', disclaimer_signed: 1, visitor_signature: 'uploads/add_visitor_interactions/visitor_1.png', parent_guardian_signature: 'uploads/add_visitor_interactions/parent_1.png' };
+                 if (data) fillForm(data);
+                 responseMessage.textContent = 'جلب البيانات بنجاح (محاكاة).';
+             }
+        }
+
+        function fillForm(data) {
+            isEditMode = true;
+            document.getElementById('interaction_id').value = data.id;
+            document.getElementById('submit_button').setAttribute('data-action', 'edit');
+            applyTranslations(currentLang); 
+            document.getElementById('print_button').classList.remove('hidden');
+            document.getElementById('delete_button').classList.remove('hidden');
+
+            // تنظيف القيم '0' إلى فارغة قبل التعبئة
+            const cleanData = { ...data };
+            const stringFields = ['visitor_full_name', 'entity', 'visitor_gender', 'visitor_nationality', 'visitor_contact_number', 'parent_guardian_name', 'parent_guardian_contact', 'relationship_to_visitor'];
+            stringFields.forEach(field => {
+                if (cleanData[field] === '0' || cleanData[field] === 0) {
+                    cleanData[field] = '';
+                }
+            });
+
+            // تعبئة البيانات
+            for (const key in cleanData) {
+                const element = document.getElementById(key);
+                if (element) {
+                    if (element.type === 'radio') {
+                        document.querySelector(`input[name="${key}"][value="${cleanData[key]}"]`).checked = true;
+                    } else if (element.type === 'checkbox') {
+                         element.checked = cleanData[key] == 1;
+                    } else {
+                         element.value = cleanData[key];
+                    }
+                }
+            }
+            
+            // عرض التوقيعات أولاً
+            displaySignature(cleanData.visitor_signature, 'visitor');
+            displaySignature(cleanData.parent_guardian_signature, 'parent');
+            
+            // ثم تحديث القسم بناءً على العمر مع التحقق من التوقيع المحفوظ
+            const age = parseInt(cleanData.visitor_age || 0);
+            const hasParentSig = !!cleanData.parent_guardian_signature;
+            toggleParentSection(true, age, hasParentSig);
+        }
+
+        function displaySignature(path, type, isNew = false) {
+            if (path && (path.includes('uploads/') || isNew)) { 
+                const displayDiv = document.getElementById(`${type}_signature_display`);
+                const inputDiv = document.getElementById(`${type}_signature_input`);
+                const fullPath = isNew ? path : `../../${path}`; 
+                const pad = type === 'visitor' ? visitorPad : parentPad;
+                const editBtn = document.querySelector(`#${type}_signature_input .edit-signature-btn`);
+                const deleteBtn = document.getElementById(`delete_${type}_signature`);
+                
+                displayDiv.innerHTML = `<p class="small-text">التوقيع المحفوظ:</p><img src="${fullPath}" alt="${type} Signature" style="max-height: 100px; border: 1px solid #ccc; border-radius: 4px;">`;
+                displayDiv.classList.remove('hidden');
+                inputDiv.classList.add('hidden');
+                if (pad) pad.clear(); // مسح الكانفاس
+                editBtn.classList.remove('hidden'); // إظهار زر التعديل
+                if (isEditMode) deleteBtn.classList.remove('hidden'); // إظهار زر الحذف في التعديل
+                signatureEditMode[type] = false;
+            } else {
+                // إذا لم يكن موجود، أظهر الكانفاس للإدخال الجديد
+                const inputDiv = document.getElementById(`${type}_signature_input`);
+                inputDiv.classList.remove('hidden');
+                signatureEditMode[type] = true;
+            }
+        }
+        
+        // *** منطق CRUD والإرسال ***
+        document.getElementById('visitorInteractionForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const action = document.getElementById('submit_button').getAttribute('data-action');
+            const responseMessage = document.getElementById('responseMessage');
+            
+            // تحويل التوقيعات - السماح بحذف أو إدخال جديد
+            const visitorSigInput = document.getElementById('visitor_signature');
+            visitorSigInput.value = signatureEditMode.visitor && !visitorPad.isEmpty() ? visitorPad.toDataURL('image/png') : (signatureEditMode.visitor ? '' : visitorSigInput.value || '');
+            
+            const parentSigInput = document.getElementById('parent_guardian_signature');
+            if (!document.getElementById('parentGuardianSection').classList.contains('hidden')) {
+               parentSigInput.value = signatureEditMode.parent && !parentPad.isEmpty() ? parentPad.toDataURL('image/png') : (signatureEditMode.parent ? '' : parentSigInput.value || '');
+            } else {
+               parentSigInput.value = ''; 
+            }
+            
+            const data = {};
+            new FormData(e.target).forEach((value, key) => (data[key] = value));
+
+            // التحقق من الحقول المطلوبة قبل الإرسال
+            if (!validateRequiredFields(data)) {
+                responseMessage.textContent = translations.required_fields_error || '❌ يرجى ملء الحقول المطلوبة: الاسم الكامل للزائر ونوع الزيارة.';
+                responseMessage.style.color = 'red';
+                return;
+            }
+
+            responseMessage.textContent = translations.message_sending || '... جاري الإرسال';
+            responseMessage.style.color = 'var(--color-primary-dark)';
+
+            try {
+                const response = await fetch(`${API_URL}?action=${action}`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data)
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    responseMessage.textContent = `${translations.message_success || '✅ نجاح:'} ${result.message} (ID: ${result.id})`;
+                    responseMessage.style.color = 'green';
+                    if (action === "add") { 
+                        e.target.reset(); 
+                        visitorPad.clear(); 
+                        parentPad.clear(); 
+                        signatureEditMode = { visitor: false, parent: false };
+                        isEditMode = false;
+                    } else if (action === "edit") { 
+                        fetchVisitorData(result.id); 
+                    }
+                } else {
+                    responseMessage.textContent = `${translations.message_failure || '❌ فشل:'} ${result.message}`;
+                    responseMessage.style.color = 'red';
+                }
+            } catch (error) {
+                responseMessage.textContent = `${translations.message_connection_error || '❌ خطأ في الاتصال:'} ${error.message}`;
+                responseMessage.style.color = 'red';
+            }
+        });
+        
+        async function handleDelete() {
+            const id = document.getElementById('interaction_id').value;
+            if (!id || !confirm(translations.confirm_delete || 'هل أنت متأكد من حذف هذا السجل؟')) return;
+            try {
+                const response = await fetch(`${API_URL}?action=delete`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id }) });
+                const result = await response.json();
+                if (result.success) { alert(translations.delete_success || 'تم حذف السجل بنجاح.'); window.location.href = 'add_visitor_interactions.html'; } else { alert(`${translations.delete_failure || 'فشل الحذف:'} ${result.message}`); }
+            } catch (error) { alert(`${translations.message_connection_error || 'خطأ في الاتصال:'} ${error.message}`); }
+        }
+
+        async function handleSearch() {
+            const term = document.getElementById('search_term').value;
+            const date = document.getElementById('search_date').value;
+            const phone = document.getElementById('search_phone').value;
+            const entity = document.getElementById('search_entity').value;
+            const resultsDiv = document.getElementById('searchResults');
+            
+            if (!term && !date && !phone && !entity) { alert(translations.enter_search_criteria || 'الرجاء إدخال معيار بحث واحد على الأقل.'); return; }
+            const queryParams = new URLSearchParams({ action: 'search', search_term: term, search_date: date, search_phone: phone, search_entity: entity }).toString();
+
+            try {
+                const response = await fetch(`${API_URL}?${queryParams}`);
+                const result = await response.json();
+                resultsDiv.classList.remove('hidden');
+                resultsDiv.innerHTML = `<p class="small-text">${translations.search_results || 'النتائج:'} (${result.count || 0})</p>`;
+
+                if (result.success && result.results && result.results.length > 0) {
+                    result.results.forEach(item => {
+                        const div = document.createElement('div');
+                        div.className = 'search-item';
+                        div.innerHTML = `<i class="fas fa-file-alt" style="margin-left: 5px; color: var(--color-primary-dark);"></i>${item.id} | ${item.visit_date} | ${item.visitor_full_name} | ${item.entity || ''}`;
+                        div.onclick = () => { window.location.href = `add_visitor_interactions.html?id=${item.id}`; };
+                        resultsDiv.appendChild(div);
+                    });
+                } else { resultsDiv.innerHTML += `<p class="small-text">${translations.no_records_found || 'لم يتم العثور على سجلات.'}</p>`; }
+
+            } catch (error) { resultsDiv.innerHTML = `<p style="color:red;" class="small-text">${translations.search_error || 'خطأ في البحث:'} ${error.message}</p>`; }
+        }
+
+        function printReport() {
+            const id = document.getElementById('interaction_id').value;
+            if (id) { window.open(`${REPORT_URL}?id=${id}`, '_blank'); } 
+            else { alert(translations.select_record_for_report || 'الرجاء اختيار سجل أولاً لطباعة التقرير.'); }
+        }
+        
+        // *** التهيئة عند التحميل - تاريخ الإمارات ***
+        window.onload = function() {
+            // تعيين التاريخ الحالي بتوقيت الإمارات
+            const now = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Dubai' });
+            document.getElementById('visit_date').value = now;
+            
+            initializePads();
+            document.getElementById('visitor_age').addEventListener('input', () => toggleParentSection(isEditMode));
+            
+            const url_id = getQueryParam('id');
+            if (url_id) {
+                fetchVisitorData(url_id);
+            } else {
+                document.getElementById('submit_button').setAttribute('data-action', 'add');
+                toggleParentSection(false);
+            }
+            
+            loadTranslations('ar'); 
+        };
+    </script>
+</body>
+</html>

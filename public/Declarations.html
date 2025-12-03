@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الإقرارات الرسمية - مأوى الشارقة للقطط والكلاب</title>
+    <style>
+        :root {
+            --main-green: #198754;
+            --olive-tone: #495057;
+            --light-beige: #f8ffef;
+            --border-color: var(--olive-tone);
+            --text-color: #343a40;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: white;
+            color: var(--text-color);
+            font-size: 10px;
+            line-height: 1.3;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+        }
+        .header {
+            text-align: center;
+            border-bottom: 2px solid var(--main-green);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            color: var(--main-green);
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+        .header p {
+            color: var(--olive-tone);
+            font-size: 12px;
+            margin: 0;
+        }
+        .buttons-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .btn {
+            background-color: var(--main-green);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .btn:hover {
+            background-color: #157347;
+        }
+        .btn-minor {
+            background-color: #ffc107;
+            color: #000;
+        }
+        .btn-minor:hover {
+            background-color: #e0a800;
+        }
+        .section {
+            display: none;
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            background-color: var(--light-beige);
+        }
+        .section.active {
+            display: block;
+        }
+        .section h3 {
+            color: var(--main-green);
+            text-align: center;
+            border-bottom: 1px solid var(--main-green);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        .report-body {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .column {
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 3px;
+            background-color: white;
+        }
+        .arabic {
+            direction: rtl;
+            text-align: right;
+        }
+        .english {
+            direction: ltr;
+            text-align: left;
+        }
+        .arabic ul, .english ul {
+            font-size: 10px;
+            line-height: 1.4;
+            margin-bottom: 10px;
+        }
+        .arabic p, .english p {
+            font-size: 10px;
+            line-height: 1.3;
+            margin-bottom: 5px;
+            text-align: justify;
+        }
+        .disclaimer-note {
+            font-size: 9px;
+            text-align: center;
+            color: var(--olive-tone);
+            font-style: italic;
+            margin-top: 10px;
+        }
+        .reason-line {
+            border-bottom: 1px dashed var(--olive-tone);
+            padding-bottom: 2px;
+            margin: 10px 0;
+            font-style: italic;
+        }
+        .sub-header {
+            font-size: 11px;
+            color: var(--main-green);
+            text-align: center;
+            margin: 15px 0 10px 0;
+            font-weight: bold;
+        }
+        .icon {
+            font-size: 16px;
+        }
+        .minor-section {
+            background-color: #fff3cd;
+            border-color: #ffc107;
+        }
+        @media print {
+            .buttons-section, .no-print {
+                display: none !important;
+            }
+            .container {
+                border: none;
+                padding: 0;
+            }
+            .active {
+                display: block !important;
+                page-break-inside: avoid;
+            }
+        }
+        @media (max-width: 768px) {
+            .report-body {
+                grid-template-columns: 1fr;
+            }
+            .buttons-section {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>الإقرارات الرسمية</h1>
+            <p>Official Declarations - Sharjah Cats and Dogs Shelter</p>
+        </div>
+        <div class="buttons-section">
+            <button class="btn" onclick="showSection('reservation')">
+                <span class="icon">📅</span>
+                حجز حيوان / Animal Reservation
+            </button>
+            <button class="btn" onclick="showSection('adoption')">
+                <span class="icon">❤️</span>
+                تبني حيوان / Animal Adoption
+            </button>
+            <button class="btn" onclick="showSection('disclaimer')">
+                <span class="icon">⚖️</span>
+                اتفاقية التنازل وإخلاء المسؤولية / Waiver and Liability Agreement
+            </button>
+            <button class="btn" onclick="showSection('adult-visitor')">
+                <span class="icon">🐾</span>
+                إقرار إخلاء المسؤولية لتفاعل الزوار البالغين / Adult Visitor Liability Waiver
+            </button>
+            <button class="btn btn-minor" onclick="showSection('minors')">
+                <span class="icon">👨‍👩‍👧</span>
+                إقرار إخلاء المسؤولية للقاصرين / Minors Liability Waiver
+            </button>
+        </div>
+        <!-- قسم حجز الحيوان -->
+        <div id="reservation" class="section">
+            <h3>ملاحظات مهمة للحجز / Important Notes for Booking</h3>
+            <div class="report-body">
+                <div class="column arabic">
+                    <ul>
+                        <li>يتم حجز الحيوان (قط/كلب) بعد دفع رسوم التبني.</li>
+                        <li>يتم حجز الحيوان لمدة 4 أيام عمل فور جاهزيته للتبني.</li>
+                        <li>يتم إلغاء طلب الحجز في حال عدم الرد من مقدم الطلب خلال قنوات التواصل عن طريق الهاتف، الواتس آب أو البريد الإلكتروني.</li>
+                    </ul>
+                    <p class="disclaimer-note">هذا نموذج حجز ولا يعتبر تبنيًا</p>
+                </div>
+                <div class="column english">
+                    <ul>
+                        <li>This reservation will be after paying adoption fees.</li>
+                        <li>This reservation will be for 4 working days once the animal is ready for adoption.</li>
+                        <li>This reservation will be canceled if there is no response from the applicant via phone call, WhatsApp, or email.</li>
+                    </ul>
+                    <p class="disclaimer-note">This is a reservation form and does not constitute adoption</p>
+                </div>
+            </div>
+        </div>
+        <!-- قسم التبني -->
+        <div id="adoption" class="section">
+            <h3>إقرار إخلاء مسؤولية المتبني / Adopter's Disclaimer Declaration</h3>
+            <div class="report-body">
+                <div class="column arabic">
+                    <p style="font-weight: bold; font-size: 10px; margin-top: 0; color: var(--main-green);">أقرّ بأنني اطّلعت على التعليمات والإرشادات المقدمة من قبل موظفي مأوى الشارقة للقطط والكلاب بشأن مبادئ الرعاية العامة، وأتعهد بالالتزام بها. كما أتحمل كامل المسؤولية عن التطعيمات والرعاية الصحية والبيطرية للحيوان بعد مغادرته المأوى، وألتزم بتوفير المأوى والغذاء والعناية المناسبة له بطريقة إنسانية.</p>
+                    <p style="font-weight: bold; font-size: 10px; margin-top: 0; color: var(--main-green);">وأقرّ بعدم بيع أو التنازل عن الحيوان أو التخلص منه لأي جهة، وأعفي مأوى الشارقة للقطط والكلاب من أي مسؤولية مستقبلية تتعلق بسلوك الحيوان أو حالته الصحية أو أي أضرار قد تنشأ بعد التبني</p>
+                </div>
+                <div class="column english">
+                    <p style="font-weight: bold; font-size: 10px; margin-top: 0; color: var(--main-green);">I hereby acknowledge that I have reviewed and understood the guidelines and instructions provided by the staff of the Sharjah Cat and Dog Shelter regarding general animal care principles, and I pledge to comply with them.</p>
+                    <p style="font-weight: bold; font-size: 10px; margin-top: 0; color: var(--main-green);">I accept full responsibility for all vaccinations, health care, and veterinary follow-up required for the animal after it leaves the shelter, and I commit to providing proper shelter, food, and humane care.</p>
+                    <p style="font-weight: bold; font-size: 10px; margin-top: 0; color: var(--main-green);">Furthermore, I undertake not to sell, transfer, or abandon the adopted animal to any person or entity, and I release the Sharjah Cat and Dog Shelter from any future liability related to the animal’s behavior, health condition, or any damages that may arise after adoption.</p>
+                </div>
+            </div>
+        </div>
+        <!-- قسم التنازل وإخلاء المسؤولية -->
+        <div id="disclaimer" class="section">
+            <h3>اتفاقية التنازل وإخلاء المسؤولية / Waiver and Liability Agreement</h3>
+            <!-- جزء اتفاقية التنازل -->
+            <div class="report-body">
+                <div class="column arabic">
+                    <p style="font-weight: bold; font-size: 10px; margin-top: 0; color: var(--main-green);">اتفاقية تنازل عن حيوان</p>
+                    <p style="font-size: 10px; line-height: 1.3; margin-bottom: 2px; text-align: justify;">أقر أنا الموقع أدناه بأنني أتنازل طوعًا عن وصاية وملكية الحيوانات المذكورة أدناه إلى مأوى الشارقة للقطط والكلاب، دون أي وعد بالتسامح أو الإكراه.</p>
+                    <p class="reason-line" id="reasonArabic">السبب: ...........................................................</p>
+                    <p style="font-size: 10px; line-height: 1.3; margin: 3px 0 2px 0; text-align: justify;">في مقابل موافقة مأوى الشارقة للقطط والكلاب على استلام الحيوان/الحيوانات المذكورة أعلاه، أوافق بموجبه وأقر بشروط هذه الاتفاقية، وأتعهد وأؤكد وألتزم لمأوى الشارقة للقطط والكلاب بما يلي:</p>
+                    <ul>
+                        <li>أقر بأنني المالك الشرعي أو الوكيل المفوض قانونًا عن مالك الحيوان/الحيوانات المذكورة أعلاه.</li>
+                        <li>أفهم أنه بمجرد تسليمي الحيوان/الحيوانات المذكورة أعلاه، لا يمكن إعادتها أو استردادها، وأقر بأن هذا التنازل نافذ ولا يجوز إلغاؤه أو تعديله كليًا أو جزئيًا.</li>
+                        <li>من خلال تسليمي هذا الحيوان إلى مأوى الشارقة للقطط والكلاب، أقر وأوافق على أن المأوى يمتلك الحق القانوني الكامل والحصري في اتخاذ أي قرارات أو إجراءات تخص الحيوان/الحيوانات.</li>
+                    </ul>
+                </div>
+                <div class="column english">
+                    <p style="font-weight: bold; font-size: 10px; margin-top: 0; color: var(--main-green);">Animal Waiver Agreement</p>
+                    <p style="font-size: 10px; line-height: 1.3; margin-bottom: 2px; text-align: justify;">I, the undersigned, hereby voluntarily release the custody and ownership of the animal(s) listed below to Sharjah Cats and Dogs Shelter, without any promise of leniency or coercion.</p>
+                    <p class="reason-line" id="reasonEnglish">Reason: ……………………………………………………….</p>
+                    <p style="font-size: 10px; line-height: 1.3; margin: 3px 0 2px 0; text-align: justify;">In consideration for the acceptance of the animal(s) described above by Sharjah Cats and Dogs Shelter, of which I hereby agree to and acknowledge the terms of this Agreement, further represent, warrants, and pledges to Sharjah Cats and Dogs Shelter the following:</p>
+                    <ul>
+                        <li>I attest that I am the lawful owner, or duly authorized agent for the owner, of the animal(s) listed above.</li>
+                        <li>I understand that once I relinquish the animal(s), the animal(s) will not be available to be returned and further acknowledge that this waiver is effective and may not be revoked, altered, rescinded or voided in part or whole.</li>
+                        <li>By relinquishing this animal to Sharjah Cats and Dogs Shelter, I acknowledge and agree that Sharjah Cats and Dogs Shelter shall have the sole and exclusive legal right to make any and all decisions, and to take any action, regarding the animal(s).</li>
+                    </ul>
+                </div>
+            </div>
+            <!-- جزء إقرار إخلاء المسؤولية للتنازل -->
+            <div class="report-body">
+                <div class="column arabic">
+                    <p style="font-weight: bold; font-size: 10px; margin-top: 0; color: var(--main-green); margin-bottom: 2px;">أقرّ أنا الموقّع أدناه بأنني أتنازل طوعًا عن الحيوان لمأوى الشارقة للقطط والكلاب، وأتحمل كامل المسؤولية عن قراري هذا دون أي وعود أو التزامات من المأوى.</p>
+                    <p style="font-weight: bold; font-size: 10px; margin-top: 0; color: var(--main-green); margin-bottom: 2px;">كما أُقرّ بأن المأوى وموظفيه ووكلاءه غير مسؤولين عن أي أضرار أو إصابات قد تنتج عن الحيوان بعد التنازل أو أثناء وجودي في المأوى، ولم يتم تقديم أي ضمانات بشأن حالته الصحية أو ملاءمته للتبني.</p>
+                    <p style="font-weight: bold; font-size: 10px; margin-top: 0; color: var(--main-green);">وأتعهد بعدم تحميل المأوى أو موظفيه أي مسؤولية قانونية أو المطالبة بأي تعويض لأي سبب يتعلق بالحيوان المذكور.</p>
+                </div>
+                <div class="column english">
+                    <p style="font-weight: bold; font-size: 10px; margin-top: 0; color: var(--main-green); margin-bottom: 2px;">I, the undersigned, hereby voluntarily surrender the animal to Sharjah Cats and Dogs Shelter and assume full responsibility for this decision without any promises or obligations from the Shelter.</p>
+                    <p style="font-weight: bold; font-size: 10px; margin-top: 0; color: var(--main-green); margin-bottom: 2px;">I further acknowledge that the Shelter, its employees, and agents shall not be held liable for any damages, injuries, or losses arising from or caused by the animal after surrender or during my presence at the Shelter, and no warranties, express or implied, have been provided regarding the animal's health status or suitability for adoption.</p>
+                    <p style="font-weight: bold; font-size: 10px; margin-top: 0; color: var(--main-green);">Moreover, I covenant and agree not to hold the Shelter or its employees legally responsible or to demand any compensation for any matter pertaining to the surrendered animal.</p>
+                </div>
+            </div>
+        </div>
+        <!-- قسم إقرار إخلاء المسؤولية لتفاعل الزوار البالغين -->
+        <div id="adult-visitor" class="section">
+            <h3>إقرار إخلاء المسؤولية لتفاعل الزوار / Liability Waiver for Visitor Interaction</h3>
+            <div class="report-body">
+                <div class="column arabic">
+                    <h6 style="color: var(--main-green); font-size: 9px; text-align: center; margin-bottom: 5px; font-weight: bold;">اتفاقية إخلاء المسؤولية لمأوى الشارقة للقطط والكلاب (للزائر البالغ)</h6>
+                    <ul style="font-size: 9px;">
+                        <li>أقر بأنني دخلت مأوى الشارقة للقطط والكلاب بمحض إرادتي وبقرار شخصي، وسأتفاعل طوعاً مع القطط و/أو الكلاب التي قد تتصرف بطرق غير متوقعة. ولن أحمل مأوى الشارقة للقطط والكلاب أو بلدية الشارقة أو أي من موظفيها أو طاقمها أو وكلائها أو ممثليها أي مسؤولية، ولن أطالب بأي تعويض نتيجة أي إصابة قد تحدث في الموقع.</li>
+                        <li>أعلم بأن لدى مأوى الشارقة للقطط والكلاب سياسات وقواعد وإجراءات يجب الالتزام بها، وأوافق على الامتثال لها.</li>
+                        <li>أقر بأنني قرأت وفهمت هذه "اتفاقية إخلاء المسؤولية".</li>
+                    </ul>
+                </div>
+                <div class="column english">
+                    <h6 style="color: var(--main-green); font-size: 9px; text-align: center; margin-bottom: 5px; font-weight: bold;">Sharjah Cat and Dog Shelter Liability Waiver Agreement (For Adult Visitor)</h6>
+                    <ul style="font-size: 9px;">
+                        <li>I, the undersigned, hereby acknowledge and agree that I have entered the Sharjah Cat and Dog Shelter voluntarily and of my own free will. I understand that I will be interacting with cats and/or dogs that may behave in unpredictable ways. Accordingly, I release the Sharjah Cat and Dog Shelter, the Sharjah Municipality, and all of their employees, staff, agents, and representatives from any and all responsibility or liability for any injury or damage that may occur on the premises, and I waive any right to claim compensation.</li>
+                        <li>I understand that the Sharjah Cat and Dog Shelter has established certain policies, rules, and procedures that must be followed, and I agree to comply fully with them.</li>
+                        <li>I confirm that I have read and fully understood this “Liability Waiver Agreement.”</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <!-- قسم إقرار إخلاء المسؤولية للقاصرين -->
+        <div id="minors" class="section minor-section">
+            <h3>إقرار إخلاء المسؤولية للقاصرين / Liability Waiver for Minors</h3>
+            <div class="report-body">
+                <div class="column arabic">
+                    <h6 style="color: var(--main-green); font-size: 9px; text-align: center; margin-bottom: 5px; font-weight: bold;">اتفاقية إخلاء المسؤولية لمأوى الشارقة للقطط والكلاب (للزوار والمتطوعين أقل من 18 عاماً)</h6>
+                    <ul style="font-size: 9px;">
+                        <li>يتطلب دخول الزوار أو المتطوعين الذين تقل أعمارهم عن 18 عاماً توقيع أحد الوالدين أو الوصي القانوني قبل دخول مأوى الشارقة للقطط والكلاب.</li>
+                        <li>بصفتي والد/والدة أو الوصي القانوني على القاصر المذكور أعلاه، أؤكد أنني قرأت وفهمت تماماً "اتفاقية إخلاء المسؤولية" الخاصة بمأوى الشارقة للقطط والكلاب. وبموجب هذه الاتفاقية، أوافق على السماح لطفلي/القاصر المذكور بالتفاعل مع الحيوانات داخل المأوى، وأُخلي مسؤولية مأوى الشارقة للقطط والكلاب وبلدية الشارقة وجميع موظفيها أو ممثليها من أي مسؤولية أو التزام أو مطالبة قد تنشأ نتيجة هذا التفاعل أو أي إصابة قد تحدث أثناء الزيارة.</li>
+                        <li>أقر بأنني قرأت وفهمت هذه "اتفاقية إخلاء المسؤولية" وأوافق على جميع بنودها.</li>
+                    </ul>
+                </div>
+                <div class="column english">
+                    <h6 style="color: var(--main-green); font-size: 9px; text-align: center; margin-bottom: 5px; font-weight: bold;">Sharjah Cat and Dog Shelter Liability Waiver Agreement (For Minors Under 18)</h6>
+                    <ul style="font-size: 9px;">
+                        <li>Entry for visitors or volunteers under the age of 18 requires the signature of a parent or legal guardian prior to entering the Sharjah Cat and Dog Shelter.</li>
+                        <li>As the parent/guardian of the minor named above, I confirm that I have read and fully understood the “Liability Waiver Agreement” of the Sharjah Cat and Dog Shelter. Pursuant to this Agreement, I consent to allowing my child/the minor named above to interact with animals within the Shelter, and I release the Sharjah Cat and Dog Shelter, the Sharjah Municipality, and all of their employees or representatives from any responsibility, obligation, or claim that may arise as a result of this interaction or any injury that may occur during the visit.</li>
+                        <li>I confirm that I have read and understood this “Liability Waiver Agreement” and agree to all of its terms.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="session_check.js"></script>
+    <script>
+        function showSection(sectionId) {
+            // إخفاء جميع الأقسام
+            document.querySelectorAll('.section').forEach(sec => {
+                sec.classList.remove('active');
+            });
+            // إظهار القسم المحدد
+            document.getElementById(sectionId).classList.add('active');
+        }
+        // إظهار القسم الأول افتراضيًا
+        showSection('reservation');
+    </script>
+</body>
+</html>
