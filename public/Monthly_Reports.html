@@ -339,10 +339,10 @@
         return type.includes('cat') || type.includes('قط');
       }).length;
       
-      // Count dog complaints (ComplaintType contains 'dog' or 'كل')
+      // Count dog complaints (ComplaintType contains 'dog' or 'كلب')
       const dogComplaints = complaints.filter(c => {
         const type = (c.ComplaintType || '').toLowerCase();
-        return type.includes('dog') || type.includes('كل');
+        return type.includes('dog') || type.includes('كلب');
       }).length;
       
       return { totalReceived, totalClosed, catComplaints, dogComplaints };
