@@ -206,17 +206,67 @@
       </div>
     </div>
 
+    <!-- Animals Statistics -->
+    <div class="card" id="animalsCard" style="display:none;">
+      <div class="section-title">🐾 إحصائيات الحيوانات</div>
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-value" id="totalAnimals">--</div>
+          <div class="stat-label">إجمالي الحيوانات</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="totalCats">--</div>
+          <div class="stat-label">عدد القطط</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="totalDogs">--</div>
+          <div class="stat-label">عدد الكلاب</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="activeAnimals">--</div>
+          <div class="stat-label">الحيوانات النشطة</div>
+        </div>
+      </div>
+    </div>
+
     <!-- Reception / Customer Service Statistics -->
     <div class="card" id="receptionCard" style="display:none;">
       <div class="section-title">🏢 إحصائيات الاستقبال وخدمة العملاء</div>
       <div class="stats-grid" id="receptionStats">
         <div class="stat-item">
-          <div class="stat-value stat-unavailable" id="totalAdoptions">غير متوفر</div>
+          <div class="stat-value" id="totalAdoptions">--</div>
           <div class="stat-label">عدد حالات التبني</div>
         </div>
         <div class="stat-item">
-          <div class="stat-value stat-unavailable" id="totalIntakes">غير متوفر</div>
-          <div class="stat-label">عدد حالات الاستلام</div>
+          <div class="stat-value" id="totalReserved">--</div>
+          <div class="stat-label">عدد الحجوزات</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="pendingApplications">--</div>
+          <div class="stat-label">طلبات التبني المعلقة</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="totalVisitors">--</div>
+          <div class="stat-label">إجمالي الزوار</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Incoming Requests Statistics -->
+    <div class="card" id="incomingCard" style="display:none;">
+      <div class="section-title">📥 طلبات استلام الحيوانات</div>
+      <div class="stats-grid" id="incomingStats">
+        <div class="stat-item">
+          <div class="stat-value" id="incomingCats">--</div>
+          <div class="stat-label">طلبات القطط</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="incomingDogs">--</div>
+          <div class="stat-label">طلبات الكلاب</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="incomingTotal">--</div>
+          <div class="stat-label">إجمالي الكمية</div>
         </div>
       </div>
     </div>
@@ -226,12 +276,16 @@
       <div class="section-title">🏥 إحصائيات الرعاية البيطرية</div>
       <div class="stats-grid" id="vetCareStats">
         <div class="stat-item">
-          <div class="stat-value stat-unavailable" id="totalOperations">غير متوفر</div>
-          <div class="stat-label">عدد العمليات</div>
+          <div class="stat-value" id="totalVisits">--</div>
+          <div class="stat-label">عدد الزيارات</div>
         </div>
         <div class="stat-item">
-          <div class="stat-value stat-unavailable" id="totalEuthanasia">غير متوفر</div>
-          <div class="stat-label">عدد حالات القتل الرحيم</div>
+          <div class="stat-value" id="completedCases">--</div>
+          <div class="stat-label">الحالات المكتملة</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="inProgressCases">--</div>
+          <div class="stat-label">الحالات قيد المعالجة</div>
         </div>
       </div>
     </div>
@@ -241,22 +295,19 @@
       <h4>📝 ملاحظات للمطورين</h4>
       <ul>
         <li>
-          <strong>Complaints API:</strong> يستخدم <code>/health_vet/api/get_all_complaints.php</code> مع المعلمات <code>from</code> و <code>to</code> للفلترة بالتاريخ.
-        </li>
-        <li>
-          <strong>نقاط النهاية المطلوبة:</strong>
+          <strong>APIs المستخدمة:</strong>
           <ul>
-            <li><code>/health_vet/api/get_adoptions.php?start=YYYY-MM-DD&end=YYYY-MM-DD</code> - لإحصائيات التبني</li>
-            <li><code>/health_vet/api/get_intakes.php?start=YYYY-MM-DD&end=YYYY-MM-DD</code> - لإحصائيات الاستلام</li>
-            <li><code>/health_vet/api/get_operations.php?start=YYYY-MM-DD&end=YYYY-MM-DD</code> - لإحصائيات العمليات</li>
-            <li><code>/health_vet/api/get_euthanasia.php?start=YYYY-MM-DD&end=YYYY-MM-DD</code> - لإحصائيات القتل الرحيم</li>
+            <li><code>/health_vet/api/get_all_complaints.php?from=&to=</code> - إحصائيات الشكاوى</li>
+            <li><code>/health_vet/api/get_data.php?resource=animals</code> - بيانات الحيوانات</li>
+            <li><code>/health_vet/api/get_data.php?resource=adoptions</code> - بيانات التبني</li>
+            <li><code>/health_vet/api/add_visit.php?action=get_all</code> - بيانات الزيارات</li>
+            <li><code>/health_vet/api/get_adoption_applications_pending.php</code> - طلبات التبني المعلقة</li>
+            <li><code>/health_vet/api/get_incoming_requests_summary.php</code> - طلبات استلام الحيوانات</li>
+            <li><code>/health_vet/api/get_visitors_summary.php</code> - ملخص الزوار</li>
           </ul>
         </li>
         <li>
-          <strong>شكل البيانات المتوقع:</strong> يجب أن ترجع كل نقطة نهاية <code>{ success: true, data: [...] }</code> أو <code>{ success: true, count: N }</code>
-        </li>
-        <li>
-          <strong>ملاحظة:</strong> إذا لم تدعم <code>get_all_complaints.php</code> معلمات <code>from/to</code>، يرجى تحديث الـ API لدعم فلترة التاريخ.
+          <strong>الجداول المستخدمة:</strong> <code>Complaints</code>, <code>tbl_animals</code>, <code>tbl_adoptions</code>, <code>tbl_visits</code>, <code>adoption_applications</code>, <code>incoming_animal_requests</code>, <code>visitor_interactions</code>
         </li>
       </ul>
     </div>
@@ -266,8 +317,9 @@
   <script>
     /*
       Monthly Report Page - HealthVet
-      Displays complaint statistics and placeholders for other metrics.
-      Developer Notes: See backend API requirements in the dev-notes section above.
+      Uses existing APIs to display statistics.
+      APIs: get_all_complaints.php, get_data.php, add_visit.php, 
+            get_adoption_applications_pending.php, get_incoming_requests_summary.php, get_visitors_summary.php
     */
     
     const API_BASE = '/health_vet/api/';
@@ -296,79 +348,7 @@
     // Show error message
     function showError(message) {
       const container = $('errorContainer');
-      container.innerHTML = `<div class="error">${message}</div>`;
-    }
-    
-    // Load complaints data
-    async function loadComplaints(start, end) {
-      try {
-        // The API uses 'from' and 'to' parameters based on get_all_complaints.php
-        const url = `${API_BASE}get_all_complaints.php?from=${start}&to=${end}`;
-        const response = await fetch(url, { credentials: 'same-origin' });
-        
-        if (!response.ok) {
-          throw new Error(`HTTP error: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        
-        if (!data.success) {
-          throw new Error(data.message || 'فشل في جلب بيانات الشكاوى');
-        }
-        
-        return data.data || [];
-      } catch (error) {
-        console.error('Error loading complaints:', error);
-        throw error;
-      }
-    }
-    
-    // Compute complaint statistics
-    function computeComplaintStats(complaints) {
-      const totalReceived = complaints.length;
-      
-      // Count closed complaints (ComplaintStatus === 'Closed' or FinalStatus contains 'Close')
-      const totalClosed = complaints.filter(c => 
-        c.ComplaintStatus === 'Closed' || 
-        (c.FinalStatus && c.FinalStatus.toLowerCase().includes('close'))
-      ).length;
-      
-      // Count cat complaints (ComplaintType contains 'cat' or 'قط')
-      const catComplaints = complaints.filter(c => {
-        const type = (c.ComplaintType || '').toLowerCase();
-        return type.includes('cat') || type.includes('قط');
-      }).length;
-      
-      // Count dog complaints (ComplaintType contains 'dog' or 'كلب')
-      const dogComplaints = complaints.filter(c => {
-        const type = (c.ComplaintType || '').toLowerCase();
-        return type.includes('dog') || type.includes('كلب');
-      }).length;
-      
-      return { totalReceived, totalClosed, catComplaints, dogComplaints };
-    }
-    
-    // Try to load optional API data
-    async function tryLoadOptionalData(endpoint, start, end) {
-      try {
-        const url = `${API_BASE}${endpoint}?start=${start}&end=${end}`;
-        const response = await fetch(url, { credentials: 'same-origin' });
-        
-        if (!response.ok) return null;
-        
-        const data = await response.json();
-        
-        if (!data.success) return null;
-        
-        // Return count if available, or array length
-        if (typeof data.count === 'number') return data.count;
-        if (Array.isArray(data.data)) return data.data.length;
-        if (Array.isArray(data)) return data.length;
-        
-        return null;
-      } catch {
-        return null;
-      }
+      container.innerHTML += `<div class="error">${message}</div>`;
     }
     
     // Update stat display
@@ -382,6 +362,166 @@
           el.textContent = value;
           el.classList.remove('stat-unavailable');
         }
+      }
+    }
+
+    // Check if date is in range
+    function isDateInRange(dateStr, start, end) {
+      if (!dateStr) return false;
+      const date = new Date(dateStr);
+      const startDate = new Date(start);
+      const endDate = new Date(end);
+      endDate.setHours(23, 59, 59, 999);
+      return date >= startDate && date <= endDate;
+    }
+
+    // Load complaints data using get_all_complaints.php
+    async function loadComplaints(start, end) {
+      try {
+        const url = `${API_BASE}get_all_complaints.php?from=${start}&to=${end}`;
+        const response = await fetch(url, { credentials: 'same-origin' });
+        if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+        const data = await response.json();
+        if (!data.success) throw new Error(data.message || 'فشل في جلب بيانات الشكاوى');
+        return data.data || [];
+      } catch (error) {
+        console.error('Error loading complaints:', error);
+        throw error;
+      }
+    }
+    
+    // Compute complaint statistics
+    function computeComplaintStats(complaints) {
+      const totalReceived = complaints.length;
+      const totalClosed = complaints.filter(c => 
+        c.ComplaintStatus === 'Closed' || 
+        (c.FinalStatus && c.FinalStatus.toLowerCase().includes('close'))
+      ).length;
+      const catComplaints = complaints.filter(c => {
+        const type = (c.ComplaintType || '').toLowerCase();
+        return type.includes('cat') || type === 'cats';
+      }).length;
+      const dogComplaints = complaints.filter(c => {
+        const type = (c.ComplaintType || '').toLowerCase();
+        return type.includes('dog') || type === 'dogs';
+      }).length;
+      return { totalReceived, totalClosed, catComplaints, dogComplaints };
+    }
+
+    // Load animals data using get_data.php?resource=animals
+    async function loadAnimals(start, end) {
+      try {
+        const url = `${API_BASE}get_data.php?resource=animals&per_page=10000`;
+        const response = await fetch(url, { credentials: 'same-origin' });
+        if (!response.ok) return null;
+        const data = await response.json();
+        if (!data.success) return null;
+        // Filter by registration_date within range
+        const animals = (data.data || []).filter(a => isDateInRange(a.registration_date, start, end));
+        return {
+          total: animals.length,
+          cats: animals.filter(a => (a.animal_type || '').toLowerCase() === 'cats').length,
+          dogs: animals.filter(a => (a.animal_type || '').toLowerCase() === 'dogs').length,
+          active: animals.filter(a => (a.is_active || '').toLowerCase() === 'active').length
+        };
+      } catch (error) {
+        console.warn('Error loading animals:', error);
+        return null;
+      }
+    }
+
+    // Load adoptions data using get_data.php?resource=adoptions
+    async function loadAdoptions(start, end) {
+      try {
+        const url = `${API_BASE}get_data.php?resource=adoptions&per_page=10000`;
+        const response = await fetch(url, { credentials: 'same-origin' });
+        if (!response.ok) return null;
+        const data = await response.json();
+        if (!data.success) return null;
+        // Filter by adoption_date within range
+        const adoptions = (data.data || []).filter(a => isDateInRange(a.adoption_date, start, end));
+        return {
+          adopted: adoptions.filter(a => (a.Operation_type || '').toLowerCase() === 'adopted').length,
+          reserved: adoptions.filter(a => (a.Operation_type || '').toLowerCase() === 'reserved').length
+        };
+      } catch (error) {
+        console.warn('Error loading adoptions:', error);
+        return null;
+      }
+    }
+
+    // Load visits data using add_visit.php?action=get_all
+    async function loadVisits(start, end) {
+      try {
+        const url = `${API_BASE}add_visit.php?action=get_all`;
+        const response = await fetch(url, { credentials: 'same-origin' });
+        if (!response.ok) return null;
+        const data = await response.json();
+        if (!data.success) return null;
+        // Filter by visit_date within range
+        const visits = (data.visits || []).filter(v => isDateInRange(v.visit_date, start, end));
+        return {
+          total: visits.length,
+          completed: visits.filter(v => (v.CaseStatus || '').toLowerCase() === 'completed').length,
+          inProgress: visits.filter(v => (v.CaseStatus || '').toLowerCase().includes('progress')).length
+        };
+      } catch (error) {
+        console.warn('Error loading visits:', error);
+        return null;
+      }
+    }
+
+    // Load pending adoption applications using get_adoption_applications_pending.php
+    async function loadPendingApplications() {
+      try {
+        const url = `${API_BASE}get_adoption_applications_pending.php`;
+        const response = await fetch(url, { credentials: 'same-origin' });
+        if (!response.ok) return null;
+        const data = await response.json();
+        if (!data.success) return null;
+        return (data.data || []).length;
+      } catch (error) {
+        console.warn('Error loading pending applications:', error);
+        return null;
+      }
+    }
+
+    // Load incoming requests summary using get_incoming_requests_summary.php
+    async function loadIncomingRequests() {
+      try {
+        const url = `${API_BASE}get_incoming_requests_summary.php`;
+        const response = await fetch(url, { credentials: 'same-origin' });
+        if (!response.ok) return null;
+        const data = await response.json();
+        if (!data.success) return null;
+        const summary = { cats: 0, dogs: 0, totalQty: 0 };
+        (data.data || []).forEach(item => {
+          const type = (item.animal_type || '').toLowerCase();
+          const requests = parseInt(item.requests) || 0;
+          const qty = parseInt(item.total_quantity) || 0;
+          if (type === 'cat') { summary.cats = requests; }
+          if (type === 'dog') { summary.dogs = requests; }
+          summary.totalQty += qty;
+        });
+        return summary;
+      } catch (error) {
+        console.warn('Error loading incoming requests:', error);
+        return null;
+      }
+    }
+
+    // Load visitors summary using get_visitors_summary.php
+    async function loadVisitorsSummary() {
+      try {
+        const url = `${API_BASE}get_visitors_summary.php`;
+        const response = await fetch(url, { credentials: 'same-origin' });
+        if (!response.ok) return null;
+        const data = await response.json();
+        if (!data.success) return null;
+        return data.total || 0;
+      } catch (error) {
+        console.warn('Error loading visitors summary:', error);
+        return null;
       }
     }
     
@@ -399,44 +539,85 @@
       // Update date range display
       $('dateRange').textContent = `من ${formatDateArabic(start)} إلى ${formatDateArabic(end)}`;
       
+      // Load complaints
       try {
-        // Load complaints data
         const complaints = await loadComplaints(start, end);
         const stats = computeComplaintStats(complaints);
-        
-        // Update complaint statistics
         updateStat('totalReceived', stats.totalReceived);
         updateStat('totalClosed', stats.totalClosed);
         updateStat('catComplaints', stats.catComplaints);
         updateStat('dogComplaints', stats.dogComplaints);
-        
-        // Show complaints card
         $('complaintsCard').style.display = 'block';
-        
       } catch (error) {
         showError(`خطأ في تحميل بيانات الشكاوى: ${error.message}`);
       }
-      
-      // Try to load optional data (these will show placeholders if APIs don't exist)
+
+      // Load animals
       try {
-        const adoptionsCount = await tryLoadOptionalData('get_adoptions.php', start, end);
-        updateStat('totalAdoptions', adoptionsCount, adoptionsCount === null);
-        
-        const intakesCount = await tryLoadOptionalData('get_intakes.php', start, end);
-        updateStat('totalIntakes', intakesCount, intakesCount === null);
-        
-        const operationsCount = await tryLoadOptionalData('get_operations.php', start, end);
-        updateStat('totalOperations', operationsCount, operationsCount === null);
-        
-        const euthanasiaCount = await tryLoadOptionalData('get_euthanasia.php', start, end);
-        updateStat('totalEuthanasia', euthanasiaCount, euthanasiaCount === null);
-        
-        // Show optional sections
-        $('receptionCard').style.display = 'block';
-        $('vetCareCard').style.display = 'block';
-        
+        const animalsData = await loadAnimals(start, end);
+        if (animalsData) {
+          updateStat('totalAnimals', animalsData.total);
+          updateStat('totalCats', animalsData.cats);
+          updateStat('totalDogs', animalsData.dogs);
+          updateStat('activeAnimals', animalsData.active);
+          $('animalsCard').style.display = 'block';
+        }
       } catch (error) {
-        console.warn('Error loading optional data:', error);
+        console.warn('Error loading animals:', error);
+      }
+
+      // Load adoptions
+      try {
+        const adoptionsData = await loadAdoptions(start, end);
+        if (adoptionsData) {
+          updateStat('totalAdoptions', adoptionsData.adopted);
+          updateStat('totalReserved', adoptionsData.reserved);
+        }
+      } catch (error) {
+        console.warn('Error loading adoptions:', error);
+      }
+
+      // Load pending applications
+      try {
+        const pendingCount = await loadPendingApplications();
+        updateStat('pendingApplications', pendingCount, pendingCount === null);
+      } catch (error) {
+        console.warn('Error loading pending applications:', error);
+      }
+
+      // Load visitors summary
+      try {
+        const visitorsTotal = await loadVisitorsSummary();
+        updateStat('totalVisitors', visitorsTotal, visitorsTotal === null);
+        $('receptionCard').style.display = 'block';
+      } catch (error) {
+        console.warn('Error loading visitors:', error);
+      }
+
+      // Load incoming requests
+      try {
+        const incomingData = await loadIncomingRequests();
+        if (incomingData) {
+          updateStat('incomingCats', incomingData.cats);
+          updateStat('incomingDogs', incomingData.dogs);
+          updateStat('incomingTotal', incomingData.totalQty);
+          $('incomingCard').style.display = 'block';
+        }
+      } catch (error) {
+        console.warn('Error loading incoming requests:', error);
+      }
+
+      // Load visits
+      try {
+        const visitsData = await loadVisits(start, end);
+        if (visitsData) {
+          updateStat('totalVisits', visitsData.total);
+          updateStat('completedCases', visitsData.completed);
+          updateStat('inProgressCases', visitsData.inProgress);
+          $('vetCareCard').style.display = 'block';
+        }
+      } catch (error) {
+        console.warn('Error loading visits:', error);
       }
       
       // Hide loading indicator
